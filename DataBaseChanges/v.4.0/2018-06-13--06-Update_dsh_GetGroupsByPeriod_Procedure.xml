@@ -1,0 +1,355 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Update_Imp_Delivery_Refresh_Procedure" author="Emil">
+    <createProcedure>
+      ALTER PROCEDURE [dbo].[dsh_GetGroupsByPeriod]
+      @begin DATE='06.06.2014'
+      ,@end DATE='06.06.2017'
+      AS
+
+      BEGIN
+      --drop table #Contacts
+
+
+      create table #Contacts(
+      contact_id int,
+      region_id int,
+      firstLevel_id int,
+      secondLevel_id int,
+      thirdLevel_id int,
+      mainManager_id int,
+      employe_id int)
+
+      insert into #Contacts
+
+      select distinct
+      contact_id,
+      region_id,
+      firstLevel_id,
+      secondLevel_id,
+      thirdLevel_id,
+      mainManager_id,
+      employe_id
+
+      from ent_Contacts ec
+      INNER JOIN ent_Delivery ed ON ed.contact_id = ec.id_contact
+      WHERE
+      ec.isReport = 1
+      AND ed.date &gt;= @begin
+      AND ed.date &lt;= @end
+
+      union
+
+      select distinct
+      contact_id,
+      region_id,
+      firstLevel_id,
+      secondLevel_id,
+      thirdLevel_id,
+      mainManager_id,
+      employe_id
+
+      from ent_Contacts ec
+      INNER JOIN ent_ReturnGoods rg ON rg.contact_id = ec.id_contact
+      WHERE
+      ec.isReport = 1
+      and (rg.date &gt;= @begin AND rg.date &lt;= @end)
+
+
+
+      --TODO: для чего .value('.', 'varchar(max)')????
+      SELECT cast(
+      '{"Contact_Region":['+
+      isnull((
+      SELECT STUFF((
+      SELECT
+      ',{"id":' + cast(er.id as varchar(max))
+      + ',"name":"' + REPLACE(er.name, '"', '\"')
+      +'"}'
+      FROM ent_Regions er
+      where exists(select 1 from #Contacts ec where er.id = ec.region_id)
+      order by er.name
+      for xml path(''), type
+      ).value('.', 'varchar(max)'), 1, 1, '')
+      ), '')
+      +'],'
+
+      +
+      '"Contact_FirstLevel":['+
+      isnull((
+      SELECT STUFF((
+      SELECT
+      ',{"id":' + cast(ep.id as varchar(max))
+      + ',"name":"' + REPLACE(ep.name, '"', '\"') +'"}'
+      FROM ent_FirstLevels ep
+      where exists(select 1 from #Contacts ec where ep.id = ec.firstLevel_id)
+      order by ep.name
+      for xml path(''), type
+      ).value('.', 'varchar(max)'), 1, 1, '')
+      ), '')
+      +'],'
+
+      +
+      '"Contact_SecondLevel":['+
+      isnull((
+      SELECT STUFF((
+      SELECT
+      ',{"id":' + cast(ep.id as varchar(max))
+      + ',"name":"' + REPLACE(ep.name, '"', '\"') +'"}'
+      FROM ent_FirstLevels ep
+      where exists(select 1 from #Contacts ec where ep.id = ec.secondLevel_id)
+      order by ep.name
+      for xml path(''), type
+      ).value('.', 'varchar(max)'), 1, 1, '')
+      ), '')
+      +'],'
+
+      +
+      '"Contact_ThirdLevel":['+
+      isnull((
+      SELECT STUFF((
+      SELECT
+      ',{"id":' + cast(ep.id as varchar(max))
+      + ',"name":"' + REPLACE(ep.name, '"', '\"') +'"}'
+      FROM ent_FirstLevels ep
+      where exists(select 1 from #Contacts ec where ep.id = ec.thirdLevel_id)
+      order by ep.name
+      for xml path(''), type
+      ).value('.', 'varchar(max)'), 1, 1, '')
+      ), '')
+      +'],'
+
+	    +
+      '"Contact_SystemHandle":['+
+      isnull((
+      SELECT STUFF((
+      SELECT
+      ',{"id":' + cast(eg.id as varchar(max)) + ',"name":"'
+      + REPLACE(eg.name, '"', '\"') +'"}'
+      FROM ent_SystemHandle eg
+      order by eg.name
+      for xml path(''), type
+      ).value('.', 'varchar(max)'), 1, 1, '')
+      ), '')
+      +'],'
+
+	    +
+      '"Contact_SystemNalog":['+
+      isnull((
+      SELECT STUFF((
+      SELECT
+      ',{"id":' + cast(eg.id as varchar(max)) + ',"name":"'
+      + REPLACE(eg.name, '"', '\"') +'"}'
+      FROM ent_SystemNalog eg
+      order by eg.name
+      for xml path(''), type
+      ).value('.', 'varchar(max)'), 1, 1, '')
+      ), '')
+      +'],'
+
+      +
+      '"Good_GroupNMK":['+
+      isnull((
+      SELECT STUFF((
+      SELECT
+      ',{"id":' + cast(eg.id as varchar(max)) + ',"name":"'
+      + REPLACE(eg.name, '"', '\"') +'"}'
+      FROM ent_GroupNMK eg
+      order by eg.name
+      for xml path(''), type
+      ).value('.', 'varchar(max)'), 1, 1, '')
+      ), '')
+      +'],'
+	  
+	  
+
+      +
+      '"Good_subGroupNMK":['+
+      isnull((
+      SELECT STUFF((
+      SELECT
+      ',{"id":' + cast(es.id as varchar(max)) + ',"name":"'
+      + REPLACE(es.name, '"', '\"') +'"}'
+      FROM ent_SubgroupNMK es
+      order by es.name
+      for xml path(''), type
+      ).value('.', 'varchar(max)'), 1, 1, '')
+      ), '')
+      +'],'
+
+      +
+      '"Good_brend":['+
+      isnull((
+      SELECT STUFF((
+      SELECT
+      ',{"id":' + cast(eb.id as varchar(max)) + ',"name":"'
+      + REPLACE(eb.name, '"', '\"') +'"}'
+      FROM ent_Brends eb
+      order by eb.name
+      for xml path(''), type
+      ).value('.', 'varchar(max)'), 1, 1, '')
+      ), '')
+      +'],'
+
+      +
+      '"Contact_MainManager":['+
+      isnull((
+      SELECT STUFF((
+      SELECT
+      ',{"id":' + cast(es.id as varchar(max)) + ',"name":"'
+      + REPLACE(es.name, '"', '\"') +'"}'
+      FROM ent_MainManagers es
+      where exists(select 1 from #Contacts ec where es.id = ec.mainManager_id)
+      order by es.name
+      for xml path(''), type
+      ).value('.', 'varchar(max)'), 1, 1, '')
+      ), '')
+      +'],'
+      /*
+      +
+      '"Contact_name":['+
+      isnull((
+      select STUFF((
+      SELECT DISTINCT ',{"id":' + cast(ec.id_contact as varchar(max)) + ',"name":"' + REPLACE(ec.name, '"', '\"') +'"}' FROM ent_Contacts ec
+      INNER JOIN ent_Delivery ed ON ec.id_contact = ed.contact_id
+      WHERE ec.isReport = 1 AND ed.date &gt;= @begin AND ed.date &lt;= @end
+      for xml path(''), type
+      ).value('.', 'varchar(max)'), 1, 1, '')
+      ), '')
+      +'],'  */
+
+      +
+      '"Good_kindPacking":['+
+      isnull((
+      SELECT STUFF((
+      SELECT
+      ',{"id":' + cast(ek.id as varchar(max)) + ',"name":"'
+      + REPLACE(ek.name, '"', '\"') +'"}'
+      FROM ent_KindPacking ek
+      order by ek.name
+      for xml path(''), type
+      ).value('.', 'varchar(max)'), 1, 1, '')
+      ), '')
+      +'],'
+
+      +
+      '"Good_BKG":['+
+      isnull((
+      SELECT STUFF((
+      SELECT
+      ',{"id":' + cast(ebkg.id as varchar(max)) + ',"name":"'
+      + REPLACE(ebkg.name, '"', '\"') +'"}'
+      FROM ent_BKG ebkg
+      order by ebkg.name
+      for xml path(''), type
+      ).value('.', 'varchar(max)'), 1, 1, '')
+      ), '')
+      +'],'
+
+      +
+      '"Contact_Manager":['+
+      isnull((
+      SELECT STUFF((
+      SELECT
+      ',{"id":' + cast(ee.id as varchar(max)) + ',"name":"'
+      + REPLACE(ee.name, '"', '\"') +'"}'
+      FROM ent_Employe ee
+      where exists(select 1 from #Contacts ec where ee.id = ec.employe_id)
+      order by ee.name
+      for xml path(''), type
+      ).value('.', 'varchar(max)'), 1, 1, '')
+      ), '')
+      +'],'
+
+
+
+      +
+      '"Goods_Type":['+
+      isnull((
+      SELECT STUFF((
+      SELECT
+      ',{"id":' + cast(gt.id as varchar(max)) + ',"name":"'
+      + REPLACE(gt.name, '"', '\"') +'"}'
+      FROM ent_GoodsType gt
+      order by gt.name
+      for xml path(''), type
+      ).value('.', 'varchar(max)'), 1, 1, '')
+      ), '')
+      --+'],'
+      +'],'
+
+
+
+      +
+      '"Contact_Category":['+
+      isnull((
+      SELECT STUFF((
+      SELECT
+      ',{"id":' + cast(cc.id as varchar(max)) + ',"name":"'
+      + REPLACE(cc.name, '"', '\"') +'"}'
+
+      FROM ent_ContactCategory cc
+      where cc.isDeleted = 0
+      order by cc.name
+
+      for xml path(''), type
+      ).value('.', 'varchar(max)'), 1, 1, '')
+      ), '')
+      +'],'
+
+      +
+      '"Contact_Geography":['+
+      isnull((
+      SELECT STUFF((
+      SELECT
+      ',{"id":' + cast(g.id as varchar(max)) + ',"name":"'
+      + REPLACE(g.geographyValue, '"', '\"') +'"}'
+
+      FROM ent_Geography g
+      order by g.geographyValue
+
+      for xml path(''), type
+      ).value('.', 'varchar(max)'), 1, 1, '')
+      ), '')
+      +']'
+
+
+      --+
+      --'"Contact_Group":['+
+      --isnull((
+      --SELECT STUFF((
+      --SELECT
+      --',{"id":' + cast(cg.id as varchar(max)) + ',"name":"'
+      --+ REPLACE(cg.[key] + ' ' + cg.name, '"', '\"') +'"}'
+      --FROM ent_ContactGroups cg
+      --order by cg.treeKey
+      --for xml path(''), type
+      --).value('.', 'varchar(max)'), 1, 1, '')
+      --), '')
+      --+']'
+
+
+
+      /*товары берем не все!!! Из 2-х групп. Смотри rpt_GetNomenclature
+      +
+      '"Good_name":['+
+      isnull((
+      select STUFF((
+      SELECT ',{"id":' + cast(eg.id_good as varchar(max)) + ',"name":"' + REPLACE(REPLACE(eg.name, '\', '\\'), '"', '\"') +'"}' FROM ent_Goods eg
+      for xml path(''), type
+      ).value('.', 'varchar(max)'), 1, 1, '')
+      ), '')
+      +']'   */
+
+      + '}'
+      as text) as jsonfile
+
+      END
+    </createProcedure>
+  </changeSet>
+</databaseChangeLog>

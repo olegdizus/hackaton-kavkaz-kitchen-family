@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="DeleteNullPriceGood" author="Zhukov">
+		<sql>
+			DELETE pgd
+			FROM ent_PriceGoodsDetails pgd
+			INNER JOIN [ent_PriceGoods] pg
+			  ON pgd.priceGoods_id = pg.id
+			WHERE pg.priceType_id is null
+
+		
+			delete ent_PriceGoods
+			where priceType_id is null
+		</sql>
+	</changeSet>
+  
+</databaseChangeLog>

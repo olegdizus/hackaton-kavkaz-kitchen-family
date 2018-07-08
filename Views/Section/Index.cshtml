@@ -1,0 +1,113 @@
+﻿@using Dashboard.Helpers
+@using Dashboard.Models
+@{
+    ViewBag.Title = "Срез";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section styles
+{
+    @Styles.Render(
+                Dashboard.Bundles.BootstrapTagsInput.Css.Key,
+                Dashboard.Bundles.FilterControl.Css.Key,
+        Dashboard.Bundles.Tooltipster.Css.Key
+                )
+
+
+}
+
+@Html.Partial("SpeedometerTemplate")
+@Html.Partial("GraphicTemplate")
+@Html.Partial("SalesIndicatorTemplate")
+@Html.Partial("ReceivableIndicatorTemplate")
+@Html.Partial("PieChartTemplate")
+@Html.Partial("WaffleChartTemplate")
+@Html.Partial("BasicMaterial")
+
+<div id="main-section-content" class="section-content">
+    <div class="row">
+        <div class="col-xs-2 custom_col_xs_2">
+            <div class="date-picker">
+                @Html.Partial("DatePicker")
+            </div>
+        </div>
+
+        <div class="col-xs-10">
+
+            @Html.Partial("FilterControl")
+
+            <h2 class="section-header sales-indicator">Показатели продаж за день</h2>
+
+            <div class="row">
+                <div class="col-xs-3">
+                    <div id="salesIndicator" class="dashboard" data-bind="template: { name: 'salesIndicatorTemplate' }"></div>
+                </div>
+                <div class="col-xs-3">
+                    <div id="totalMoneyIndicator" class="dashboard" data-bind="template: { name: 'salesIndicatorTemplate' }"></div>
+                </div>
+
+                <div class="col-xs-3">
+                    <div id="deliveryCountIndicator" class="dashboard" data-bind="template: { name: 'salesIndicatorTemplate' }"></div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-3">
+                    <div id="averageDayDeliveryDynamicGraphic" class="dashboard" data-bind="template: { name: 'graphicTemplate'}"></div>
+                </div>
+                <div class="col-xs-3">
+                    <div id="avarageDayRevenueDynamic" class="dashboard" data-bind="template: { name: 'graphicTemplate'}"></div>
+                </div>
+                <div class="col-xs-3">
+                    <div id="avarageDayGrossProfitDynamic" class="dashboard" data-bind="template: { name: 'graphicTemplate'}"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+    
+</div>
+
+@section Scripts
+{
+    <script type="text/javascript">
+
+        var userSettings = JSON.parse(@Html.JsonRaw((object) ViewBag.userSettings));
+
+        var isCalendarMonthUse = @ViewBag.isCalendarMonthUse.ToString().ToLower();
+
+        // todo временное решение, пока не сделано получение данных по задолженности для каждого пользователя
+        if (!isCalendarMonthUse) {
+            $('#DebitData').addClass('semiopacity');
+            $('#receivableDynamicGraphic').addClass('semiopacity');
+            $('#partOfReceivableDynamic').addClass('semiopacity');
+            $('#dzSpeedometer').addClass('semiopacity');
+        }
+
+
+        if (!isCalendarMonthUse) {
+            $('#grossProfitPrognoz').hide();
+        }
+
+
+    </script>
+
+    @Scripts.Render(
+        Dashboard.Bundles.Extentions.Scripts.Key,
+        Dashboard.Bundles.SectionViewModels.Scripts.Key,
+        Dashboard.Bundles.koViewModels.Scripts.Key,
+        Dashboard.Bundles.Flot.Scripts.Key,
+
+        Dashboard.Bundles.dataProvider.Scripts.Key,
+        Dashboard.Bundles.Knockout.Scripts.Key,
+        Dashboard.Bundles.dataUrlProvider.Scripts.Key,
+        Dashboard.Bundles.Extentions.Scripts.Key,
+        Dashboard.Bundles.UserSetting.Scripts.Key,
+        Dashboard.Bundles.bootstrapplugins.Scripts.Key,
+        Dashboard.Bundles.Helpers.Scripts.Key,
+        Dashboard.Bundles.SectionIndexScript.Scripts.Key,
+        Dashboard.Bundles.Tooltipster.Scripts.Key
+    )
+
+
+}

@@ -1,0 +1,43 @@
+﻿.post-info-table {
+    background: inherit;
+}
+
+    .post-info-table td {
+        padding: 2px 15px 2px 2px;
+    }
+
+.alert {
+    margin-bottom: 4px !important;
+}
+
+.btn-actions-block {
+    margin-bottom: 4px;
+}
+
+        /*.btn-xs, .btn-group-xs > .btn {
+            padding: 0 5px 0 0;
+        }*/
+
+.modal-body {
+    padding-left: 15px;
+}
+
+.alert-old-post {
+    background-color: #fff0f5;
+}
+
+.right {
+    float: right;
+}
+
+.left {
+    float: left;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.alert .alert-link, .alert a {
+    text-decoration: none !important;
+}

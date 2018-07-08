@@ -1,0 +1,43 @@
+﻿@model Dashboard.DB.Models.Plan
+
+@{
+    ViewBag.Title = "Планы";
+}
+@section styles
+{
+    @Styles.Render(Dashboard.Bundles.Kendo.kendo.Css.Key)
+    <style>
+        .control-label {
+            text-align: left !important;
+        }
+    </style>
+}
+@using (Html.BeginForm())
+{
+    <h2>@ViewBag.Title</h2>
+
+    <div class="form-horizontal">
+       @Html.Partial("~/Views/Shared/CalendarMonthControl.cshtml")
+
+        <span id="errorSpan" class="text-danger"></span>
+        <span id="infoSpan" class="text-info"></span>
+
+        @Html.HiddenFor(model => model.id)
+        <div id="grid"></div>
+    </div>
+}
+@section Scripts
+{
+    @Scripts.Render(
+                Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+                Dashboard.Bundles.Kendo.kendoHelp.Scripts.Key,
+                Dashboard.Bundles.Extentions.Scripts.Key,
+                Dashboard.Bundles.Reports.ReportHelper.Scripts.Key,
+                Dashboard.Bundles.Reports.PlanGrid.Scripts.Key,
+                Dashboard.Bundles.jquery.jqueryval.Scripts.Key
+                )
+    <script>
+       
+        UpdateKendoGrid(true);
+    </script>
+}

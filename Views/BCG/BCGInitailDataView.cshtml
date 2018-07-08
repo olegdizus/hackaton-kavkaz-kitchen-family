@@ -1,0 +1,94 @@
+﻿@{
+    ViewBag.Title = "Исходные данные БКГ";
+}
+
+@section styles
+{
+    @Styles.Render(
+        Dashboard.Bundles.Kendo.KendoStandart.Css.Key,
+        Dashboard.Bundles.BCG.Css.Key,
+        Dashboard.Bundles.Tooltipster.Css.Key
+    )
+}
+<style>
+    .tooltip {
+        opacity: 1;
+        font-size: 14px;
+    }
+</style>
+
+
+<h2>БКГ</h2>
+<input type="hidden" value="@ViewBag.reportId" id="reportId" />
+<input type="hidden" value="@ViewBag.fromReportId" id="fromReportId" />
+<input type="hidden" value="@ViewBag.editOnOpen" id="editOnOpen" />
+
+@Html.Partial("SelectedPeriodIndicatorControl")
+
+<div class="row">
+    <div class="col-lg-1 col-md-1 col-xs-1 col-sm-1 right-align">
+        <h5>Классификация:</h5>
+    </div>
+    <div class="col-lg-2 col-md-2 col-xs-2 col-sm-2">
+        <select class="form-control" id="classificationList" name="classificationList">
+            @foreach (var i in @ViewBag.classifications)
+            {
+                <option value="@(i.value)">
+                    @(i.classificationName)
+                </option>
+            }
+        </select>
+    </div>
+</div>
+
+
+
+
+<div id="emptyBcgReportMessage" style="display: none;">
+    <h3>Выберете период и нажмите обновить.</h3>
+</div>
+
+<div id="bcgReport" style="display: none;">
+
+    <ul class="nav nav-tabs">
+        <li id="liInitialDataTab"><a href="#initialData" data-toggle="tab">Исходные данные</a></li>
+        <li id="liAnalysisTab"><a id="analysisTab" href="#analysis" data-toggle="tab">Анализ</a></li>
+    </ul>
+
+    <div class="tab-content">
+        <div class="tab-pane fade" id="initialData">
+            <div id="grid"></div>
+        </div>
+
+        <div class="tab-pane fade" id="analysis">
+            @Html.Partial("BCGMatrixView")
+            @Html.Partial("ConclusionsView")
+        </div>
+
+        <div id="buttonsDiv">
+            <a id="saveInitialData" class="btn btn-primary">Сохранить</a>
+            <a id="cancelInitialData" class="btn btn-default">Отмена</a>
+        </div>
+
+        <div id="updateButtonDiv">
+            <a id="updateInitialData" class="btn btn-primary">Редактировать</a>
+            <a id="copyInitialData" class="btn btn-primary">Копировать</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render(
+        Dashboard.Bundles.Extentions.Scripts.Key,
+        Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+        Dashboard.Bundles.Reports.ReportHelper.Scripts.Key,
+        Dashboard.Bundles.Knockout.Scripts.Key,
+        Dashboard.Bundles.Reports.BCGReport.Scripts.Key,
+        Dashboard.Bundles.Constants.Scripts.Key,
+        Dashboard.Bundles.Tooltipster.Scripts.Key
+    )
+
+    <script type="text/javascript">
+        setDates('@ViewBag.beginDate', '@ViewBag.endDate');
+    </script>
+}

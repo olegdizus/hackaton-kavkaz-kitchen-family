@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="RemoveIndicatorsTable" author="zelim">
+
+    <!-- Удаляем столбцы в ссылающихся таблицах -->
+
+    <dropForeignKeyConstraint baseTableName="tst_CalculateData" constraintName="FK_tst_CalculateData_tst_Indicators"/>
+    <dropForeignKeyConstraint baseTableName="tst_CalculateDataByContacts" constraintName="FK_tst_CalculateDataByContacts_tst_Indicators"/>
+    
+    <dropColumn tableName="tst_CalculateData" columnName="indicator_id" />
+    <dropColumn tableName="tst_CalculateDataByContacts" columnName="indicator_id" />
+
+    <!-- Удаляем саму таблицу -->
+    <dropTable cascadeConstraints="true" tableName="tst_Indicators"/>
+
+  </changeSet>
+</databaseChangeLog>

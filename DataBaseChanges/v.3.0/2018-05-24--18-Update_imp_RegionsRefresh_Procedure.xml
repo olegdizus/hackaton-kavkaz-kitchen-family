@@ -1,0 +1,110 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Update_imp_RegionsRefresh_Procedure" author="Andrey">
+    <createProcedure>
+-- =============================================
+-- Author:		Татарков Михаил
+-- Create date: 
+-- Description:	
+-- =============================================
+ALTER PROCEDURE [dbo].[imp_RegionsRefresh] 
+	-- Add the parameters for the stored procedure here
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;	
+	
+	
+	declare @importId uniqueidentifier
+
+	CREATE TABLE #importIdTable 
+	 (
+	  importId uniqueidentifier
+	 )
+
+	while 0 &lt; (select count(*)
+				from [imp_Regions]
+				where importId not in (select importId from #importIdTable))
+	begin
+		
+		set @importId = (select top 1 importId
+						from [imp_Regions]
+						where importId not in (select importId from #importIdTable)
+						order by id)
+
+		insert into #importIdTable (importId) values (@importId);
+
+	MERGE ent_Regions AS T
+	USING 
+		(SELECT i.[guid]
+				  ,i.[key]
+				  ,i.[name]
+				  ,i.[user1c]
+					,i.[isDeleted]		  
+			FROM [dbo].[imp_Regions] i
+		  where i.id in (select max(id) from [imp_Regions] group by guid)
+	  and importId=@importId
+	) AS S
+
+	ON T.guid = S.guid	 
+	WHEN MATCHED 
+	and (T.[key] != S.[key] or T.[key] is not null and S.[key] is null or T.[key] is null and S.[key] is not null
+      or T.[name] != S.[name] or T.[name] is not null and S.[name] is null or T.[name] is null and S.[name] is not null
+      or T.[user1c] != S.[user1c] or T.[user1c] is not null and S.[user1c] is null or T.[user1c] is null and S.[user1c] is not null
+      or T.[isDeleted] != S.[isDeleted] or T.[isDeleted] is not null and S.[isDeleted] is null or T.[isDeleted] is null and S.[isDeleted] is not null
+     ) 
+		THEN
+			UPDATE
+			SET T.[key] = S.[key] ,
+			   T.[name] = S.[name] ,
+			   T.[user1c] = S.[user1c],
+			   T.[hst_datetime] = getdate(),
+			  T.[isDeleted] = S.[isDeleted]  
+
+	WHEN NOT MATCHED BY TARGET 
+		THEN INSERT (
+				[guid]
+			  ,[key]
+			  ,[name]
+			  ,[hst_datetime]
+			  ,[user1c]
+			  ,[isDeleted]   
+				  )
+			 VALUES (
+				 [guid]
+			  ,[key]
+			  ,[name]
+			  ,getdate() 
+			  ,[user1c]   
+			  ,[isDeleted]   
+				);
+
+	end ;
+--проверяем количество обработанных данных	
+		insert into imp_importLog ([date]
+           ,[entity]
+           ,[key])
+		select getdate(),
+			 'Регионы',
+			  i.[key] 
+		from imp_Regions i
+		where 
+			i.guid not in (
+				select guid 
+				from ent_Regions);
+
+delete from [imp_Regions] where importId in (select importId from #importIdTable);
+
+
+END
+
+    </createProcedure>
+
+  </changeSet>
+</databaseChangeLog>

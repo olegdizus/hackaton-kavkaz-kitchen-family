@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="AddIsTransferNameToServerColumnToRpt_Dimension" author="ura">
+
+    <addColumn tableName="rpt_Dimension">
+
+      <column name="isTransferNameToServer" type="BIT" defaultValue="1">
+        <constraints nullable="false" />
+      </column>
+
+    </addColumn>
+
+
+    <sql>
+
+      UPDATE rpt_Dimension
+      SET isTransferNameToServer = 0
+      WHERE value = 'Contact_Group'
+
+    </sql>
+  
+  
+  
+  </changeSet>
+</databaseChangeLog>

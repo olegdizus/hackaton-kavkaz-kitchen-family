@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="AddAccountantRole" author="ura">
+
+    <sql>
+
+      insert into [DashboardUsers].[dbo].[AspNetRoles]
+      (id, Name) values ('41f13921-0204-4124-97ca-2fd538c4b99b', 'Accountant')
+
+    </sql>
+
+  </changeSet>
+</databaseChangeLog>

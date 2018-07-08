@@ -1,0 +1,60 @@
+﻿@using Dashboard.Helpers
+@{
+    ViewBag.Title = "Отчёт по проверке данных";
+}
+
+@section styles
+{
+    @Styles.Render(
+        Dashboard.Bundles.Kendo.kendo.Css.Key,
+        Dashboard.Bundles.HighlightStyle.Css.Key
+    )
+}
+
+<h2>
+    @ViewBag.Title
+</h2>
+    <br>
+    <table>
+        <tr>
+            <td>
+                <button id="perviosDay" class="btn btn-default" type="button">⇩</button>
+            </td>
+            <td>
+				<input style="text-align: justify" data-bind="value: date" type="text" id="periodDatepicker" data-date-format="dd.mm.yyyy" class="datepicker form-control">
+            </td>
+            <td>
+                <button id="nextDay" class="btn btn-default" type="button">⇧</button>
+            </td>
+            <td>
+                <label><input type="checkbox" id="onlyDifference" checked="checked"/>Показывать только различия в деталях</label>
+            </td>
+        </tr>
+    </table>
+    <div id="grid" style="height: 500px"></div>
+<div>
+	@section scripts
+	{
+	    @Scripts.Render(
+	        Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+	        Dashboard.Bundles.Kendo.kendoHelp.Scripts.Key,
+	        Dashboard.Bundles.Knockout.Scripts.Key,
+	        Dashboard.Bundles.Reports.ReportHelper.Scripts.Key,
+	        Dashboard.Bundles.UserSetting.Scripts.Key,
+	        Dashboard.Bundles.TestDataGrid.Scripts.Key
+        )
+    
+	    <script>
+    	    var userSetting = @Html.JsonRaw((object) ViewBag.userSettings);
+
+    	    var dataReportUrl = '@Url.Action("GetTestData")';
+    	    var columnNamesUrl = '@Url.Action("GetColumnNames")';
+    	    var detailUrl = '@Url.Action("GetDetailReport")';
+    	</script>
+    
+	    @Scripts.Render(
+	        Dashboard.Bundles.Reports.TestDataReportScript.Scripts.Key
+        )
+	}
+
+</div>

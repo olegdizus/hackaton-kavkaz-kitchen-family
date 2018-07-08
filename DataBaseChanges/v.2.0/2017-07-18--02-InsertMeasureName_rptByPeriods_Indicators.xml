@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="InsertMeasureName_rptByPeriods_Indicators" author="Egorov">
+
+    <insert tableName="rpt_ByPeriods_Indicators">
+      <column name="name" value="Средний вес отгрузки, кг" />
+      <column name="aggregateType" value="average" />
+
+      <column name="measureName" value="avgWeight" />
+      <column name="kategory_id" value="1" />
+      <column name="isOnlyReport" value="1" />
+    </insert>
+
+    <insert tableName="rpt_ByPeriods_Indicators">
+      <column name="name" value="Доля ММЛ, руб" />
+      <column name="aggregateType" value="simple" />
+
+      <column name="measureName" value="mmlPrice" />
+      <column name="kategory_id" value="1" />
+      <column name="isOnlyReport" value="1" />
+    </insert>
+
+    <insert tableName="rpt_ByPeriods_Indicators">
+      <column name="name" value="Наценка, %" />
+      <column name="aggregateType" value="percent" />
+
+      <column name="measureName" value="grossProfitCoef" />
+      <column name="kategory_id" value="1" />
+      <column name="isOnlyReport" value="1" />
+    </insert>
+
+  </changeSet>
+</databaseChangeLog>

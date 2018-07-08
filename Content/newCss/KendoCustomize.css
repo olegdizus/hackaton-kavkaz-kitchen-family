@@ -1,0 +1,28 @@
+﻿.body {
+    font-family: Arial;
+    font-size: 0.92em;
+}
+
+td[role="gridcell"] {
+    font-size: 11px;
+}
+
+.k-grid-header th.k-header > .k-link {
+    padding: 5px 5px 5px 5px;
+}
+
+.k-grid td {
+    padding: 5px;
+}
+
+.k-header {
+    color: #a8a8a8 !important;
+}
+
+.k-i-collapse {
+    background-position: 0 -192px;
+}
+
+.k-i-expand {
+    background-position: 0 -224px;
+}

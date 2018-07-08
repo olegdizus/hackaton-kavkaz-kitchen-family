@@ -1,0 +1,129 @@
+﻿@using Dashboard.DB.Models.Reports
+@using Dashboard.Helpers
+@{
+	ViewBag.Title = "Дебиторская задолженность";
+}
+@section styles
+ {
+	@Styles.Render(
+        Dashboard.Bundles.Kendo.kendo.Css.Key,
+        Dashboard.Bundles.DeliveryStyle.Css.Key
+    )
+}
+
+<div>
+	<table id="filters">
+		<tr>
+		    <td style="width:150px">
+		        <br>
+		        <input style="text-align: justify" type="text" id="beginDatepicker" data-date-format="dd.mm.yyyy" class="datepicker form-control">
+		        
+                <input type="button" value="Обновить" class="form-control btn btn-primary submitButton" id="refresh">		    
+		        @*<input type="text" id="byDateDatepicker" data-bind="value: date" data-date-format="dd.mm.yyyy" class="datepicker">*@
+		    </td>
+			@foreach (GrenceColor grenceColor in ViewBag.grenceColor)
+			{
+				<td>
+					<div class="delayFilter active" category="@((int)grenceColor.DelayCategory)">
+						<div style="background-color:@grenceColor.color ;" class="color" id="colorDiv"></div>
+						@Html.Raw(grenceColor.name)
+					</div>
+				</td>
+			}
+
+		</tr>
+	</table>
+
+	<br />
+	<div id="Grid" style="min-width: 1400px"></div>
+
+	@section scripts
+	{
+   
+		@Scripts.Render(
+		    //Dashboard.Bundles.jquery.jqueryui.Scripts.Key,
+		    Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+		    Dashboard.Bundles.Kendo.kendoHelp.Scripts.Key,
+		    Dashboard.Bundles.Knockout.Scripts.Key,
+		    Dashboard.Bundles.UserSetting.Scripts.Key,
+		    Dashboard.Bundles.Reports.ReportHelper.Scripts.Key,
+		    Dashboard.Bundles.Extentions.Scripts.Key,
+		    Dashboard.Bundles.Reports.DebitoreReport.Scripts.Key 
+        )
+		<script>
+
+			var grenceColor = [
+				@{
+					int i = 0;
+
+					foreach (GrenceColor grenceColor in ViewBag.grenceColor)
+					{
+						@Html.Raw(string.Format("{2}{{value: {0}, color: '{1}'}}", grenceColor.value, grenceColor.color, i == 0 ? "" : ","))
+						;
+
+						i++;
+					}
+				}
+			];
+
+			$(function() {
+
+			    $('#beginDatepicker').datepicker({
+			        todayHighlight: true,
+			        autoclose: true,
+			        language: 'ru'
+			    }).datepicker("setDate", '@ViewBag.reportDate');
+
+				var userSetting = @Html.JsonRaw((object) ViewBag.userSettings);
+
+				var settingManager = new UserSettingManager(userSetting);
+
+				var viewModel = {
+				    date: ko.observable(settingManager.getSetting('singleDate')),
+				}
+
+				ko.applyBindings(viewModel);
+
+				$(".datepicker").datepicker({
+					language: 'ru'
+				});
+
+				$('#refresh').on('click', function () {
+				    settingManager
+                        .setSetting('date', viewModel.date());
+                    
+				    settingManager
+                        .updateSettings(function() {
+                            $("#Grid").data("kendoGrid").dataSource.read();
+                        });
+				});
+
+				//$('#byDateDatepicker').change(
+				//	function() {
+				//		settingManager.setSetting('date', viewModel.date());
+				//		settingManager.updateSettings(function() {
+				//			$("#Grid").data("kendoGrid").dataSource.read();
+
+				//		});
+				//	});
+
+				$(".delayFilter").click(
+					function() {
+						$(this).toggleClass('active');
+
+						$("#Grid").data("kendoGrid").dataSource.read();
+					});
+
+				CreateDebitoreGrid(
+					$('#Grid'),
+					'@Url.Action("GetReportTable")',
+					'@Url.Action("GetDeliveries")',
+					grenceColor,
+					'@User.Identity.Name.Replace("\\", "\\\\")');
+			});
+
+
+		</script>
+
+	}
+</div>

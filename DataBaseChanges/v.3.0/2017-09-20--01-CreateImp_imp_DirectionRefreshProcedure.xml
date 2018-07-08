@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="CreateImp_imp_DirectionRefreshProcedure" author="Ura">
+    <createProcedure>
+
+      CREATE PROCEDURE [dbo].[imp_DirectionRefresh]
+      AS
+      BEGIN
+      -- SET NOCOUNT ON added to prevent extra result sets from
+      -- interfering with SELECT statements.
+      SET NOCOUNT ON;
+      DECLARE @importId UNIQUEIDENTIFIER
+
+      CREATE TABLE #importIdTable (
+      importId UNIQUEIDENTIFIER
+      )
+
+      WHILE 0 &lt; (SELECT
+      COUNT(*)
+      FROM imp_Directions
+      WHERE importId NOT IN (SELECT importId FROM #importIdTable))
+      BEGIN
+
+      SET @importId = (SELECT TOP 1
+      importId
+      FROM imp_Directions
+      WHERE importId NOT IN (SELECT importId FROM #importIdTable)
+      ORDER BY id)
+
+      INSERT INTO #importIdTable (importId)
+      VALUES (@importId);
+
+
+      --Импорт направлений
+      MERGE ent_Directions AS T
+      USING (SELECT
+      id.[guid],
+      id.name,
+      id.isDeleted,
+      id.user1C,
+      id.typeObject,
+      id.hst_datetime AS hst_datetime
+
+      FROM  imp_Directions id
+
+      WHERE id.importId = @importId
+      ) AS S
+
+      ON T.[guid] = S.[guid]
+      WHEN MATCHED
+      AND (T.name != S.name OR T.name IS NOT NULL AND S.name IS NULL OR T.name IS NULL AND S.name IS NOT NULL
+      OR T.isDeleted != S.isDeleted OR T.isDeleted IS NOT NULL AND S.isDeleted IS NULL OR T.isDeleted IS NULL AND S.isDeleted IS NOT NULL
+      OR T.user1C != S.user1C OR T.user1C IS NOT NULL AND S.user1C IS NULL OR T.user1C IS NULL AND S.user1C IS NOT NULL
+      OR T.typeObject != S.name OR T.typeObject IS NOT NULL AND S.typeObject IS NULL OR T.typeObject IS NULL AND S.typeObject IS NOT NULL)
+
+      THEN UPDATE
+      SET T.[guid] = S.[guid]
+      ,T.name = S.name
+      ,T.isDeleted = S.isDeleted
+      ,T.user1C = S.user1C
+      ,T.typeObject = S.typeObject
+      ,T.hst_datetime = S.hst_datetime
+
+      WHEN NOT MATCHED BY TARGET
+      THEN INSERT (
+      [guid],
+      name,
+      isDeleted,
+      user1C,
+      typeObject,
+      hst_datetime)
+      VALUES (
+      [guid],
+      name,
+      isDeleted,
+      user1C,
+      typeObject,
+      hst_datetime);
+
+
+      print 'Удаление из импортной таблицы';
+      DELETE FROM imp_Directions
+      WHERE importId IN (SELECT
+      importId
+      FROM #importIdTable);
+      END;
+      DROP TABLE #importIdTable
+      END
+
+
+    </createProcedure>
+
+  </changeSet>
+</databaseChangeLog>

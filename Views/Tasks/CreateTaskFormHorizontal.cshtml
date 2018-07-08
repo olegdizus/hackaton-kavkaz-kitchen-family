@@ -1,0 +1,50 @@
+﻿@using Dashboard.DB.Models.ModelExt
+@using Dashboard.Models
+@model Dashboard.DB.Models.TaskPlanner.TaskViewModel
+
+@using (Html.BeginForm("CreateTask", "Tasks", FormMethod.Post, new { id = "createTaskForm", enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+
+    @Html.ValidationMessage("CreateTaskError", new { @class = "text-danger" })
+    <div class="form-horizontal">
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        
+            <div class="form-group">
+                @Html.LabelFor(model => model.employeeTo_id, htmlAttributes: new { @class = "control-label col-md-3" })
+                <div class="col-md-9">
+                    @Html.DropDownList("employeeTo_id", null, htmlAttributes: new { @class = "form-control modal-control" })
+                    @Html.ValidationMessageFor(model => model.employeeTo_id, "", new { @class = "text-danger", id = "employeeValidator" })
+                </div>
+            </div>
+        
+      
+        <div class="form-group">
+            @Html.LabelFor(model => model.Theme, htmlAttributes: new { @class = "control-label col-md-3" })
+            <div class="col-md-9">
+                @Html.EditorFor(model => model.Theme, new { htmlAttributes = new { @class = "form-control modal-control" } })
+                @Html.ValidationMessageFor(model => model.Theme, "", new { @class = "text-danger", id = "themeValidator" })
+            </div>
+        </div>
+
+	    <div class="form-group">
+		    @Html.LabelFor(model => model.PlannedDate, htmlAttributes: new {@class = "control-label col-md-3"})
+		    <div class="col-md-9">
+			    @Html.EditorFor(model => model.PlannedDate, new { htmlAttributes = new { @class = "datetimepicker  form-control", style="max-width:none;width:100%" } })
+			    @Html.ValidationMessageFor(model => model.PlannedDate, "", new {@class = "text-danger", id = "plannedDateValidator"})
+		    </div>
+	    </div>
+		<div class="form-group">
+			@Html.Label("Вложение", htmlAttributes: new { @class = "control-label col-md-3" })
+			<div class="col-md-9">
+				<span class="file-input btn btn-primary btn-file">
+					<span>
+						файл не выбран.
+					</span>
+					<input type="file" id="uploadFile">
+				</span>
+				@Html.ValidationMessage("AttachedFile", new {@class = "text-danger", id = "AttachedFile"})
+			</div>
+		</div>
+    </div>
+}

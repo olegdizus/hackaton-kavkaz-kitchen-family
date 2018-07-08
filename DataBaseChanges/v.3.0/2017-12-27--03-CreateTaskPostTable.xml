@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="CreateTaskPost" author="Andrey">
+
+<createTable tableName="ent_TaskPost">
+
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+
+	   <column name="PlannedDate"  type="datetime">
+        <constraints nullable="false" />
+      </column>
+	  
+	  <column name="CreationDate"  type="datetime">
+        <constraints nullable="false" />
+      </column>
+	  
+	  <column name="Body"  type="nvarchar(800)">
+        <constraints nullable="true" />
+      </column>
+	  
+	  <column name="employeFrom_id"  type="INT">
+		<constraints nullable="true"/>
+      </column>
+	  
+	  <column name="taskState_id"  type="INT">
+		<constraints nullable="false"/>
+      </column>
+	  
+	  <column name="task_id"  type="INT">
+		<constraints nullable="false"/>
+      </column>
+	  
+	  <column name="IsLastPost" type="BIT">
+		<constraints nullable="false"/>
+      </column>
+	      
+    </createTable>
+    
+	<addForeignKeyConstraint referencedColumnNames="id" referencedTableName="dsh_Employee"
+		 baseColumnNames="employeFrom_id" baseTableName="ent_TaskPost"
+		 constraintName="FK_TaskPost_Employee" onDelete="NO ACTION"/>
+	
+	<addForeignKeyConstraint referencedColumnNames="id" referencedTableName="dsh_Employee"
+		 baseColumnNames="taskState_id" baseTableName="ent_TaskPost"
+		 constraintName="FK_TaskPost_TaskState" onDelete="NO ACTION"/>
+		 
+	<addForeignKeyConstraint referencedColumnNames="id" referencedTableName="ent_Task"
+		 baseColumnNames="task_id" baseTableName="ent_TaskPost"
+		 constraintName="FK_TaskPost_Task" onDelete="NO ACTION"/>
+  </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,28 @@
+﻿@{
+    ViewBag.Title = "Нет прав доступа";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section styles{
+<style>
+    .noemployee-message-block{
+        padding: 20px;
+    }
+    .noemployee-message {
+        color: red;
+        font-size: 18px;
+    }
+    .noemployee-description {
+        color: #000;
+        margin: 10px 0px;
+    }
+
+</style>
+}
+
+<div class="noemployee-message-block">
+    <span class="noemployee-message">Вы не являетесь сотрудником компании</span>
+    <p class="noemployee-description">
+        Только сотрудники компании могут работать с планищиком задач
+    </p>
+    <a href="@Url.Action("","")" class="btn btn-default">Вернуться на главную</a>
+</div>

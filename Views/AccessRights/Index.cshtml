@@ -1,0 +1,40 @@
+﻿@{
+    ViewBag.Title = "Список пользователей по иерархии";
+}
+
+@section styles
+{
+    @Styles.Render(
+        Dashboard.Bundles.Kendo.KendoStandart.Css.Key,
+        Dashboard.Bundles.AccessRights.Css.Key
+    )
+}
+
+<h2>Список пользователей по иерархии</h2>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div id="grid"></div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-3">
+        <br />
+    </div>
+</div>
+
+@section scripts{
+    @Scripts.Render(
+        Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+        Dashboard.Bundles.AccessRights.Scripts.Key
+    )
+
+    <script type="text/javascript">
+        var isReport = true;
+
+        $(function() {
+            AccessRightsGrid("#grid", null, isReport);
+        });
+
+    </script>
+}

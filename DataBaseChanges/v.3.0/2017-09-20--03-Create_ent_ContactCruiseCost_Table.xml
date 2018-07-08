@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Create_ent_ContactCruiseCost_Table" author="Ura">
+
+    <createTable tableName="ent_ContactCruiseCost">
+
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+
+      <column name="cruiseName" type="nvarchar(250)"/>
+
+      <column name="cruiseIsDeleted" type="bit"/>
+
+      <column name="directionName" type="nvarchar(250)"/>
+    
+      <column name="directionIsDeleted" type="bit"/>
+
+      <column name="contact_id" type="int"/>
+
+      <column name="directDelivery" type="bit"/>
+
+      <column name="contactPlanWeight" type="decimal(18,2)"/>
+
+      <column name="cruisePlanWeight" type="decimal(18,2)"/>
+
+      <column name="cruiseCost" type="decimal(18,2)"/>
+
+      <column name="contactCruisePlanCost" type="decimal(18,2)"/>
+
+      <column name="forwarder_id" type="int"/>
+      
+      <column name="forwarderName" type="nvarchar(250)"/>
+
+    </createTable>
+
+  </changeSet>
+</databaseChangeLog>
+

@@ -1,0 +1,16 @@
+﻿<script id="bar" type="text/x-kendo-tmpl">
+	<div class="progress" style="min-width:200px">
+
+		<div class="progress-bar" style="width:#:Math.min(getPercent(Plan,FaktByPlan)*100,100)#%;">
+		</div>
+		<div class="progress-value" style="width: 100%;">
+			#=FaktByPlan==null ? 0 : FormatValue(FaktByPlan, 'n0')# (#=kendo.toString(getPercent(Plan,FaktByPlan),"p")#)
+		</div>
+	</div>
+</script>
+
+<script>
+    //$(function() {
+        window.barTemplate = kendo.template($('#bar').html());
+    //});
+</script>

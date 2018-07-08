@@ -1,0 +1,41 @@
+html, body {
+    width: 100%;
+    height: 100%;
+}
+
+.header {
+    width: 100%;
+    height: 48px;
+    background-color: black;
+}
+
+.layout {
+    padding-top: 20px;
+}
+
+.icon {
+    width: 24px;
+    height: 24px;
+}
+
+.tab-pane {
+    padding-top: 20px;
+}
+
+.hb {
+    position: absolute;
+    background-image: url("../Images/img/hb.png");
+    width: 50px;
+    height: 50px;
+    top: 80px;
+    z-index: 1000;
+}
+
+.icon-16{
+    width: 16px;
+    height: 16px;
+}
+
+.folded ~ tr:not(.active) {
+    display: none;
+}  

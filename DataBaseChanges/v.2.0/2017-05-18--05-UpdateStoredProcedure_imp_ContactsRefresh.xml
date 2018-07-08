@@ -1,0 +1,528 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="UpdateStoredProcedure_imp_ContactsRefresh" author="ura">
+    <createProcedure>
+      
+      ALTER PROCEDURE [dbo].[imp_ContactsRefresh]
+      -- Add the parameters for the stored procedure here
+      AS
+      BEGIN
+      -- SET NOCOUNT ON added to prevent extra result sets from
+      -- interfering with SELECT statements.
+      SET NOCOUNT ON;
+
+      declare @BuyersGroup nvarchar(10) =
+      (select top 1 id
+      from ent_ContactGroups
+      where [key] = '00000022')--покупатели
+
+      declare @BuyersGroupPP nvarchar(10) =
+      (select top 1 @BuyersGroup + '.' + cast(id as nvarchar)
+      from ent_ContactGroups
+      where [key] = 'кака3590')--прямые продажи
+
+      declare @BuyersGroupR1 nvarchar(10) =
+      (select top 1 @BuyersGroup + '.' + cast(id as nvarchar)
+      from ent_ContactGroups
+      where [key] = 'кака3588')--регионы 1
+
+      declare @BuyersGroupR2 nvarchar(10) =
+      (select top 1 @BuyersGroup + '.' + cast(id as nvarchar)
+      from ent_ContactGroups
+      where [key] = 'У-005251')--регионы 2
+
+      declare @BuyersGroupR3 nvarchar(10) =
+      (select top 1 @BuyersGroup + '.' + cast(id as nvarchar)
+      from ent_ContactGroups
+      where [key] = '00000417')--регионы 3
+
+      declare @BuyersGroupSet nvarchar(10) =
+      (select top 1 @BuyersGroup + '.' + cast(id as nvarchar)
+      from ent_ContactGroups
+      where [key] = 'кака3589')--сети
+
+      MERGE ent_ContactType AS T
+      USING (
+      select distinct contactType
+      from imp_contacts)
+      AS S
+      ON T.name = S.contactType
+      WHEN NOT MATCHED BY TARGET
+      THEN INSERT (
+      [name])
+      VALUES (
+      contactType
+      );
+
+      MERGE ent_Employe AS T
+      USING (
+      select distinct managerName, managerkey
+      from Imp_contacts
+      where managerKey is not null
+      )
+      AS S
+      ON T.[key] = S.managerkey
+      WHEN MATCHED
+      and (
+      T.name != S.managerName
+      or T.name is null
+      )
+      THEN
+      UPDATE
+      SET
+      T.name = S.managerName
+
+      WHEN NOT MATCHED BY TARGET
+      THEN INSERT (
+      [key]
+      ,[name])
+      VALUES (
+      managerKey
+      ,managerName
+      );
+
+      MERGE ent_Users AS T
+      USING (
+      select distinct mainManagerName, mainManagerGuid
+      from Imp_contacts
+      where mainManagerGuid is not null
+      )
+      AS S
+      ON T.guid = S.mainManagerGuid
+      WHEN MATCHED
+      and (
+      T.name != S.mainManagerName
+      or T.name is null
+      )
+      THEN
+      UPDATE
+      SET
+      T.name = S.mainManagerName
+
+      WHEN NOT MATCHED BY TARGET
+      THEN INSERT (
+      guid
+      ,[name])
+      VALUES (
+      mainManagerGuid
+      ,mainManagerName
+      );
+
+      MERGE ent_Supervizer AS T
+      USING (
+      select distinct supervizerName, supervizerkey
+      from Imp_contacts
+      where supervizerkey is not null)
+      AS S
+      ON T.userName = S.supervizerkey
+      WHEN MATCHED
+      and (
+      T.name != S.supervizerName
+      or T.name is null
+      )
+      THEN
+      UPDATE
+      SET
+      T.name = S.supervizerName
+
+      WHEN NOT MATCHED BY TARGET
+      THEN INSERT (
+      userName
+      ,[name])
+      VALUES (
+      supervizerkey
+      ,supervizerName
+      );
+
+
+
+
+
+      MERGE ent_Geography AS T
+      USING (
+      select distinct geographyGuid, geographyValue
+      from Imp_contacts
+      where geographyGuid is not null) AS S
+      ON T.geographyGuid = S.geographyGuid
+      WHEN MATCHED
+      and (
+      T.geographyValue != S.geographyValue
+      or T.geographyValue is null
+      )
+      THEN
+      UPDATE
+      SET
+      T.geographyValue = S.geographyValue
+      WHEN NOT MATCHED BY TARGET
+      THEN INSERT (
+      [geographyGuid]
+      ,[geographyValue])
+      VALUES (
+      geographyGuid
+      ,geographyValue
+      );
+
+
+
+
+      declare @importId uniqueidentifier
+
+      CREATE TABLE #importIdTable
+      (
+      importId uniqueidentifier
+      )
+
+      while 0 &lt; (select count(*)
+				from imp_contacts
+				where importId not in (select importId from #importIdTable))
+	begin
+		
+		set @importId = (select top 1 importId
+						from imp_contacts
+						where importId not in (select importId from #importIdTable)
+						order by id)
+
+		insert into #importIdTable (importId) values (@importId);
+						
+	MERGE ent_Contacts AS T
+	USING 
+	(SELECT
+      c.[guid]
+      ,c.[binaryGuid]
+      ,c.[contactKey]
+      ,c.[fullName]
+	    ,c.name
+      ,c.[isActiv]
+      ,c.[parentFolder]
+      ,c.[INN]
+      ,c.[KPP]
+      ,c.[OKPO]
+      ,c.[OKOPF]
+      ,c.[contactType]
+      ,c.[Customer]
+      ,c.[Provider]
+      ,case when c.[NotResident]=0 then 1 else 0 end  as Resident
+      ,c.[comment]
+      ,c.[planWeight]
+      ,c.[managerName]
+      ,c.[managerKey]
+      ,c.[mainManagerName]
+      ,c.[mainManagerGuid]
+      ,c.[milkProvider]
+      ,c.[planSum]
+      ,c.[User1C]
+      ,c.[isDeleted]
+	    ,c.[CompanyAddress]
+      ,c.[factAddress]
+      ,c.[shippingAddress]
+      ,c.[fax]
+      ,c.[email]
+      ,c.[CurrentAccount]
+      ,c.[CorrespondentAccount]
+      ,c.[BIK]
+      ,c.[Bank]
+      ,c.[OGRN]
+	  ,c.longitude
+	  ,c.latitude
+	  ,c.PlanDeliveryCount
+	  ,c.geographyGuid
+	
+	,e.id as [employe_id]
+	,e2.id as mainManager_id
+	,hc.id_contact as [parentHolding_id]
+	,ct.id as contactType_id
+	,s.id as supervizer_id
+	,cg.id as parent_id
+	,p.id as firstLevel_id
+	,r.id as region_id
+	,cc.id as category_id
+	,g.id as geography_id
+
+	 from imp_contacts c
+left join ent_Employe e on c.managerKey=e.[key]
+left join ent_Users e2 on c.mainManagerGuid=e2.guid
+left join ent_Contacts hc on c.holdingKey=hc.contactKey
+left join ent_ContactType ct on c.contactType=ct.name
+left join ent_Supervizer s on c.supervizerKey=s.UserName
+left join ent_ContactGroups cg on c.parentGuid=cg.guid
+left join ent_Persones p on c.firstLevelGuid=p.guid
+left join ent_Regions r on c.regionGuid=r.guid
+left join ent_ContactCategory cc on c.categoryGuid=cc.guid
+left join ent_Geography g on c.geographyGuid=g.geographyGuid
+
+where c.id in (select max(id) from imp_contacts group by contactKey)
+	and importId=@importId
+	--and c.isdeleted = 0
+ ) AS S
+
+	ON T.[guid] = S.[guid]
+	
+	WHEN MATCHED 
+	and (T.contactKey != S.contactKey or T.contactKey is not null and S.contactKey is null or T.contactKey is null and S.contactKey is not null
+      or T.[binaryGuid] != S.[binaryGuid] or T.[binaryGuid] is not null and S.[binaryGuid] is null or T.[binaryGuid] is null and S.[binaryGuid] is not null
+      or T.name != S.name or T.name is not null and S.name is null or T.name is null and S.name is not null
+	  or T.fullName != S.fullName or T.fullName is not null and S.fullName is null or T.fullName is null and S.fullName is not null
+      or T.isActiv != S.isActiv or T.isActiv is not null and S.isActiv is null or T.isActiv is null and S.isActiv is not null
+      or T.folderCode != S.parentFolder or T.folderCode is not null and S.parentFolder is null or T.folderCode is null and S.parentFolder is not null
+      or T.INN != S.INN or T.INN is not null and S.INN is null or T.INN is null and S.INN is not null
+      or T.KPP != S.KPP or T.KPP is not null and S.KPP is null or T.KPP is null and S.KPP is not null
+      or T.OKPO != S.OKPO or T.OKPO is not null and S.OKPO is null or T.OKPO is null and S.OKPO is not null
+      or T.OKOPF != S.OKOPF or T.OKOPF is not null and S.OKOPF is null or T.OKOPF is null and S.OKOPF is not null
+      or T.Customer != S.Customer or T.Customer is not null and S.Customer is null or T.Customer is null and S.Customer is not null
+      or T.Provider != S.Provider or T.Provider is not null and S.Provider is null or T.Provider is null and S.Provider is not null
+      or T.Resident != S.Resident or T.Resident is not null and S.Resident is null or T.Resident is null and S.Resident is not null
+      or T.comment != S.comment or T.comment is not null and S.comment is null or T.comment is null and S.comment is not null
+      or T.planWeight != S.planWeight or T.planWeight is not null and S.planWeight is null or T.planWeight is null and S.planWeight is not null
+      or T.[employe_id] != S.[employe_id] or T.[employe_id] is not null and S.[employe_id] is null or T.[employe_id] is null and S.[employe_id] is not null
+      or T.mainManager_id != S.mainManager_id or T.mainManager_id is not null and S.mainManager_id is null or T.mainManager_id is null and S.mainManager_id is not null
+      or T.milkProvider != S.milkProvider or T.milkProvider is not null and S.milkProvider is null or T.milkProvider is null and S.milkProvider is not null
+      or T.planSum != S.planSum or T.planSum is not null and S.planSum is null or T.planSum is null and S.planSum is not null
+      or T.User1C != S.User1C or T.User1C is not null and S.User1C is null or T.User1C is null and S.User1C is not null
+      or T.[parentHolding_id] != S.[parentHolding_id] or T.[parentHolding_id] is not null and S.[parentHolding_id] is null
+      or T.isDeleted != S.isDeleted or T.isDeleted is not null and S.isDeleted is null or T.isDeleted is null and S.isDeleted is not null
+	  or T.supervizer_id != S.supervizer_id or T.supervizer_id is not null and S.supervizer_id is null or T.supervizer_id is null and S.supervizer_id is not null
+	  or T.CompanyAddress != S.CompanyAddress or T.CompanyAddress is not null and S.CompanyAddress is null or T.CompanyAddress is null and S.CompanyAddress is not null
+      or T.factAddress != S.factAddress or T.factAddress is not null and S.factAddress is null or T.factAddress is null and S.factAddress is not null
+      or T.shippingAddress != S.shippingAddress or T.shippingAddress is not null and S.shippingAddress is null or T.shippingAddress is null and S.shippingAddress is not null
+      or T.fax != S.fax or T.fax is not null and S.fax is null or T.fax is null and S.fax is not null
+      or T.email != S.email or T.email is not null and S.email is null or T.email is null and S.email is not null
+      or T.CurrentAccount != S.CurrentAccount or T.CurrentAccount is not null and S.CurrentAccount is null or T.CurrentAccount is null and S.CurrentAccount is not null
+      or T.CorrespondentAccount != S.CorrespondentAccount or T.CorrespondentAccount is not null and S.CorrespondentAccount is null or T.CorrespondentAccount is null and S.CorrespondentAccount is not null
+      or T.BIK != S.BIK or T.BIK is not null and S.BIK is null or T.BIK is null and S.BIK is not null
+      or T.Bank != S.Bank or T.Bank is not null and S.Bank is null or T.Bank is null and S.Bank is not null
+      or T.OGRN != S.OGRN or T.OGRN is not null and S.OGRN is null or T.OGRN is null and S.OGRN is not null
+	  or T.longitude != S.longitude or T.longitude is not null and S.longitude is null or T.longitude is null and S.longitude is not null
+      or T.latitude != S.latitude or T.latitude is not null and S.latitude is null or T.latitude is null and S.latitude is not null
+      or T.parent_id != S.parent_id or T.parent_id is not null and S.parent_id is null or T.parent_id is null and S.parent_id is not null
+      or T.firstLevel_id != S.firstLevel_id or T.firstLevel_id is not null and S.firstLevel_id is null or T.firstLevel_id is null and S.firstLevel_id is not null
+      or T.region_id != S.region_id or T.region_id is not null and S.region_id is null or T.region_id is null and S.region_id is not null
+      or T.category_id != S.category_id or T.category_id is not null and S.category_id is null or T.category_id is null and S.category_id is not null
+	  or T.PlanDeliveryCount != S.PlanDeliveryCount or T.PlanDeliveryCount is not null and S.PlanDeliveryCount is null or T.PlanDeliveryCount is null and S.PlanDeliveryCount is not null
+	  
+	  or T.geography_id != S.geography_id or T.geography_id is not null and S.geography_id is null or T.geography_id is null and S.geography_id is not null
+					) 
+		THEN
+			UPDATE
+			SET 
+	   T.contactKey = S.contactKey
+      ,T.[binaryGuid] = S.[binaryGuid]
+      ,T.fullName = S.fullName
+	  ,T.name = S.name
+      ,T.isActiv = S.isActiv
+      ,T.folderCode = S.parentFolder
+      ,T.INN = S.INN
+      ,T.KPP = S.KPP
+      ,T.OKPO = S.OKPO
+      ,T.OKOPF = S.OKOPF
+      ,T.contactType_id = S.contactType_id
+      ,T.Customer = S.Customer
+      ,T.Provider = S.Provider
+      ,T.Resident = S.Resident
+      ,T.comment = S.comment
+      ,T.planWeight = S.planWeight
+      ,T.[employe_id] = S.[employe_id]
+      ,T.mainManager_id = S.mainManager_id
+      ,T.milkProvider = S.milkProvider
+      ,T.planSum = S.planSum
+      ,T.User1C = S.User1C
+      ,T.parentHolding_id = S.parentHolding_id
+      ,T.isDeleted = S.isDeleted
+	  ,T.supervizer_id = S.supervizer_id
+	  ,T.CompanyAddress = S.CompanyAddress
+      ,T.factAddress = S.factAddress
+      ,T.shippingAddress = S.shippingAddress
+      ,T.fax = S.fax
+      ,T.email = S.email
+      ,T.CurrentAccount = S.CurrentAccount
+      ,T.CorrespondentAccount = S.CorrespondentAccount
+      ,T.BIK = S.BIK
+      ,T.Bank = S.Bank
+      ,T.OGRN = S.OGRN
+	  ,T.longitude = S.longitude
+	  ,T.latitude = S.latitude
+	  ,T.parent_id = S.parent_id
+	  ,T.firstLevel_id = S.firstLevel_id
+	  ,T.region_id = S.region_id
+	  ,T.category_id = S.category_id
+	  ,T.PlanDeliveryCount = S.PlanDeliveryCount
+	  ,T.geography_id = S.geography_id
+
+	WHEN NOT MATCHED BY TARGET 
+		THEN INSERT (
+	   [guid]
+	  ,[contactKey]
+	  ,[binaryGuid]
+	  ,name
+      ,[fullName]
+      ,[isActiv]
+      ,[folderCode]
+      ,[INN]
+      ,[KPP]
+      ,[OKPO]
+      ,[OKOPF]
+      ,contactType_id
+      ,[Customer]
+      ,[Provider]
+      ,[Resident]
+      ,[comment]
+      ,[planWeight]
+      ,employe_id
+      ,mainManager_id
+      ,[milkProvider]
+      ,[planSum]
+      ,[User1C]
+      ,parentHolding_id
+      ,[isDeleted]
+	  ,supervizer_id
+	  ,[CompanyAddress]
+      ,[factAddress]
+      ,[shippingAddress]
+      ,[fax]
+      ,[email]
+      ,[CurrentAccount]
+      ,[CorrespondentAccount]
+      ,[BIK]
+      ,[Bank]
+      ,[OGRN]
+	  ,latitude
+	  ,longitude
+	  ,parent_id
+	  ,firstLevel_id
+	  ,region_id
+	  ,category_id
+	  ,PlanDeliveryCount
+	  ,geography_id
+	  )
+     VALUES (
+	   [guid]
+      ,[contactKey]
+	  ,[binaryGuid]
+      ,name
+	  ,[fullName]
+      ,[isActiv]
+      ,parentFolder
+      ,[INN]
+      ,[KPP]
+      ,[OKPO]
+      ,[OKOPF]
+      ,contactType_id
+      ,[Customer]
+      ,[Provider]
+      ,[Resident]
+      ,[comment]
+      ,[planWeight]
+      ,employe_id
+      ,mainManager_id
+      ,[milkProvider]
+      ,[planSum]
+      ,[User1C]
+      ,parentHolding_Id
+      ,[isDeleted]
+	  ,supervizer_id
+	  ,[CompanyAddress]
+      ,[factAddress]
+      ,[shippingAddress]
+      ,[fax]
+      ,[email]
+      ,[CurrentAccount]
+      ,[CorrespondentAccount]
+      ,[BIK]
+      ,[Bank]
+      ,[OGRN]
+	  ,latitude
+	  ,longitude
+	  ,parent_id
+	  ,firstLevel_id
+	  ,region_id
+	  ,category_id
+	  ,PlanDeliveryCount
+	  ,geography_id
+		   );
+
+delete from ent_ContactsDeliveryDays where contact_id in (select c.id_contact 
+														from imp_ContactsDeliveryDays dd
+														join ent_Contacts c on dd.contactKey=c.contactKey
+														where importId=@importId)
+	MERGE ent_ContactsDeliveryDays AS T
+	USING (
+		select dd.DeliveryDay, c.id_contact
+		from imp_ContactsDeliveryDays dd
+		join ent_Contacts c on dd.contactKey=c.contactKey
+		where importId=@importId)
+   AS S
+	ON T.contact_id = S.id_contact and T.DeliveryDay = S.DeliveryDay
+	WHEN NOT MATCHED BY TARGET 
+		THEN INSERT (
+			contact_id
+           ,DeliveryDay)
+     VALUES (
+			id_contact
+           ,DeliveryDay
+		   );
+	 --WHEN NOT MATCHED BY SOURCE
+	 --and (T.contact_id in (select c.id_contact
+		--				from imp_ContactsDeliveryDays dd
+		--				join ent_Contacts c on dd.contactKey=c.contactKey))
+		--THEN DELETE;
+	end 
+
+		--проверяем количество обработанных данных	
+
+	insert into imp_importLog ([date]
+           ,[entity]
+           ,[key])
+		select getdate(),
+			 'Контрагенты',
+			 i.contactKey 
+		from imp_Contacts i
+		where 
+			i.contactKey not in (
+				select contactKey 
+				from ent_Contacts);
+
+delete from imp_Contacts where importId in (select importId from #importIdTable);
+delete from imp_ContactsDeliveryDays where importId in (select importId from #importIdTable);
+	--Проставим поле isReport
+
+	MERGE ent_Contacts AS T
+	USING
+		(select id_contact,
+			case when  
+					c.name != 'Компания Национальных Продуктов '
+					and ((cg.treeKey between @BuyersGroupPP + '.0' and @BuyersGroupPP + '.z') 
+							or (cg.treeKey between @BuyersGroupR1 + '.0' and @BuyersGroupR1 + '.z') 
+							or (cg.treeKey between @BuyersGroupR2 + '.0' and @BuyersGroupR2 + '.z') 
+							or (cg.treeKey between @BuyersGroupR3 + '.0' and @BuyersGroupR3 + '.z') 
+							or (cg.treeKey between @BuyersGroupSet + '.0' and @BuyersGroupSet + '.z')) 
+					--and c.isDeleted = 0 
+					then 1
+			else 0 end as isReport
+		from ent_Contacts c
+		inner join ent_ContactGroups cg on c.parent_id = cg.id
+		union
+		select id_contact, 0 as isReport
+		from ent_Contacts c
+		where parent_id is null
+		) as S
+	ON T.id_contact = S.id_contact
+
+	WHEN MATCHED
+	and T.isReport != S.isReport or T.isReport is not null and S.isReport is null or T.isReport is  null and S.isReport is not null
+	THEN
+			UPDATE
+			SET 
+				 T.isReport = S.isReport;
+	
+
+
+END;
+
+    </createProcedure>
+
+  </changeSet>
+</databaseChangeLog>

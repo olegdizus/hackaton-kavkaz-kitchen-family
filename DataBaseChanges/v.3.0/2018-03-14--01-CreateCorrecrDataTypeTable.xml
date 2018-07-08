@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="CteateCorrectDataType" author="Andrey">
+
+  <createTable tableName="ent_CorrectDataType">
+
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+
+	  <column name="Name"  type="nvarchar(128)">
+        <constraints nullable="false" />
+      </column>
+	  
+	  <column name="System"  type="nvarchar(128)">
+        <constraints nullable="true" />
+      </column>
+	  
+	  <column name="Destination"  type="nvarchar(128)">
+        <constraints nullable="true" />
+      </column>
+	  
+	  <column name="Description"  type="nvarchar(512)">
+        <constraints nullable="true" />
+      </column>
+	
+	</createTable>
+  </changeSet>
+</databaseChangeLog>

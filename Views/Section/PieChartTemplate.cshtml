@@ -1,0 +1,13 @@
+﻿<script type="text/html" id="pieChartTemplate">
+    <h5 data-bind="text: title, visible: showTitle" id="pieChartTitle" class="graphic-main-header" style="margin-top: 0"></h5>
+    <div data-bind="attr: { id: pieChartId }" style="width:400px;height:200px">
+        
+    </div>
+    <div id="hoverable" class="hoverable-pie-chart">
+
+    </div>
+</script>
+
+@Scripts.Render(
+        Dashboard.Bundles.pieChart.Scripts.Key
+    )

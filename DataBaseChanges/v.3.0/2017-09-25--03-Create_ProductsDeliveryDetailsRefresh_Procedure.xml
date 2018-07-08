@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Create_ProductsDeliveryDetailsRefresh_Procedure" author="Ura">
+    <createProcedure>
+
+-- =============================================
+-- Author:		Дудченко Юрий
+-- Create date: 25.09.2017
+-- Description:
+-- =============================================
+
+    CREATE PROCEDURE imp_ProductsDeliveryDetailsRefresh
+
+      AS
+      BEGIN
+      SET NOCOUNT ON;
+
+
+      DECLARE @importId UNIQUEIDENTIFIER
+
+      CREATE TABLE #importIdTable (
+      importId UNIQUEIDENTIFIER
+      )
+
+      WHILE 0 &lt; (SELECT
+      COUNT(*)
+    FROM imp_ProductsDeliveryDetails
+    WHERE importId NOT IN (SELECT importId FROM #importIdTable))
+  BEGIN
+
+  SET @importId = (SELECT TOP 1
+      importId
+    FROM imp_ProductsDeliveryDetails
+    WHERE importId NOT IN (SELECT importId FROM #importIdTable)
+    ORDER BY id)
+
+  INSERT INTO #importIdTable (importId)
+    VALUES (@importId);
+
+
+	MERGE ent_ProductsDeliveryDetails AS T
+	USING (SELECT
+		
+      ipdd.[Weight],
+      ipdd.[user1C],
+      ipdd.[hst_datetime],
+	  ipdd.[DeliveryGuid],
+
+	  pd.id AS productsDelivery_id,
+	  d.id AS delivery_id
+
+	FROM imp_ProductsDeliveryDetails ipdd
+
+		LEFT JOIN ent_ProductsDelivery pd ON pd.[guid] = ipdd.productsDeliveryGuid
+
+		LEFT JOIN ent_Delivery d ON d.[guid] = ipdd.DeliveryGuid
+
+    WHERE ipdd.importId = @importId
+	) AS S
+
+  ON T.productsDelivery_id = S.productsDelivery_id AND T.[DeliveryGuid] = S.[DeliveryGuid]
+  WHEN MATCHED
+
+  THEN UPDATE
+      SET 
+		 T.[Weight] = S.[Weight],
+		 T.delivery_id = S.delivery_id
+	
+  WHEN NOT MATCHED BY TARGET
+    THEN INSERT (
+      [productsDelivery_id],
+	  [Weight],
+	  [delivery_id],
+	  [DeliveryGuid],
+	  [hst_datetime]
+	  )
+        VALUES (      
+      [productsDelivery_id],
+	  [Weight],
+	  [delivery_id],
+	  [DeliveryGuid],
+	  [hst_datetime]
+	  );
+
+	   print 'Удаление из импортной таблицы';
+
+  DELETE FROM imp_ProductsDeliveryDetails
+  WHERE importId IN (SELECT
+        importId
+      FROM #importIdTable);
+  END;
+  DROP TABLE #importIdTable
+
+
+END
+
+    </createProcedure>
+
+  </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,68 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="CreateKpiVariantsTable" author="apetrosyan">
+
+    <createTable tableName="kpi_Variants">
+
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+
+      <column name="name" type="nvarchar(150)">
+        <constraints nullable="false" />
+      </column>
+
+      <column name="position_id" type="INT">
+        <constraints nullable="false" />
+      </column>
+
+  </createTable>
+  
+     <addForeignKeyConstraint referencedColumnNames="id" referencedTableName="dsh_Position"
+                                  baseColumnNames="position_id" baseTableName="kpi_Variants"
+                            constraintName="FK_Position_Variants" onDelete="NO ACTION"/>
+
+    <createTable tableName="kpi_Matrix">
+
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+
+      <column name="indicator_id" type="INT">
+        <constraints nullable="false" />
+      </column>
+
+      <column name="month" type="DATETIME">
+        <constraints nullable="false" />
+      </column>
+
+     <column name="variant_id" type="INT">
+        <constraints nullable="false" />
+      </column>
+
+      <column name="value" type="DECIMAL">
+        <constraints nullable="false" />
+      </column>
+
+  </createTable>
+    
+  <addPrimaryKey columnNames="id"
+            constraintName="pk_ByPeriods_Indicators"
+            tableName="rpt_ByPeriods_Indicators"/>
+
+  <addForeignKeyConstraint referencedColumnNames="id" referencedTableName="kpi_Variants"
+                                  baseColumnNames="variant_id" baseTableName="kpi_Matrix"
+                            constraintName="FK_Matrix_Variants" onDelete="NO ACTION"/>
+
+   <addForeignKeyConstraint referencedColumnNames="id" referencedTableName="rpt_ByPeriods_Indicators"
+                                  baseColumnNames="indicator_id" baseTableName="kpi_Matrix"
+                            constraintName="FK_Matrix_Indicators" onDelete="NO ACTION"/>
+
+  </changeSet>
+</databaseChangeLog>
+

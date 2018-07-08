@@ -1,0 +1,121 @@
+﻿@Styles.Render(Dashboard.Bundles.Arcticmodal.Css.Key)
+
+<div style="display: none;">
+    <div class="box-modal" id="editTaskPostModal">
+        <div class="box-modal_close arcticmodal-close">×</div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>Редактирование действия</h4>
+            </div>
+            <div id="editTaskPostFormDiv" class="modal-body">
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="closeModalButton" class="btn btn-default close-modal-button">Закрыть</button>
+                <button type="button" id="editTaskPostModalButton" class="btn btn-primary">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+    	includeOnce('bundles/arcticmodal');
+    	includeOnce('bundles/Task');
+
+        EditTaskPostModalManager.getInstance().init();
+    });
+
+    function EditTaskPostModalManager() {
+        this.init = function () {
+            $('.close-modal-button').click(function () {
+                closeEditTaskPostModal();
+            });
+        }
+
+        this.openModal = function (form, callbackOnSuccess) {
+            setCallback(callbackOnSuccess);
+
+            setFormToEditPaskPostFormDiv(form);
+
+            TaskPlannerModalManager
+                .getInstance().
+                bindDatetimepicker(form);
+
+            TaskPlannerModalManager.getInstance()
+                .bindTaskStateSelectedListOnChange(form);
+
+            openEditTaskPostModal();
+
+            TaskPlannerModalManager.getInstance().bindOkButtonClickHandler('editTaskPostModalButton', editTaskPost);
+
+            TaskPlannerModalManager.getInstance().bindTaskStateSelectedListOnChange(form);
+        }
+
+        function openEditTaskPostModal() {
+            $('#editTaskPostModal').arcticmodal();
+        }
+
+        function setFormToEditPaskPostFormDiv(form) {
+            var formDiv = $('#editTaskPostFormDiv');
+            formDiv.html('');
+            formDiv.html(form);
+        }
+
+        function setCallback(callbackOnSuccess) {
+            EditTaskPostModalManager.callback = callbackOnSuccess;
+        }
+
+        this.closeModal = function () {
+            closeEditTaskPostModal();
+        }
+
+        function closeEditTaskPostModal() {
+            $('#editTaskPostModal').arcticmodal('close');
+        }
+
+        function editTaskPost() {
+            var values = TaskPlannerModalManager
+                .getInstance()
+                .serializeForm('editTaskPostForm');
+
+            var callback = getCallback();
+
+            var url = basePath + 'Tasks/EditTaskPost';
+
+            TaskPlannerModalManager
+                .getInstance()
+                .sendAjax({
+                        url: url,
+                        data: values,
+                        formId: 'editTaskPostFormDiv',
+                        onSuccessCallback: function() {
+                            callback();
+                            closeEditTaskPostModal();
+                        },
+                        bindHanlersAfterAjax: function(form) {
+                            TaskPlannerModalManager
+                                .getInstance()
+                                .bindDatetimepicker(form);
+
+                            TaskPlannerModalManager
+                                .getInstance()
+                                .bindTaskStateSelectedListOnChange(form);
+                        }
+                    }
+                );
+        }
+
+        function getCallback() {
+            return EditTaskPostModalManager.callback;
+        }
+    }
+
+    EditTaskPostModalManager.getInstance = function () {
+        if (!EditTaskPostModalManager.instance) {
+            EditTaskPostModalManager.instance = new EditTaskPostModalManager();
+        }
+
+        return EditTaskPostModalManager.instance;
+    }
+</script>

@@ -1,0 +1,638 @@
+﻿[
+  {
+    "Name": "Аутентификация",
+    "MainController": "Account",
+    "Rights": {
+      "Read": {
+        "Actions": [
+          "Login",
+          "LogOff"
+        ]
+      }
+    }
+  },
+  {
+    "Name": "Авторизованный",
+    "MainController": "Account",
+    "Rights": {
+      "Read": {
+        "Actions": [
+          "Manage",
+          "GetUserAccountData",
+          "ChangeLogin"
+        ]
+      }
+    }
+  },
+
+  {
+    "Name": "Мотивация",
+    "MainController": "SalesSalary",
+    "Rights": {
+      "Read": {
+        "Actions": [
+
+          "GetSalary"
+        ],
+        "DependentMethods": [
+          {
+            "Controller": "GeneralStatement",
+            "Actions": [
+              "GetGridColumns",
+              "GetGridRows",
+              "Index"
+            ]
+          },
+          {
+            "Controller": "HierarchyMenu",
+            "Actions": [
+              "GetHierarchyMenuItems"
+            ]
+          }
+        ]
+      },
+      "Edit": {
+        "Actions": [
+          "SaveSalaryParts",
+          "SetPayedMaxPercent",
+          "EditSalaryFine",
+          "AddSalaryFine",
+          "DeleteSalaryFine",
+          "SetToLower",
+          "CopySalaryPartsByPrevMonths"
+        ]
+      }
+    }
+  },
+
+  {
+    "Name": "УправлениеПользователями",
+    "MainController": "Account",
+    "Rights": {
+      "Create": {
+        "Actions": [ "Register" ]
+      },
+      "Read": {
+        "Actions": [ "Index" ]
+      },
+      "Edit": {
+        "Actions": [
+
+          "ConfirmEmail",
+          "ForgotPassword",
+          "ForgotPasswordConfirmation",
+          "ResetPassword",
+          "ResetPasswordConfirmation",
+          "Disassociate",
+          "Manage",
+          "ExternalLoginFailure",
+          "AllIndicatorsAccounts",
+          "UsersList",
+          "UpdateUser"
+        ]
+      },
+      "Delete": {
+        "Actions": [
+
+          "RemoveAccountList"
+        ]
+      }
+
+    }
+  },
+
+  {
+    "Name": "СбросПароля",
+    "MainController": "Account",
+    "Rights": {
+      
+      "Read": {
+        "Actions": [ "Index" ]
+      },
+      "Edit": {
+        "Actions": [
+          "ResetPassword",
+          "ResetPasswordConfirmation"
+        ]
+      }
+    }
+  },
+  {
+    "Name": "Домашняя",
+    "MainController": "Home"
+  },
+  {
+    "Name": "Срез",
+    "MainController": "Section",
+    "Rights": {
+      "Read": {
+        "DependentMethods": [
+          {
+            "Controller": "Data",
+            "Actions": [
+              "Face"
+            ]
+          },
+          {
+            "Controller": "Date",
+            "Actions": [
+              "GetBeginProductionMonth"
+            ]
+          }
+        ]
+      },
+      "Edit": {
+        "Actions": [
+          "ReportTest"
+        ]
+      }
+    }
+  },
+  {
+    "Name": "Планы",
+    "Childs": [
+      {
+        "Name": "РедактированиеВсехПланов",
+        "MainController": "Date",
+        "Rights": {
+
+          "Read": {
+            "Actions": [
+              "GetNeighborProductionMonth"
+            ]
+          }
+        }
+      },
+      {
+        "Name": "ПланыКоммерческойСлужбы",
+        "MainController": "Plan",
+        "Rights": {
+          "Read": {
+            "DependentMethods": [
+              {
+                "Actions": [
+                  "GetNearMonthDate"
+                ]
+              }
+            ]
+          },
+          "Edit": {
+            "DependentMethods": [
+              {
+                "Actions": [
+                  "SavePlan",
+                  "GetRegionRows",
+                  "GetGridColumns"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "Name": "МатрицаKPI",
+        "MainController": "MatrixOfKeyPerformanceIndicators",
+        "Rights": {
+          "Read": {
+            "DependentMethods": [
+              {
+                "Actions": [
+                  "AllKpiVariants",
+                  "GetKPI",
+                  "GetVariantsForGridColumns"
+                ]
+              }
+
+            ]
+          },
+          "Edit": {
+
+            "Actions": [
+              "Update"
+            ],
+            "DependentMethods": [
+              {
+                "Actions": [
+                  "UpdateKPI"
+                ]
+              }
+            ]
+
+          }
+        }
+
+      },
+      {
+        "Name": "ПланыПродаж",
+        "MainController": "SalesPlansKpi",
+        "Rights": {
+          "Read": {
+            "DependentMethods": [
+              {
+                "Actions": [
+                  "GetVariantsList",
+                  "GetCurrentVariant",
+                  "GetSalesPlans",
+                  "GetSalesPlansByIndicator",
+                  "GetAllComments"
+                ]
+              }
+            ]
+          },
+          "Edit": {
+
+            "DependentMethods": [
+              {
+                "Actions": [
+                  "SetEmployeeVariantByMonth",
+                  "UpdateSalesPlans",
+                  "ApproveVariant",
+                  "SendVariantToApprove"
+                ]
+              }
+            ]
+
+          }
+        }
+
+
+      },
+      {
+        "Name": "ПланыПродажКС",
+        "MainController": "KSPlans",
+        "Rights": {
+          "Read": {
+            "DependentMethods": [
+              {
+                "Actions": [
+                  "GetPlans"
+                ]
+              }
+            ]
+          },
+          "Edit": {
+
+            "DependentMethods": [
+              {
+                "Actions": [
+                  "UpdateSalesPlans"
+                ]
+              }
+            ]
+
+          }
+        }
+
+
+      },
+      {
+        "Name": "ИмпортЭксельПлановПродажКС",
+        "MainController": "KSPlansExcelImport",
+        "Rights": {
+          "Edit": {
+
+            "DependentMethods": [
+              {
+                "Actions": [
+                  "ImportExcel"
+                ]
+              }
+            ]
+
+          }
+        }
+
+
+      }
+    ]
+  },
+  {
+    "Name": "Справочники",
+    "Childs": [
+      {
+        "Name": "Сотрудники",
+        "MainController": "Employees",
+        "Rights": {
+          "Read": {
+            "DependentMethods": [
+              {
+                "Actions": [
+                  "AllEmployees"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "Name": "ВариантыKPI",
+        "MainController": "KpiVariants",
+        "Rights": {
+          "Read": {
+            "DependentMethods": [
+              {
+                "Actions": [
+                  "AllKpiVariants"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "Name": "ЦеныНаОсновноеСырьё",
+        "MainController": "BasicMaterial",
+        "Rights": {
+          "Read": {
+            "Actions": [
+              "Index"
+            ],
+            "DependentMethods": [
+              {
+                "Actions": [
+                  "AllBasicMaterialPrices"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "Name": "Индикаторы",
+        "MainController": "IndicatorsByPeriodRpts",
+        "Rights": {
+          "Read": {
+            "Actions": [
+              "Index"
+            ],
+            "DependentMethods": [
+              {
+                "Actions": [
+                  "AllIndicatorsByPeriodRpts"
+                ]
+              }
+            ]
+          }
+        }
+      },
+      {
+        "Name": "Должности",
+        "MainController": "Positions",
+        "Rights": {
+          "Read": {
+            "Actions": [
+              "Index"
+            ],
+            "DependentMethods": [
+              {
+                "Actions": [
+                  "AllPositions"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "Name": "Отчеты",
+    "Childs": [
+      {
+        "Name": "БКГ",
+        "MainController": "BCG",
+        "Rights": {
+          "Read": {
+
+            "Actions": [
+              "GetAllBCGReports",
+              "BCGInitialDataView",
+              "GetBrandsWithIndicatorValue",
+              "GetReportData",
+              "Create",
+              "Update"
+            ]
+
+          }
+        }
+      },
+      {
+        "Name": "ПузырьковаяДиаграмма",
+        "MainController": "Bubble",
+        "Rights": {
+          "Read": {
+
+            "Actions": [
+              "GetBubbleRegions",
+              "GetPeriods"
+            ]
+
+          }
+        }
+      },
+      {
+        "Name": "НекорректныеДанные",
+        "MainController": "CorrectData",
+        "Rights": {
+          "Read": {
+            "Actions": [
+              "Index",
+              "AllCorrectData"
+
+            ]
+          }
+        }
+      },
+      {
+        "Name": "Фильтры",
+        "MainController": "Filters",
+        "Rights": {
+          "Read": {
+            "Actions": [
+              "GetGroupNames",
+              "GetGroupValues",
+              "GetSectionGroupValues",
+              "Search"
+            ]
+
+          }
+        }
+      },
+      {
+        "Name": "ИерархииПериоды",
+        "MainController": "SharedReport",
+        "Rights": {
+          "Read": {
+            "Actions": [
+              "GetNomenclature",
+              "GetContacts",
+              "GetPeriods"
+            ]
+
+          }
+        }
+      },
+      {
+        "Name": "ДебиторскаяЗадолженность",
+        "MainController": "DebitoreReportOlap",
+        "Rights": {
+          "Read": {
+            "Actions": [
+              "GetSubGroups",
+              "GetOlapJsons",
+              "Index"
+            ]
+          }
+        }
+      },
+      {
+        "Name": "ПроверкаДанных",
+        "MainController": "TestDataReport",
+        "Rights": {
+          "Read": {
+
+            "Actions": [
+              "GetTestData",
+              "GetDetailReport",
+              "GetColumnNames"
+            ]
+
+          }
+        }
+      },
+      {
+        "Name": "ОтчетПоПериодам",
+        "MainController": "ReportByPeriodsOLAP",
+        "Rights": {
+          "Read": {
+
+            "Actions": [
+              "Index",
+              "GetSubGroups",
+              "GetOlapJsons",
+              "ExportExcel"
+            ]
+
+          }
+        }
+      },
+      {
+        "Name": "АнализПоПериодам",
+        "MainController": "AnalizeByPeriodsOLAP",
+        "Rights": {
+          "Read": {
+
+            "Actions": [
+              "Index",
+              "Analize",
+              "GetPeriodValues",
+              "GetSubGroups"
+            ]
+          }
+        }
+      },
+      {
+        "Name": "ПланФактныйАнализ",
+        "MainController": "PlanFactReport",
+        "Rights": {
+          "Read": {
+
+            "Actions": [
+              "GetSubGroups",
+              "GetOlapJsons",
+              "GetValueColumns",
+              "FindEmployees"
+            ]
+
+          }
+        }
+      },
+      {
+        "Name": "ПланФактныйАнализКС",
+        "MainController": "PlanFactKS",
+        "Rights": {
+          "Read": {
+
+            "Actions": [
+              "GetSubGroups",
+              "GetValueColumns"
+            ]
+
+          }
+        }
+      },
+      {
+        "Name": "ПоказателиПродаж",
+        "MainController": "SalesIndicatorReportOLAP",
+        "Rights": {
+          "Read": {
+            "Actions": [
+              "Contact",
+              "GetSubGroups",
+              "GetOlapJsons",
+              "GetSalesIndicatorsNomenclature",
+              "GetSalesIndicatorsContactDeliveries",
+              "GetSalesIndicatorNomenclatureDeliveries",
+              "ExportExcel"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "Name": "Администрирование",
+    "Childs": [
+      {
+        "Name": "НазначениеПрав",
+        "MainController": "AccessRights",
+        "Rights": {
+          "Read": {
+            "Actions": [
+              "Index",
+              "GetModulesRigths",
+              "GetItems",
+              "GetModulesRigths",
+              "GetAllAccessRights",
+              "DeleteAccessRights",
+              "AddAccessRight",
+              "UpdateRigths"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  {
+    "Name": "Задачи",
+    "MainController": "Tasks",
+    "Rights": {
+      "Read": {
+        "Actions": [
+          "Index",
+          "GetAllTasksForKendoGrid",
+          "GetIndexOfArray",
+          "CreateTask",
+          "CreateTaskPost",
+          "CloseTask",
+          "DeleteTask",
+          "DeleteTaskPost",
+          "GetAttachedFile",
+          "GetTaskPosts"
+        ]
+      }
+    }
+  },
+    {
+        "Name": "ДокументыЭксель",
+        "MainController": "ExcelDocuments",
+        "Rights": {
+            "Read": {
+                "Actions": [
+                    "Index",
+                    "AllExcelDocuments"
+                ]
+            }
+        }
+    }
+]

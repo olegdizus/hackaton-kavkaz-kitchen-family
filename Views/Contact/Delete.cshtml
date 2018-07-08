@@ -1,0 +1,127 @@
+﻿
+
+
+
+
+
+
+
+@model Dashboard.DB.Models.Contact
+
+@{
+    ViewBag.Title = "Удаление";
+}
+
+<h2>@ViewBag.Title</h2>
+
+<h3>Вы уверены, что хотите удалить?</h3>
+<div>
+    <hr />
+    <dl class="dl-horizontal">
+        <dt>
+            @Html.DisplayNameFor(model => model.sales)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.sales)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.contactKey)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.contactKey)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.name)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.name)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.fullName)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.fullName)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.isReport)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.isReport)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.firstLevel_id)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.firstLevel_id)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.secondLevel_id)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.secondLevel_id)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.thirdLevel_id)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.thirdLevel_id)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.mainManager_id)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.mainManager_id)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.employe_id)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.employe_id)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.region_id)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.region_id)
+        </dd>
+
+        <dt>
+            @Html.DisplayNameFor(model => model.binaryGuid)
+        </dt>
+
+        <dd>
+            @Html.DisplayFor(model => model.binaryGuid)
+        </dd>
+
+    </dl>
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Удалить" class="btn btn-primary" /> |
+            @Html.ActionLink("Назад", "Index")
+        </div>
+    }
+</div>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+ 
+  <changeSet id="Create_TaskState" author="Andrey">
+
+	<createTable tableName="TaskState">
+
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+	  
+	  <column name="user_Name" type="nvarchar(100)">
+		<constraints nullable="true"/>
+	  </column>
+	  
+	  <column name="name" type="nvarchar(MAX)">
+		<constraints nullable="true"/>
+	  </column>
+	 	 
+	  
+    </createTable>
+		    
+  </changeSet> 
+  
+</databaseChangeLog>
+

@@ -1,0 +1,27 @@
+﻿@model SelectList
+
+<input type="hidden" id="currentVariant" />
+
+<div id="VariantsDiv">
+    <div class="row top-buffer">
+        <div class="col-lg-2 col-md-2 col-xs-2 col-sm-2">
+            <h5>Вариант расчета:</h5>
+        </div>
+        <div class="col-lg-2 col-md-2 col-xs-2 col-sm-2">
+
+            @Html.DropDownList("KpiVariants", Model, new { id = "KpiVariants", @class = "form-control", disabled = "disabled" })
+
+        </div>
+        <div class="col-lg-2 col-md-2 col-xs-2 col-sm-2">
+            <h5 id="changeVariantBtn" class="k-icon k-edit" style="display: none"></h5>
+            <h5 id="saveVariantBtn" class="k-icon k-update" style="display: none"></h5>
+            <h5 id="cancelVariantBtn" class="k-icon k-cancel" style="display: none"></h5>
+        </div>
+    </div>
+    
+</div>
+
+
+<script>
+    UpdateVariants();
+</script>

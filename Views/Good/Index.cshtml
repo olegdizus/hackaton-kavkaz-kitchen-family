@@ -1,0 +1,63 @@
+﻿@using Kendo.Mvc.UI;
+@using Dashboard.DB.Models;
+@using System.Web.Mvc;
+@using Dashboard.DB.Hack
+
+@section styles
+{
+    @Styles.Render(Dashboard.Bundles.Kendo.KendoStandart.Css.Key,
+        Dashboard.Bundles.Fontawesome.Css.Key)
+}
+
+@section Scripts
+{
+    @Scripts.Render(
+        Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+        Dashboard.Bundles.Kendo.kendoHelp.Scripts.Key)
+}
+
+
+@Html.Partial("DeleteModalWindow")
+@{
+}
+@{
+	ViewBag.Title = "Товары";
+}
+<h2>@ViewBag.Title</h2>
+
+<div class="form-horizontal">
+<p>
+    @*@Html.ActionLink("Создать", "Create")*@
+</p>
+
+<div>
+		 @(Html.Kendo().Grid<Good>()
+        .Name("Grid")
+        .Columns(columns =>
+        {
+			columns.Bound(p => p.name);
+			
+        })
+        .DataSource(dataSource => dataSource
+					.Ajax()
+					.Events(events => events.Error("error_handler"))
+					.Read(read => read.Action("AllHackGoods", "Good"))
+					.PageSize(30)
+					.Total(0))					
+				.Pageable()
+				.Sortable()
+				.Filterable()
+					)
+</div>
+</div>
+
+
+
+
+
+
+
+
+
+
+

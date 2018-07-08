@@ -1,0 +1,72 @@
+﻿@using Dashboard.Models
+@using Kendo.Mvc.UI;
+
+@section styles
+{
+    @Styles.Render(Dashboard.Bundles.Kendo.KendoStandart.Css.Key,
+        Dashboard.Bundles.Fontawesome.Css.Key)
+}
+
+@section Scripts
+{
+    @Scripts.Render(
+        Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+        Dashboard.Bundles.Kendo.kendoHelp.Scripts.Key)
+}
+
+@Html.Partial("LayOffModal")
+@Html.Partial("deleteModalWindow")
+
+@{
+    	ViewBag.Title = "Список сотрудников";
+    }
+    <h2>@ViewBag.Title</h2>
+    
+    <div class="form-horizontal">
+    <p>
+        @Html.ActionLink("Создать", "Create")
+    </p>
+    
+    <div>
+    		 @(Html.Kendo().Grid<EmployeeViewModel>()
+            .Name("Grid")
+            .Columns(columns =>
+            {
+    			columns.Bound(p => p.surname);
+    			columns.Bound(p => p.name);
+    			columns.Bound(p => p.patron);
+                columns.Bound(p => p.Position);
+                columns.Bound(p => p.userName);
+                columns.Bound(p => p.Parent);
+                columns.Bound(p => p.endDate);
+                columns.Bound(p => p.id)
+                .Title("")
+                .Filterable(false)
+                .Sortable(false)
+                .Template(t => { })
+                .ClientTemplate("#=getClientRestoreDeleteTemplate(id, surname, endDate, 'Employees')#");
+            })
+            .DataSource(dataSource => dataSource
+    					.Ajax()
+    					.Events(events => events.Error("error_handler"))
+    					.Read(read => read.Action("AllEmployees", "Employees"))
+    					.PageSize(30)
+    					.Total(0))					
+    				.Pageable()
+    				.Sortable()
+                    .Groupable()
+    				.Filterable()
+    					)
+    </div>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+

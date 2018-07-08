@@ -1,0 +1,24 @@
+﻿@Styles.Render(
+    Dashboard.Bundles.HierarchyMenu.Css.Key
+)
+@Scripts.Render(
+    Dashboard.Bundles.HierarchyMenu.Scripts.Key
+)
+<div>
+    <div style="width:80%;float:left">
+        <input type="text" class="form-control" id="input-select-node" placeholder="Введите сотрудника..." value="">
+    </div>
+    <div style="width:20%;float: right">
+        <button type="button" class="btn btn-default" id="btn-clear-search" style="width:100%">X</button>
+    </div>
+    
+    <br/>
+    <br />
+</div>
+<input type="hidden" id="menuId" />
+<div id="treeViewMenu" class="menu"></div>
+
+
+<script>
+    var rawData = @Html.Raw(ViewBag.TreeViewData);
+</script>

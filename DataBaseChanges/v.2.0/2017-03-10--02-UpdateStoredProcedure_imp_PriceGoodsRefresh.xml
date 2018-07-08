@@ -1,0 +1,149 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="UpdateStoredProcedure_imp_PriceGoodsRefresh" author="ura">
+	<createProcedure>
+        ALTER PROCEDURE  [dbo].[imp_PriceGoodsRefresh]
+			
+        AS
+        BEGIN
+	        SET NOCOUNT ON;
+        declare @importId uniqueidentifier
+
+	        CREATE TABLE #importIdTable 
+	         (
+	          importId uniqueidentifier
+	         )
+
+	        while 0 &lt; (select count(*)
+				        from imp_PriceGoods
+				        where importId not in (select importId from #importIdTable))
+	        begin
+		
+		        set @importId = (select top 1 importId
+						        from imp_PriceGoods
+						        where importId not in (select importId from #importIdTable)
+						        order by id)
+
+		        insert into #importIdTable (importId) values (@importId);
+		
+
+	        MERGE ent_PriceGoods AS T
+	        USING 
+	        (select d.[key]
+              ,d.[date]
+              ,d.[isDeleted]
+              ,d.[user1C]
+              ,d.[guid]
+              ,d.[binaryGuid]
+	          ,d.[priceType_id]
+          FROM imp_PriceGoods d
+          where d.id in (select max(id) from imp_PriceGoods group by [guid])
+          and importId=@importId
+	        --and d.isdeleted = 0
+           ) AS S
+          on T.[guid] = S.[guid]
+          WHEN MATCHED 
+		        THEN
+			        UPDATE
+			        SET 
+				         T.[date] = S.[date]
+              ,T.[isDeleted] = S.[isDeleted]
+              ,T.[user1C] = S.[user1C]
+              ,T.[key] = S.[key]
+               ,T.[binaryGuid] = S.[binaryGuid]
+	           ,T.[priceType_id] = S.[priceType_id]
+
+
+	        WHEN NOT MATCHED BY TARGET 
+		        THEN INSERT (
+		        [key]
+		        ,[date]
+		        ,[isDeleted]
+		        ,[user1C]
+		        ,[guid]
+              ,[binaryGuid]
+		        ,hst_datetime
+		        ,[priceType_id])
+            VALUES (
+		        [key]
+		        ,[date]
+		        ,[isDeleted]
+		        ,[user1C]
+		        ,[guid]
+              ,[binaryGuid]
+		        ,Getdate()
+		        ,[priceType_id]
+		        );
+
+	        MERGE ent_PriceGoodsDetails AS T
+	        USING 
+	        (SELECT g.id_good as good_id,
+		        d.id as priceGoods_id
+              ,dd.[price]
+	          ,dd.recNum
+          FROM [dbo].[imp_PriceGoodsDetails] dd
+          join ent_goods g on dd.goodGuid=g.[guid]
+          join ent_PriceGoods d on dd.priceGoodsGuid=d.[guid]
+          where dd.id in (select max(id) from [imp_PriceGoodsDetails] group by goodGuid, priceGoodsGuid, recNum)
+          and importId=@importId
+	        --and d.isdeleted = 0
+           ) AS S
+          on T.priceGoods_id = S.priceGoods_id and T.recNum = S.recNum --and T.good_id = S.good_id
+          WHEN MATCHED 
+          and (T.price != S.price
+		        or T.good_id != S.good_id)
+		        THEN
+			        UPDATE
+			        SET 
+		
+		        T.price = S.price
+		        ,T.good_id = S.good_id
+
+	        WHEN NOT MATCHED BY TARGET 
+		        THEN INSERT (
+		        good_id
+		        ,priceGoods_id
+		        ,price
+		        ,recNum)
+            VALUES (
+		        good_id
+		        ,priceGoods_id
+		        ,price
+		        ,recNum
+		        )
+	        WHEN NOT MATCHED BY SOURCE
+	         and (T.priceGoods_id in (select d.id
+						        from [imp_PriceGoodsDetails] dd
+						        join ent_PriceGoods d on dd.priceGoodsGuid=d.[guid]))
+		        THEN DELETE;
+
+	        end ;
+	        --проверяем количество обработанных данных	
+		        insert into imp_importLog ([date]
+                   ,[entity]
+                   ,[key]
+		           ,[entityDate])
+		        select getdate(),
+			         'Цены номенклатуры',
+			         i.[key],
+			         i.date
+		        from imp_PriceGoods i
+		        where 
+			        i.[key] not in (
+				        select [key] 
+				        from ent_PriceGoods);
+
+
+	        delete from imp_PriceGoods where importId in (select importId from #importIdTable);
+	        delete from [imp_PriceGoodsDetails] where importId in (select importId from #importIdTable);
+        END;
+
+    </createProcedure>
+		
+  </changeSet>
+</databaseChangeLog>

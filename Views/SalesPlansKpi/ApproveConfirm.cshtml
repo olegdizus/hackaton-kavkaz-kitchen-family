@@ -1,0 +1,70 @@
+﻿<div class="modal  modal-wide fade" id="approveConfirmModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">
+                    Согласование
+                </h4>
+            </div>
+            <div class="modal-body">
+                <span class="error-span" data-bind="text: errors"></span>
+                <div class="row">
+                    <div class="col-md-12">
+                        <label for="approveComment">Введите комментарий:</label>
+                        <textarea id="approveComment" class="form-control" rows="5"  style="max-width: none !important; resize: none;"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="sendApproveConfirm">
+                    Отправить
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Закрыть
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@*//TODO вынести отдельным контролом?*@
+<div class="row">
+
+    <div class="col-md-4 col-md-offset-2 col-sm-5 comment">
+
+        <div class="alert alert-info" id="approvedCommentAlert" style="display: none; position:relative" role="alert">
+
+            <div class="lastComment">
+                <p style="font-weight: bold">Комментарий:</p>
+                <p id="approvedComment"></p>
+            </div>
+            <div class="allComment" style="display: none">
+                <p style="font-weight: bold">Все комментарии:</p>
+                <div id="allComments">
+                </div>
+            </div>
+
+            <div style="position:absolute;bottom:0;right:5px;" class="lastComment">
+                <span class="fa fa-chevron-down" id="ShowAllComment" class="lastComment" style="cursor: pointer"></span>
+            </div>
+
+            <div style="position:absolute;bottom:0;right:5px;display: none;" class="allComment">
+                <span class="fa fa-chevron-up" id="HideAllComment" style="cursor: pointer"></span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4" style="text-align:right">
+        <button id="sendForApprove" type="button" class="btn btn-default" style="display: none;">Отправить на согласование</button>
+        <button id="ApproveVariant" type="button" class="btn btn-default" style="display: none;">Согласовать</button>
+        <button id="NotApproveVariant" type="button" class="btn btn-default" style="display: none;">Отправить на доработку</button>
+    </div>
+    <div class="col-md-2" style="text-align:right">
+        <h4>
+            <span id="approveStatus" class="label label-primary"></span>
+        </h4>
+    </div>
+</div>

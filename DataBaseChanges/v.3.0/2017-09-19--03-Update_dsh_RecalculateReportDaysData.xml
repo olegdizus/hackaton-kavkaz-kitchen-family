@@ -1,0 +1,545 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Update_dsh_RecalculateReportDaysData" author="Ura">
+    <createProcedure>
+
+      ALTER PROCEDURE [dbo].[dsh_RecalculateReportDaysData]
+      @MinDate Date ='1.1.2014',
+      @MaxDate Date ='1.1.2200'
+      AS
+      BEGIN
+      SET NOCOUNT ON;
+
+      exec imp_PersonesRefresh;
+      exec imp_RegionsRefresh;
+      exec imp_ContactCategoryRefresh;
+      exec imp_BrendsRefresh;
+      exec imp_ContactGroupsRefresh;
+      exec imp_ContactsRefresh;
+      exec imp_AgreementsRefresh;
+      exec imp_GoodsRefresh;
+      exec imp_DeliveriesRefresh;
+      exec imp_ReturnsRefresh;
+      exec imp_PaymentsRefresh;
+      exec imp_PaymentOrdersRefresh;
+      exec imp_PaymentOrdersOutcomeRefresh;
+      exec imp_PriceGoodsRefresh;
+
+      exec imp_StartChangeBalanceRefresh;
+      exec imp_BeforeReturnRefresh;
+      exec imp_DebitoreRefresh;
+      exec imp_DebitoreByContactsRefresh;
+      exec imp_PastDueAccountsRefresh;
+      exec imp_PastDueAccountsByContactsRefresh;
+      exec imp_ProfitRefresh;
+      exec imp_ReturnCauseRefresh;
+      exec imp_SumWeightByDayRefresh;
+      exec imp_CalculationDocumentRefresh;
+      exec imp_RouteForwardersRefresh
+
+      declare @idProducts nvarchar(10) =
+      (select top 1 id_good
+      from ent_Goods
+      where name = '1. ПРОДУКЦИЯ')
+
+      declare @idProductsArchive nvarchar(10) =
+      (select top 1 id_good
+      from ent_Goods
+      where name = 'ГОТОВАЯ ПРОДУКЦИЯ АРХИВ')
+
+      --Расчеты для наценки
+
+      --DROP TABLE #periods;
+      --DROP TABLE #allPrices
+      --DROP TABLE #prices
+      CREATE TABLE #periods
+      (
+      id_good int, date date
+      )
+      CREATE TABLE #allPrices
+      (
+      id_good int, date date, priceDate date
+      )
+      CREATE TABLE #prices
+      (
+      id_good int, date date, price decimal(18, 2)
+      )
+      insert into #periods
+      select id_good, date from
+      (SELECT
+      g.id_good, d.date
+      FROM ent_Delivery d
+      join ent_Contacts c on d.contact_id=c.id_contact
+      inner join ent_DeliveryDetails dd on (dd.delivery_id = d.id)
+      inner join ent_Goods g on (dd.good_id = g.id_good)
+      where d.date between @MinDate and @MaxDate
+      and (g.treeKey like @idProductsArchive + '.%' or
+      g.treeKey like @idProducts + '.%')
+      and d.isDeleted=0
+      and c.isReport=1
+
+      union
+      SELECT
+      g.id_good, d.date
+      FROM ent_ReturnGoods d
+      join ent_Contacts c on d.contact_id=c.id_contact
+      inner join ent_ReturnGoodsDetails rgd on (rgd.[return_id] = d.id)
+      inner join ent_Goods g on (rgd.good_id = g.id_good)
+      where d.date between @MinDate and @MaxDate
+      and (g.treeKey like @idProductsArchive + '.%' or
+      g.treeKey like @idProducts + '.%')
+      and d.isDeleted=0
+      and c.isReport=1) t
+      group by
+      id_good,
+      [date];
+
+      insert into #allPrices
+      Select p.id_good, p.date, max(pg.date) as priceDate
+      from #periods p
+      inner join ent_PriceGoodsDetails pgd on p.id_good = pgd.good_id
+      inner join ent_PriceGoods pg on pg.id = pgd.priceGoods_id and p.date >= pg.date
+      group by p.id_good, p.date;
+
+      insert into #prices
+      Select ap.id_good, ap.date, pgd.price as price
+      from #allPrices ap
+      inner join ent_PriceGoodsDetails pgd on ap.id_good = pgd.good_id
+      inner join ent_PriceGoods pg on pg.id = pgd.priceGoods_id and
+      ap.priceDate = pg.date
+      order by ap.date
+
+      ----------------------------------------------------------------------
+      SET NOCOUNT OFF;
+      -- расчет данных по отгрузкам:
+      --		Сумма руб отгрузок
+      --		Сумма Кг отгрузок
+      --		Количество отгрузок
+      MERGE dsh_reportDaysData AS T
+      USING
+      (SELECT date as period,
+      count(distinct deliv.contact_id) as delCount,
+      sum(dd.weight) as delKg,
+      sum(dd.sumPrice) as delRub
+      FROM ent_Delivery deliv
+      inner join ent_DeliveryDetails dd on (dd.delivery_id = deliv.id)
+      inner join ent_Goods g on (dd.good_id = g.id_good)
+      inner join ent_Contacts c on c.id_contact = deliv.contact_id
+      where deliv.date between @MinDate and @MaxDate
+      and deliv.[isDeleted]=0
+      and c.isReport = 1
+      and (g.treeKey like @idProductsArchive + '.%' or
+      g.treeKey like @idProducts + '.%')
+      group by date)
+      AS S
+      ON T.period = S.period
+      WHEN MATCHED
+      and (
+      T.delKg != S.delKg or T.delKg is not null and S.delKg is null or T.delKg is  null and S.delKg is not null
+      or T.delRub != S.delRub or T.delRub is not null and S.delRub is null or T.delRub is  null and S.delRub is not null
+      or T.delCount != S.delCount or T.delCount is not null and S.delCount is null or T.delCount is null and S.delCount is not null
+      )
+      THEN UPDATE
+      SET T.delRub = S.delRub,
+      T.delKg = S.delKg,
+      T.delCount = S.delCount
+
+      WHEN NOT MATCHED BY TARGET
+      THEN INSERT (period,
+      delKg ,
+      delRub,
+      delCount )
+
+      VALUES (period,
+      delKg ,
+      delRub,
+      delCount
+      );
+
+      -- расчет данных по возвратам:
+      --		Сумма руб возвратов
+      --		Сумма Кг возвратов
+      MERGE dsh_reportDaysData AS T
+      USING
+      (SELECT date as period,
+      sum([weight]) as returnKg,
+      sum([sumPrice]) as returnRub
+      FROM ent_ReturnGoods rets
+      inner join ent_ReturnGoodsDetails rgd on (rgd.return_id = rets.id)
+      inner join ent_Goods g on (rgd.good_id = g.id_good)
+      inner join ent_Contacts c on c.id_contact = rets.contact_id
+      where rets.date between @MinDate and @MaxDate
+      and rets.isdeleted = 0
+      and c.isReport = 1
+      and (g.treeKey like @idProductsArchive + '.%' or
+      g.treeKey like @idProducts + '.%')
+      group by date)  AS S
+
+      ON T.period = S.period
+
+      WHEN MATCHED
+      and (
+      T.returnKg != S.returnKg or T.returnKg is null
+      or T.returnRub != S.returnRub or T.returnRub is null)
+      THEN UPDATE
+      SET T.returnKg = S.returnKg,
+      T.returnRub = S.returnRub
+      WHEN NOT MATCHED BY TARGET
+      THEN INSERT (
+      [period]
+      ,returnKg
+      ,returnRub
+      )
+      VALUES (
+      [period]
+      ,returnKg
+      ,returnRub
+      );
+
+      -- расчет данных по отгрузкам:
+      --		Накопительно сумма отгрузок
+      --		Среднедневная отгрузка за последн. 30 дн, руб
+      --		Сумма отгрузки за последн. 30 дн, руб
+      --		Среднедневная отгрузка за последн. 30 дн, кг
+      MERGE dsh_reportDaysData AS T
+      USING
+      (select * from
+      (
+      select period
+      from dsh_reportDaysData
+      where period between @MinDate and @MaxDate
+      ) mq
+      cross apply
+      (
+      select
+      round(sum(isNull(delRub,0)/1000), 2) as delAccumKRub,
+      round(avg(isNull(delRub,0) - isNull(returnRub,0)), 2) as delAverRub,
+      sum(isNull(delRub,0)) as delRubSumPrev30,
+      round(avg(isNull(delKg,0) - isNull(returnKg,0)), 2) as delAverKg
+      from dsh_reportDaysData
+      where period between dateadd(day, -29, mq.period) and mq.period
+      ) ca
+      cross apply
+      (
+      select
+      sum(isNull(delRub,0) - isNull(returnRub,0)) as delAccumFactRub,
+      sum(isNull(delKg,0) - isNull(returnKg,0)) as delAccumFactKg
+      from dsh_reportDaysData
+      where period between dateadd(day, -DAY(mq.period)+1, mq.period) and mq.period
+      ) ca2
+      ) AS S
+
+      ON T.period = S.period
+
+      WHEN MATCHED
+      and (T.delAverRub != S.delAverRub or T.delAverRub is not null and S.delAverRub is null or T.delAverRub is  null and S.delAverRub is not null
+      or T.delRubSumPrev30 != S.delRubSumPrev30 or T.delRubSumPrev30 is not null and S.delRubSumPrev30 is null or T.delRubSumPrev30 is  null and S.delRubSumPrev30 is not null
+      or T.delAverKg != S.delAverKg or T.delAverKg is not null and S.delAverKg is null or T.delAverKg is  null and S.delAverKg is not null
+      or T.delAccumKRub != S.delAccumKRub or T.delAccumKRub is not null and S.delAccumKRub is null or T.delAccumKRub is  null and S.delAccumKRub is not null
+      or T.delAccumFactRub != S.delAccumFactRub or T.delAccumFactRub is not null and S.delAccumFactRub is null or T.delAccumFactRub is  null and S.delAccumFactRub is not null
+      or T.delAccumFactKg != S.delAccumFactKg or T.delAccumFactKg is not null and S.delAccumFactKg is null or T.delAccumFactKg is  null and S.delAccumFactKg is not null)
+      THEN UPDATE
+      SET T.delAverRub = S.delAverRub,
+      T.delRubSumPrev30 = S.delRubSumPrev30,
+      T.delAverKg = S.delAverKg,
+      T.delAccumKRub = S.delAccumKRub,
+      T.delAccumFactRub = S.delAccumFactRub,
+      T.delAccumFactKg = S.delAccumFactKg
+
+      WHEN NOT MATCHED BY TARGET
+      THEN INSERT (period,
+      delAverRub ,
+      delRubSumPrev30 ,
+      delAverKg ,
+      delAccumKRub,
+      delAccumFactRub,
+      delAccumFactKg)
+      VALUES (period,
+      delAverRub ,
+      delRubSumPrev30 ,
+      delAverKg ,
+      delAccumKRub,
+      delAccumFactRub,
+      delAccumFactKg);
+
+      -- расчет данных по возвратам:
+      --		Накопительно сумма возвратов
+      MERGE dsh_reportDaysData AS T
+      USING
+      (select * from
+      (select period
+      from dsh_reportDaysData
+      where period between @MinDate and @MaxDate) mq
+      cross apply
+      (select round(sum(abs(isNull(returnRub,0))/1000), 2) as returnAccumKRub
+      from dsh_reportDaysData
+      where period between dateadd(day, -29, mq.period) and mq.period) ca
+      ) AS S
+
+      ON T.period = S.period
+
+      WHEN MATCHED
+      and (T.returnAccumKRub != S.returnAccumKRub or T.returnAccumKRub is not null and S.returnAccumKRub is null or T.returnAccumKRub is  null and S.returnAccumKRub is not null)
+      THEN UPDATE
+      SET	T.returnAccumKRub = S.returnAccumKRub
+      WHEN NOT MATCHED BY TARGET
+      THEN INSERT (period,
+      returnAccumKRub)
+      VALUES (period,
+      returnAccumKRub
+      );
+
+      -- расчет данных по валовой прибыли:
+      --		Сумма плановая руб
+      MERGE dsh_reportDaysData AS T
+      USING
+      (select period, round(sum(planSum), 2) as planSum
+      From (
+      SELECT deliv.date as period,
+      sum(dd.amount * isnull(p.price, 0)) as planSum
+      FROM ent_Delivery deliv
+      inner join ent_DeliveryDetails dd on (dd.delivery_id = deliv.id)
+      inner join ent_Goods g on (dd.good_id = g.id_good)
+      inner join ent_Contacts c on c.id_contact = deliv.contact_id
+      left join #prices p on (p.id_good = g.id_good and p.date = deliv.date)
+      where deliv.date between @MinDate and @MaxDate
+      and deliv.[isDeleted]=0
+      and c.isReport = 1
+      and (g.treeKey like @idProductsArchive + '.%' or
+      g.treeKey like @idProducts + '.%')
+      group by deliv.date
+      union
+      SELECT rets.date as period,
+      sum(-rgd.amount * isnull(p.price, 0)) as planSum
+      FROM ent_ReturnGoods rets
+      inner join ent_ReturnGoodsDetails rgd on (rgd.return_id = rets.id)
+      inner join ent_Goods g on (rgd.good_id = g.id_good)
+      inner join ent_Contacts c on c.id_contact = rets.contact_id
+      left join #prices p on (p.id_good = g.id_good and p.date = rets.date)
+      where rets.date between @MinDate and @MaxDate
+      and rets.isdeleted = 0
+      and c.isReport = 1
+      and (g.treeKey like @idProductsArchive + '.%' or
+      g.treeKey like @idProducts + '.%')
+      group by rets.date
+      ) tt
+      group by period
+      )
+      AS S
+      ON T.period = S.period
+      WHEN MATCHED
+      and (
+      T.planSum != S.planSum or T.planSum is not null and S.planSum is null or T.planSum is  null and S.planSum is not null
+      )
+      THEN UPDATE
+      SET T.planSum = S.planSum
+
+      WHEN NOT MATCHED BY TARGET
+      THEN INSERT (period,
+      planSum
+      )
+
+      VALUES (period,
+      planSum
+      );
+
+      -- расчет данных по валовой прибыли:
+      --		Сумма валовой прибыли
+
+      MERGE dsh_reportDaysData AS T
+      USING (SELECT period,
+      isnull(delRub,0) - isnull(returnRub,0) - isnull(planSum,0) as grossProfitSum
+      from dsh_reportDaysData
+      where period between @MinDate and @MaxDate
+      ) AS S
+      ON T.period = S.period
+
+      WHEN MATCHED
+      and (T.grossProfitSum != S.grossProfitSum or T.grossProfitSum is not null and S.grossProfitSum is null
+      or T.grossProfitSum is  null and S.grossProfitSum is not null
+      )
+      THEN UPDATE
+      SET T.grossProfitSum = S.grossProfitSum;
+
+      -- расчет данных по валовой прибыли:
+      --		Среднедневная валовая прибыль за последн. 30 дн, руб
+      --		Накопительно сумма валовой прибыли
+      MERGE dsh_reportDaysData AS T
+      USING
+      (select * from
+      (
+      select period
+      from dsh_reportDaysData
+      where period between @MinDate and @MaxDate
+      ) mq
+      cross apply
+      (
+      select
+      round(avg(isNull(grossProfitSum,0)), 2) as grossProfitSumAver
+      from dsh_reportDaysData
+      where period between dateadd(day, -29, mq.period) and mq.period
+      ) ca
+      cross apply
+      (
+      select
+      sum(isNull(grossProfitSum,0)) as grossProfitSumAccum
+      from dsh_reportDaysData
+      where period between dateadd(day, -DAY(mq.period)+1, mq.period) and mq.period
+      ) ca2
+      ) AS S
+
+      ON T.period = S.period
+
+      WHEN MATCHED
+      and (T.grossProfitSumAver != S.grossProfitSumAver or T.grossProfitSumAver is not null and S.grossProfitSumAver is null or T.grossProfitSumAver is  null and S.grossProfitSumAver is not null
+      or T.grossProfitSumAccum != S.grossProfitSumAccum or T.grossProfitSumAccum is not null and S.grossProfitSumAccum is null or T.grossProfitSumAccum is  null and S.grossProfitSumAccum is not null
+      )
+      THEN UPDATE
+      SET T.grossProfitSumAver = S.grossProfitSumAver,
+      T.grossProfitSumAccum = S.grossProfitSumAccum
+
+      WHEN NOT MATCHED BY TARGET
+      THEN INSERT (period,
+      grossProfitSumAver ,
+      grossProfitSumAccum )
+      VALUES (period,
+      grossProfitSumAver ,
+      grossProfitSumAccum );
+
+      -- расчет данных по причинам возврата:
+      --		сумма за 30 дней по причине
+      MERGE dsh_reportCauseReturn AS T
+      USING
+      (select * from
+      (
+      select period, cause_id
+      from dsh_reportCauseReturn
+      where period between @MinDate and @MaxDate
+      ) mq
+      cross apply
+      (
+      select
+      round(sum(abs(isNull([sum],0))), 2) as sum30Days
+      from dsh_reportCauseReturn ce
+      where
+      period between dateadd(day, -29, mq.period) and mq.period
+      and ce.cause_id=mq.cause_id
+      ) ca
+      ) AS S
+
+      ON T.period = S.period and T.cause_id=S.cause_id
+
+      WHEN MATCHED
+      and (T.sum30Days != S.sum30Days)
+      THEN UPDATE
+      SET T.sum30Days = S.sum30Days;
+
+      --процент возвратов от оборота
+      MERGE dsh_reportDaysData AS T
+      USING
+      (select period, Round(returnAccumKRub/delAccumKRub*100, 2) as percentReturnFromDelivery
+      from dsh_reportDaysData
+      where isnull(returnAccumKRub, 0) != 0
+      and isnull(delAccumKRub, 0) != 0
+      and period between @MinDate and @MaxDate) as S
+      ON T.period = S.period
+
+      WHEN MATCHED
+      and (T.percentReturnFromDelivery != S.percentReturnFromDelivery or T.percentReturnFromDelivery is not null and S.percentReturnFromDelivery is null
+      or T.percentReturnFromDelivery is  null and S.percentReturnFromDelivery is not null)
+      THEN UPDATE
+      SET	T.percentReturnFromDelivery = S.percentReturnFromDelivery;
+
+      --расчет данных по ДЗ
+      --		значение коэффициента ДЗ
+      --		значение процента ДЗ
+
+      MERGE dsh_reportDaysData AS T
+      USING (SELECT period,
+      Round(debitOverdue/dolgEnd * 100, 2) as debitPercentOverdueToOverall,
+      Round(dolgEnd/delRubSumPrev30, 2) as debitCoef
+      from dsh_reportDaysData
+      where period between @MinDate and @MaxDate
+      and isnull(dolgEnd, 0) != 0
+      and isnull(delRubSumPrev30, 0) != 0
+      ) AS S
+      ON T.period = S.period
+
+      WHEN MATCHED
+      and (T.debitPercentOverdueToOverall != S.debitPercentOverdueToOverall or T.debitPercentOverdueToOverall is not null and S.debitPercentOverdueToOverall is null
+      or T.debitPercentOverdueToOverall is  null and S.debitPercentOverdueToOverall is not null
+      or T.debitCoef != S.debitCoef or T.debitCoef is not null and S.debitCoef is null or T.debitCoef is  null and S.debitCoef is not null
+      )
+      THEN UPDATE
+      SET T.debitPercentOverdueToOverall = S.debitPercentOverdueToOverall,
+      T.debitCoef = S.debitCoef;
+
+      --расчет данных по ДЗ
+      --		среднее значение ДЗ
+      --		среднее значение просроченной ДЗ
+      --		среднее значение коэффициента ДЗ
+      --		среднее значение процента ДЗ
+      MERGE dsh_reportDaysData AS T
+      USING (
+      select * from(
+      SELECT period
+      from dsh_reportDaysData
+      where period between @MinDate and @MaxDate) se
+      cross apply (
+      SELECT
+      round(avg(IsNull(dolgEnd, 0)), 2) as debitAverOverall,
+      round(avg(IsNull(debitOverdue, 0)), 2) as debitAverOverdue,
+      round(avg(IsNull(debitCoef, 0)), 2) as debitAverCoef,
+      round(avg(IsNull(debitPercentOverdueToOverall, 0)), 2) as debitAverPercentOverdueToOverall
+      from dsh_reportDaysData
+      where period between DATEADD(day, -29, se.period) and  se.period
+      ) ca
+      ) AS S
+      ON T.period = S.period
+
+      WHEN MATCHED
+      and ( T.debitAverOverall != S.debitAverOverall  or T.debitAverOverall is not null and S.debitAverOverall is null or T.debitAverOverall is  null and S.debitAverOverall is not null
+      or T.debitAverOverdue != S.debitAverOverdue  or T.debitAverOverdue is not null and S.debitAverOverdue is null or T.debitAverOverdue is  null and S.debitAverOverdue is not null
+      or T.debitAverCoef != S.debitAverCoef  or T.debitAverCoef is not null and S.debitAverCoef is null or T.debitAverCoef is  null and S.debitAverCoef is not null
+      or T.debitAverPercentOverdueToOverall != S.debitAverPercentOverdueToOverall
+      or T.debitAverPercentOverdueToOverall is not null and S.debitAverPercentOverdueToOverall is null
+      or T.debitAverPercentOverdueToOverall is  null and S.debitAverPercentOverdueToOverall is not null
+      )
+      THEN UPDATE
+      SET  T.debitAverOverall = S.debitAverOverall,
+      T.debitAverOverdue = S.debitAverOverdue,
+      T.debitAverCoef = S.debitAverCoef,
+      T.debitAverPercentOverdueToOverall = S.debitAverPercentOverdueToOverall;
+
+      -- расчет среднего процента наценки
+      MERGE dsh_reportDaysData AS T
+      USING (
+      select * from(
+      SELECT period
+      from dsh_reportDaysData
+      where period between @MinDate and @MaxDate) se
+      cross apply (
+      SELECT
+      round(avg(IsNull(profitPercent, 0)), 2) as profitAverPercent
+      from dsh_reportDaysData
+      where period between DATEADD(day, -29, se.period) and  se.period
+      ) ca
+      ) AS S
+      ON T.period = S.period
+
+      WHEN MATCHED
+      and ( T.profitAverPercent != S.profitAverPercent or T.profitAverPercent is not null and S.profitAverPercent is null or T.profitAverPercent is  null and S.profitAverPercent is not null
+      )
+      THEN UPDATE
+      SET  T.profitAverPercent = S.profitAverPercent;
+
+      END
+    </createProcedure>
+
+  </changeSet>
+</databaseChangeLog>

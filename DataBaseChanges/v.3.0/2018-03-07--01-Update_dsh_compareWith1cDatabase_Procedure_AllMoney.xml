@@ -1,0 +1,528 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Update_dsh_compareWith1cDatabase_Procedure_AllMoney" author="Andrey">
+    <sql>
+      ALTER PROCEDURE [dbo].[dsh_compareWith1cDatabase]
+
+      AS
+      BEGIN
+
+	-- реализации
+
+      select [sys].[fn_varbintohexstr](del1C.binGuid) AS 'binGuid',
+      del.[key] AS 'Code',
+	  del.isDeleted AS Deleted,
+      del.date  AS 'Date',
+	  del.sumAll AS 'Sum',
+	  del1C.[key]  AS 'Code1C',
+      DATEADD(year,-2000, del1c.date) as 'Date1C',
+      del1c.sum1c AS 'Sum1C',
+	  del1c.Posted AS Posted1C,
+	  del1c.Marked AS Marked1C,
+      'Реализация' as typeDifference
+      FROM 
+	  (select
+
+      _Number as [key],
+      _fld14025 as sum1c,
+      _IDRRef as binGuid,
+      _Date_Time as date,
+	  _Marked AS Marked,
+	  _Posted AS Posted
+
+      from [ka_sat].[dbo].[_Document503] as deliveryDoc
+      ) as del1c
+
+      LEFT JOIN ent_Delivery as del
+
+	  on del.binaryGuid = del1c.binGuid 
+		
+      where del.sumAll != del1c.sum1c 
+		OR del.binaryGuid IS NULL
+		OR ((del1c.Marked = 1 OR del1c.Posted = 0)  
+			AND del.isDeleted = 0) 
+		OR  ((del1c.Marked = 0 AND del1c.Posted = 1 )  
+			AND del.isDeleted = 1) 
+
+	-- детали реализации
+
+	SELECT  [sys].[fn_varbintohexstr](from1c._IDRRef) AS 'binGuid реализация',
+			pg.recCount AS 'Кол-во деталей',
+			pg.sumRub AS 'Сумма деталей',
+			from1c.recCount AS 'Кол-во деталей 1С',
+			from1c.sumRub AS 'Кол-во деталей 1С',
+			'Детали реализации' as typeDifference
+		FROM (
+			SELECT pg1c._IDRRef
+				,count(*) recCount
+				,sum(pgd1c._Fld14081) sumRub
+			FROM [ka_sat].[dbo].[_Document503_VT14057] pgd1c
+			JOIN [ka_sat].[dbo].[_Document503] pg1c ON pg1c._IDRRef = pgd1c._Document503_IDRRef
+			WHERE 
+					_Document503_IDRRef IN (
+					SELECT pg1c._IDRRef
+					FROM [ka_sat].[dbo].[_Document503] pg1c
+					LEFT JOIN [Dashboard].dbo.ent_Delivery pg ON pg.binaryGuid = pg1c._IDRRef
+					WHERE 
+	 					pg.guid IS NOT NULL
+						AND 
+						(
+							pg.isDeleted IS NULL 
+							
+							OR _Fld14025 != pg.sumAll
+	
+							OR (
+								(_Marked = 1 AND pg.isDeleted = 0)
+								OR
+								(_Posted = 0 AND pg.isDeleted = 0)
+							)
+						)
+					)
+			GROUP BY pg1c._IDRRef
+			) from1c
+		LEFT JOIN (
+			SELECT pg.binaryGuid
+				,count(*) AS recCount
+				,sum(sumPrice) sumRub
+			FROM [Dashboard].dbo.ent_Delivery pg
+			JOIN [Dashboard].dbo.ent_DeliveryDetails pgd ON pg.id = pgd.delivery_id
+			GROUP BY pg.binaryGuid
+			) pg ON pg.binaryGuid = from1c._IDRRef
+	
+		WHERE pg.binaryGuid IS NULL
+		OR pg.recCount != from1c.recCount
+		OR pg.sumRub != from1c.sumRub
+-- возвраты
+
+      select [sys].[fn_varbintohexstr](ret1c.binGuid) AS 'binGuid',
+      rg.date AS 'Date',
+      rg.sumAll AS 'Sum',
+	  rg.isDeleted AS Deleted,
+	  DATEADD(year,-2000, ret1c.date) as 'Date1C',
+      ret1c.sum1c AS 'Sum1C',
+	  ret1c.Marked AS Marked,
+	  ret1c.Posted AS Posted,
+      'Возврат' as typeDifference
+      from (
+	  select
+
+      _Number as [key],
+      _Fld5599 as sum1c,
+      _fld5605 as returnCause,
+      _IDRRef as binGuid,
+      _Date_Time as date,
+	  _Marked AS Marked,
+	  _Posted AS Posted
+
+      from [ka_sat].[dbo].[_Document308] as returnDoc
+      ) as ret1c
+	  
+	  LEFT JOIN ent_ReturnGoods as rg
+
+      on rg.binaryGuid = ret1c.binGuid
+		 
+      where rg.sumAll != ret1c.sum1c 
+		OR rg.binaryGuid is null
+		OR ((ret1c.Marked = 1 OR ret1c.Posted = 0)  
+			AND rg.isDeleted = 0) 
+		OR  ((ret1c.Marked = 0 AND ret1c.Posted = 1 )  
+			AND rg.isDeleted = 1)
+
+	  -- детали возврат
+
+	  SELECT  [sys].[fn_varbintohexstr](from1c._IDRRef) AS 'binGuid Возврат',
+	    pg.recCount AS 'Кол-во деталей',
+		pg.sumRub AS 'Сумма деталей',
+		from1c.recCount AS 'Кол-во деталей 1С',
+	    from1c.sumRub AS 'Сумма деталей 1С',
+	    'Детали возврат' as typeDifference
+	FROM (
+		SELECT pg1c._IDRRef
+			,count(*) recCount
+			,sum(pgd1c._Fld5630) sumRub
+		FROM [ka_sat].[dbo].[_Document308_VT5621] pgd1c
+			JOIN [ka_sat].[dbo].[_Document308] pg1c 
+				ON pg1c._IDRRef = pgd1c._Document308_IDRRef
+		WHERE 
+			_Document308_IDRRef IN (
+				SELECT pg1c._IDRRef
+				FROM [ka_sat].[dbo].[_Document308] pg1c
+					LEFT JOIN [Dashboard].dbo.ent_ReturnGoods pg 
+						ON pg.binaryGuid = pg1c._IDRRef
+				WHERE 					
+					pg.guid IS NOT NULL
+					AND 
+					(
+						pg.isDeleted IS NULL
+						
+						OR _Fld5599 != pg.sumAll
+
+						OR (
+							(_Marked = 1 AND pg.isDeleted = 0)
+							OR
+							(_Posted = 0 AND pg.isDeleted = 0)
+						)
+					)
+				)
+		GROUP BY pg1c._IDRRef
+		) from1c
+	LEFT JOIN (
+		SELECT pg.binaryGuid
+			,count(*) recCount
+			,sum(sumPrice) sumRub
+		FROM [Dashboard].dbo.ent_ReturnGoods pg
+		JOIN [Dashboard].dbo.ent_ReturnGoodsDetails pgd ON pg.id = pgd.return_id
+		GROUP BY pg.binaryGuid
+		) pg ON pg.binaryGuid = from1c._IDRRef
+		AND pg.recCount = from1c.recCount
+	WHERE pg.binaryGuid IS NULL
+		OR pg.recCount != from1c.recCount
+		OR pg.sumRub != from1c.sumRub
+
+     --договоры
+
+      select
+	  agr.[id] AS agreement_id,
+      agr.binaryGuid,
+	  agr.[key] AS [key],
+      agr.[date],
+	  agr.isDeleted,
+	  agr1C.date as date1c
+	  ,agr1C.Code as Code1C
+	  , agr1C.Marked AS Marked1C
+      
+      from ent_Agreement as agr
+
+      right join (select
+
+      _IDRRef as binGuid,
+      _Fld1950 as date,
+	  _Code as Code,
+	  _Marked AS Marked
+
+      from [ka_sat].[dbo].[_Reference73] as agrimDoc
+      ) as agr1C
+
+	  ON agr.binaryGuid = agr1c.binGuid
+
+	  WHERE 
+	   agr.binaryGuid IS NULL
+	   OR (agr1C.Marked = 1  AND agr.isDeleted = 0) 
+		OR  (agr1C.Marked = 0 AND agr.isDeleted = 1) 
+
+      order by agr1c.[date]
+
+    --контрагенты
+	
+	  select
+	  cont.id_contact,
+      cont.binaryGuid,
+	  cont.[guid],
+      cont.[name] AS Name,
+	  cont.isDeleted AS Deleted,
+	  cont1C.Code AS Name1C,
+	  cont1C.description as description1C,
+	  cont1C.Marked AS Marked1C
+      
+      from ent_Contacts as cont
+
+      right join (select
+
+      _IDRRef as binGuid,
+      _Description as description,
+	  _Fld2151 as Code,
+	  _Marked AS Marked
+
+      from [ka_sat].[dbo]._Reference114 as contrDoc
+      ) as cont1C
+
+      on cont.binaryGuid = cont1c.binGuid
+
+	  WHERE 
+		cont.binaryGuid IS NULL
+	    OR (cont1C.Marked = 1 AND cont.isDeleted = 0) 
+		OR  (cont1C.Marked = 0 AND cont.isDeleted = 1) 
+
+      order by cont.Name
+	  
+    --номенклатура
+	
+	  select
+	  good.[id_good],
+      good.binaryGuid,
+	  good.[guid],
+      good.name AS [description],
+	  good.isDeleted AS Deleted,
+	  good1C.[_Description] as description1c
+	  ,good1C.Code as Code1C
+	  ,good1C.Marked AS Marked
+      
+      from ent_goods as good
+
+      right join (select
+
+      _IDRRef as binGuid,
+      [_Description] as _description,
+	  _Code as Code,
+	  _Marked AS Marked
+
+      from [ka_sat].[dbo].[_Reference144] as goodDoc
+      ) as good1C
+
+
+      on good.binaryGuid = good1c.binGuid
+
+	   WHERE 
+	   good.binaryGuid IS NULL
+	   OR (good1C.Marked = 1 AND good.isDeleted = 0) 
+		OR  (good1C.Marked = 0 AND good.isDeleted = 1) 
+
+      order by good1c.[_Description]
+	
+	--Установка ППИ
+	
+	  SELECT
+	  PPI.[guid] AS PPI_guid,
+	  PPI.date AS [date],
+	  PPI.time AS [time],
+	  PPI.[key] AS [Number],
+	  PPI.[sum] AS [SUM],
+	  DATEADD(year,-2000, PPI1C.DateTime) AS [dateTime1C],
+	  PPI1C.Number AS Number1C,
+	  PPI1C.[Sum]AS [Sum1C]
+	  
+      FROM [ent_PaymentOrderOutcome] AS PPI
+
+      right join (select
+
+		  _IDRRef AS binGuid,
+		  _Date_Time AS DateTime,
+		  _Marked AS Marked,
+		  _Posted AS Posted,
+		  [_Number] AS Number,
+		  _Fld11641 AS [Sum]
+
+
+		  FROM [ka_sat].[dbo]._Document460 as PPI1C
+      ) as PPI1C
+
+
+      ON PPI.binaryGuid = PPI1C.binGuid 
+
+	  WHERE 
+	   PPI.binaryGuid IS NULL
+	   OR ((PPI1C.Marked = 1 OR PPI1C.Posted = 0)  
+			AND PPI.isDeleted = 0) 
+	   OR  ((PPI1C.Marked = 0 AND PPI1C.Posted = 1 )  
+			AND PPI.isDeleted = 1) 
+	   OR PPI.[sum] != PPI1C.[Sum]
+
+      ORDER BY PPI1C.Number
+
+   --Приходно кассовый ордер
+	
+	  SELECT
+	  PKO.[guid] AS PKO_guid,
+	  PKO.date AS [date],
+	  PKO.time AS [time],
+	  PKO.payment_key AS [payment_Key],
+	  PKO.amount AS [amount],
+	  DATEADD(year,-2000, PKO1C.DateTime) AS [dateTime1C],
+	  PKO1C.Number AS Number1C,
+	  PKO1C.Amount as Amount1C
+	  
+      FROM ent_Payment as PKO
+
+      right join (select
+
+		  _IDRRef AS binGuid,
+		  _Date_Time AS DateTime,
+		  _Marked AS Marked,
+		  _Posted AS Posted,
+		  [_Number] AS Number,
+		  _Fld13189 AS Amount
+
+		  FROM [ka_sat].[dbo]._Document484 as PKO1C
+      ) as PKO1C
+
+
+      ON PKO.binaryGuid = PKO1C.binGuid 
+
+	  WHERE
+	  PKO.binaryGuid IS NULL
+	   OR  
+	   ((PKO1C.Marked = 1 OR PKO1C.Posted = 0)  
+			AND PKO.isDeleted = 0) 
+		OR  ((PKO1C.Marked = 0 AND PKO1C.Posted = 1 )  
+			AND PKO.isDeleted = 1) 
+		OR (PKO.Amount != PKO1C.Amount)
+
+      ORDER BY PKO.date
+
+  --Корректировка
+	
+	  SELECT
+	  correct.[guid] AS correct_guid,
+	  correct.date AS [date],
+	  correct.time AS [time],
+	  DATEADD(year,-2000, correct1C.DateTime) AS [dateTime1C],
+	  correct1C.description as description1C
+	  
+      FROM ent_CorrectDebitore as correct
+
+      right join (select
+
+      _IDRRef AS binGuid,
+      _Fld8029 AS description,
+	  _Date_Time AS DateTime,
+	  _Marked AS Marked,
+	  _Posted AS Posted 
+
+      FROM [ka_sat].[dbo]._Document379 as correct1C
+      ) as correct1C
+
+
+      ON correct.binaryGuid = correct1C.binGuid 
+
+	  WHERE
+	  correct.binaryGuid IS NULL
+	   OR 
+	  ((correct1C.Marked = 1 OR correct1C.Posted = 0)  
+			AND correct.isDeleted = 0) 
+		OR  ((correct1C.Marked = 0 AND correct1C.Posted = 1 )  
+			AND correct.isDeleted = 1) 
+
+      ORDER BY correct.date
+ 
+-- Установка цен
+	DECLARE @P5 varbinary(16),@P6 varbinary(16)
+
+	SELECT @P5=T1._IDRRef
+	FROM [ka_sat].dbo._Reference233 T1
+	WHERE T1._Description = 'БАЗОВЫЙ'
+
+	SELECT @P6=T1._IDRRef
+	FROM [ka_sat].dbo._Reference233 T1
+	WHERE T1._Description = ' БАЗОВЫЙ( Плановые)'
+
+	SELECT  [sys].[fn_varbintohexstr](GoodPrice1C.[BinKey]) AS'binGuid',
+	GoodPrice.[Key] AS [Key],
+	GoodPrice.[Date] AS [Date],
+	GoodPrice.Price AS Price,
+	GoodPrice1C.[GoodCode] AS [Key1C],
+	CONVERT(date, GoodPrice1C.[Date]) AS [Date1C],
+	GoodPrice1C.Price AS Price1C,
+	'Установка цен'
+	FROM (
+		SELECT
+		T21._IDRRef AS [BinKey],
+		T21._Code AS [GoodCode],
+		T22._IDRRef AS [BinProdGuid],
+		T22._Marked AS [Marked],
+		T22._Posted AS [Posted],
+		T21._Description AS [GoodDescription],
+		T20._Fld16770 AS Price,
+		DATEADD(year,-2000, T22._Date_Time) AS [Date]
+		FROM [ka_sat].dbo._Document563_VT16766 T20
+			INNER JOIN [ka_sat].dbo._Document563 T22
+			ON T22._IDRRef = T20._Document563_IDRRef
+			LEFT OUTER JOIN [ka_sat].dbo._Reference144 T21
+			ON T20._Fld16768RRef = T21._IDRRef
+		WHERE (
+			(T20._Fld16774RRef = @P5) OR (T20._Fld16774RRef = @P6)) AND (T20._Fld16770 != 0) AND 
+			((EXISTS(
+				SELECT 1 
+				FROM [ka_sat].dbo._Document563_VT16766 T2
+				LEFT OUTER JOIN [ka_sat].dbo._Reference144 T3
+				ON T2._Fld16768RRef = T3._IDRRef
+				WHERE T22._IDRRef = T2._Document563_IDRRef AND ((T2._Fld16774RRef = @P5))) OR EXISTS(
+				SELECT 1 
+				FROM [ka_sat].dbo._Document563_VT16766 T4
+				LEFT OUTER JOIN [ka_sat].dbo._Reference144 T5
+				ON T4._Fld16768RRef = T5._IDRRef
+				WHERE T22._IDRRef = T4._Document563_IDRRef AND ((T4._Fld16774RRef = @P6)))) AND EXISTS(
+				SELECT 1 
+				FROM [ka_sat].dbo._Document563_VT16766 T6
+				LEFT OUTER JOIN [ka_sat].dbo._Reference144 T7
+				ON T6._Fld16768RRef = T7._IDRRef
+				WHERE T22._IDRRef = T6._Document563_IDRRef AND ((T6._Fld16770 != 0))
+			))
+	) GoodPrice1C
+	LEFT JOIN(
+		SELECT G.binaryGuid AS BinGuid,
+				PG.binaryGuid AS BinProdGuid,
+				G.goodKey AS [Key],
+				G.name AS [Name],
+				PG.date AS [Date],
+				PG.isDeleted AS isDeleted,
+				PGD.price AS Price
+		FROM ent_goods AS G
+		RIGHT JOIN ent_PriceGoodsDetails AS PGD 
+		ON G.id_good=PGD.good_id
+		LEFT JOIN  ent_PriceGoods AS PG 
+		ON PGD.priceGoods_id=PG.id
+	) AS GoodPrice
+	ON GoodPrice.BinGuid=GoodPrice1C.[BinKey] 
+		AND GoodPrice.BinProdGuid=GoodPrice1C.BinProdGuid
+	WHERE GoodPrice.Price != GoodPrice1C.Price 
+			OR GoodPrice.[Date]!=CONVERT(date, GoodPrice1C.[Date])
+			OR GoodPrice.BinProdGuid is null
+			OR GoodPrice.BinGuid IS NULL
+			OR ((GoodPrice1C.Marked = 1 OR GoodPrice1C.Posted = 0)  
+				AND GoodPrice.isDeleted = 0) 
+			OR  ((GoodPrice1C.Marked = 0 AND GoodPrice1C.Posted = 1 )  
+				AND GoodPrice.isDeleted = 1)
+
+ --Установка ПП
+	
+	  SELECT
+	  PP.[guid] AS PP_guid,
+	  PP.date AS [date],
+	  PP.time AS [time],
+	  PP.[key] AS [Number],
+	  PP.[sum] AS [SUM],
+	  PP.isDeleted AS [Deleted],
+	  DATEADD(year,-2000, PP1C.DateTime) AS [dateTime1C],
+	  PP1C.Number AS Number1C,
+	  PP1C.[Sum]AS [Sum1C],
+	  PP1C.Marked AS Marked1C,
+      PP1C.Posted AS Posted1C
+	  
+      FROM [ent_PaymentOrder] AS PP
+
+      right join (select
+
+		  _IDRRef AS binGuid,
+		  _Date_Time AS DateTime,
+		  _Marked AS Marked,
+		  _Posted AS Posted,
+		  [_Number] AS Number,
+		  _Fld11541 AS [Sum]
+
+
+		  FROM [ka_sat].[dbo].[_Document459] as PP1C
+      ) as PP1C
+
+
+      ON PP.binaryGuid = PP1C.binGuid 
+
+	  WHERE 
+	  PP.binaryGuid IS NULL
+	   OR 
+		((PP1C.Marked = 1 OR PP1C.Posted = 0)  
+			AND PP.isDeleted = 0) 
+		OR  ((PP1C.Marked = 0 AND PP1C.Posted = 1 )  
+			AND PP.isDeleted = 1)  
+        OR PP.[sum] != PP1C.[Sum]
+
+      ORDER BY PP1C.Number
+
+      END
+    </sql>
+  </changeSet>
+</databaseChangeLog>

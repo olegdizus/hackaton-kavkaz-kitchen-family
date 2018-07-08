@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="CreateSalesPlansTable" author="apetrosyan">
+
+    <createTable tableName="ent_SalesPlans">
+
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+
+      <column name="indicator_id" type="INT">
+        <constraints nullable="false" />
+      </column>
+
+      <column name="emploee_id" type="INT">
+        <constraints nullable="false" />
+      </column>
+
+      <column name="plan" type="DECIMAL">
+        <constraints nullable="false" />
+      </column>
+
+    </createTable>
+
+    <addForeignKeyConstraint referencedColumnNames="id" referencedTableName="rpt_ByPeriods_Indicators"
+                                 baseColumnNames="indicator_id" baseTableName="ent_SalesPlans"
+                           constraintName="FK_SalesPlans_Indicators" onDelete="NO ACTION"/>
+
+    <addForeignKeyConstraint referencedColumnNames="id" referencedTableName="dsh_Employee"
+                                 baseColumnNames="emploee_id" baseTableName="ent_SalesPlans"
+                           constraintName="FK_SalesPlans_Emploee" onDelete="NO ACTION"/>
+
+  </changeSet>
+</databaseChangeLog>
+

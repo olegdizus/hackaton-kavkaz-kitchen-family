@@ -1,0 +1,27 @@
+﻿@using Dashboard.DB.Models.ModelExt
+@using Kendo.Mvc.UI
+@using PagedList
+@using Dashboard.DB.Models.TaskPlanner
+@using Dashboard.Models
+
+@{
+    ViewBag.Title = "Добавление тестовых некорретных данных<";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@*@Styles.Render(Dashboard.Bundles.TasksEditor.Css.Key)*@
+
+@Styles.Render(
+        Dashboard.Bundles.Kendo.kendo.Css.Key,
+        Dashboard.Bundles.BootstrapTagsInput.Css.Key,
+        Dashboard.Bundles.FilterControl.Css.Key,
+        Dashboard.Bundles.Tooltipster.Css.Key)
+
+<link href="~/Content/font-awesome.css" rel="stylesheet" />
+
+
+<h2>@ViewBag.Title</h2>
+
+<h3>Созданы 3 тестовых версии некорректных даннных</h3>
+
+@Html.ActionLink("К списку некорректных данных","Index","CorrectData")

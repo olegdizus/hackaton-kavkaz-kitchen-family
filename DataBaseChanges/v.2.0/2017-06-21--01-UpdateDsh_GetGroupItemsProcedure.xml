@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="UpdateDsh_GetGroupItemsProcedure" author="ura">
+    <createProcedure>
+      
+  ALTER PROCEDURE [dbo].[dsh_GetGroupItems]
+                        @Group NVARCHAR(100)
+                  AS
+
+                  BEGIN
+                    IF @Group = 'Contact_name'
+                      BEGIN
+                        SELECT DISTINCT ec.id_contact AS id, ec.name AS name
+                          FROM ent_Contacts ec
+                          WHERE ec.isReport = 1 AND ec.isActiv = 1
+                        END
+                      ELSE IF @Group = 'Good_name'
+                        BEGIN
+                          SELECT eg.id_good AS id, eg.name AS name
+                          FROM ent_Goods eg
+                          WHERE eg.isDeleted = 0
+                        END
+                  END;
+
+</createProcedure>
+
+  </changeSet>
+</databaseChangeLog>

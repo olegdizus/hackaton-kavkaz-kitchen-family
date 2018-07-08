@@ -1,0 +1,10 @@
+﻿<div class="row">
+    @Html.Partial("~/Views/Shared/DateRangeFilter.cshtml")
+
+    <div class="col-lg-1 col-md-1 col-xs-1 col-sm-1 right-align">
+        <h5 id="periodTypeListLabel">Тип периода:</h5>
+    </div>
+    <div class="col-lg-2 col-md-2 col-xs-2 col-sm-2">
+        @Html.DropDownList("periodTypes", null, new { @class = "form-control activateRefreshButton", @id = "periodTypeList" })
+    </div>
+</div>

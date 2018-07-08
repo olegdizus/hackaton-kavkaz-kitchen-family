@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="2017-09-05--01-CreateTableLoggingChanges" author="Alexey">
+ 
+    <createTable tableName="LoggingChanges">
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+	  
+       <column name="user_Guid" type="uniqueidentifier">
+        <constraints nullable="false" />
+      </column>
+          
+        <column name="methodName" type="nvarchar(100)">
+        <constraints nullable="false" />
+      </column> 
+        
+       <column name="type" type="nvarchar(100)">
+        <constraints nullable="false" />
+      </column>
+        
+       <column name="changes" type="nvarchar(MAX)">
+        <constraints nullable="false" />
+      </column> 
+
+        <column name="hst_datetime" type="datetime">
+        <constraints nullable="true" />
+      </column>
+    </createTable>
+    
+  </changeSet>
+</databaseChangeLog>
+

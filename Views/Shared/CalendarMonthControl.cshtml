@@ -1,0 +1,22 @@
+﻿
+    <div class="form-group" style="padding-left:10px">
+        <div class=" col-xs-3 date-picker">
+            <ul class="pager" style="margin-top: 5px; margin-bottom: 5px; max-width: 260px;">
+                <li class="previous"><a id="perviosDay" href="#"><<</a></li>
+                <li>
+                    &nbsp;
+                    <label id="currDate" data-date="@ViewBag.month" style="padding-top: 5px; font-size: 18px;">@ViewBag.month.ToString("MMMM yyyy")</label>
+                    <input id="datepicker" data-date-format="dd.mm.yyyy" style="display: none" type="text">
+                </li>&nbsp;
+                <li class="next"><a id="nextDay" href="#">>></a></li>
+            </ul>
+        </div>
+    </div>
+
+<script>
+     @{
+         var dateTime = ViewBag.month;
+     }
+    var date = @Html.Raw(string.Format("'{0}';", dateTime.ToString("dd.MM.yyyy")));
+
+</script>

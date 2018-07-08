@@ -1,0 +1,141 @@
+﻿@using Dashboard.Helpers
+
+@{
+    ViewBag.Title = "План-фактный анализ КС";
+}
+
+@section styles
+{
+    @Styles.Render(Dashboard.Bundles.Kendo.kendo.Css.Key,
+        Dashboard.Bundles.HighlightStyle.Css.Key,
+        Dashboard.Bundles.Tooltipster.Css.Key)
+    
+}
+<style>
+    .tooltip {
+        position: relative;
+        font-size: 14px;
+         opacity: 1; 
+    }
+</style>
+
+
+@Html.Partial("UserSettingModal")
+@Html.Partial("infoModal")
+
+<h2>@ViewBag.Title</h2>
+
+<div class="row">
+    @Html.Partial("~/Views/Shared/DateRangeFilter.cshtml")
+    <div class="col-lg-1 col-md-1 col-xs-1 col-sm-1 right-align">
+        <h5>Показатель:</h5>
+    </div>
+    <div class="col-lg-2 col-md-2 col-xs-2 col-sm-2">
+        @*@Html.DropDownList("Indexes", null, new { @class = "form-control" })*@
+        <select class="form-control tooltip" id="Indexes" name="Indexes">
+            @foreach (var i in @ViewBag.Indexes)
+            {
+                <option  value="@(i.id)"  measureName="@(i.measureName)" title="@(i.description)"
+                        @(ViewBag.SelectedIndex == i.id ? "selected=\"selected\"" : "")
+                        data-aggregate-type="@(i.aggregateType)">
+                    @(i.name)
+                </option>
+            }
+        </select>
+        
+        <font size="1" id="OnlyForPrMonthAlertForCombobox" hidden="true" color="red">R1, R2, R3, Плановая кратность или АКБ корректны только для производственного месяца</font>       
+    </div>
+    <div class="col-lg-2 col-md-2 col-xs-2 col-sm-2">
+        <select class="form-control" id="DisplayVariants" name="DisplayVariants">
+            @foreach (var j in @ViewBag.DisplayVariants)
+            {
+                <option value="@(j.id)"
+                    @(ViewBag.SelectedDisplayIndex == j.id ? "selected=\"selected\"" : "")>
+                    @(j.name)
+                </option>
+            }
+        </select>
+    </div>
+    
+    <div class="col-lg-1 col-md-2 col-xs-3 col-sm-3">
+        <button type="button" class="btn btn-default" id="openSettingsModalButton">
+            Настройки
+        </button>
+    </div>
+
+</div>
+<div class="row">
+    <div class="col-lg-1 col-md-1 col-xs-1 col-sm-1">
+        <h5>Период:</h5>
+    </div>
+    <div class="col-lg-2 col-md-2 col-xs-2 col-sm-2">
+        @Html.DropDownList("periods", null, new { @class = "form-control" })
+    </div>
+    <div class="col-lg-2 col-md-2 col-xs-2 col-sm-2">
+        <div class="checkbox">
+            <label>
+                @Html.CheckBox("ByPeriods", (bool)ViewBag.ByPeriods) По периодам
+            </label>
+        </div>
+    </div>
+</div>
+
+<div>
+    <a id="SaveUserSettingsLink" href="#">Поделиться отчетом</a>
+</div>
+
+
+<br />
+
+<div id="Grid"></div>
+
+    @section Scripts
+    {
+        <script type="text/javascript">
+
+            var userSettings = JSON.parse(@Html.JsonRaw((object) ViewBag.userSettings));
+
+            var cardType = @(ViewBag.cardType ?? -1);
+
+            var employeeId = @(ViewBag.selectedEmployeeId ?? -1);
+
+            var periods = @ViewBag.periodsEnum;
+
+        </script>
+
+
+        @Scripts.Render(
+            Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+            Dashboard.Bundles.Kendo.kendoHelp.Scripts.Key,
+            Dashboard.Bundles.Knockout.Scripts.Key,
+
+            Dashboard.Bundles.Extentions.Scripts.Key,
+            Dashboard.Bundles.UserSetting.Scripts.Key,
+            Dashboard.Bundles.Reports.ReportHelper.Scripts.Key,
+            Dashboard.Bundles.Reports.PlanFactKS.Scripts.Key,
+            Dashboard.Bundles.PrMonthAlert.Scripts.Key,
+            Dashboard.Bundles.Tooltipster.Scripts.Key,
+            Dashboard.Bundles.Reports.ReportHelper.Scripts.Key,
+            Dashboard.Bundles.Underscore.Scripts.Key
+            )
+
+        @Html.Partial("BarTemplate")
+    }
+<script>
+    $(document).ready(function() {
+        $('.tooltip').tooltipster(
+            {
+                content: 'Loading...',
+                theme: 'tooltipster-light',
+                functionBefore: function(instance, helper) {
+
+                    var $origin = $(helper.origin);
+                    var attributes = $(helper.origin).find("option:selected").attr("measureName");
+
+                    getTooltipAjax(instance, $origin, attributes);
+
+                }
+            }
+        );
+    });
+</script>

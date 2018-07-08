@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="AddColumnsPriceType" author="ura">
+
+    <addColumn tableName="ent_PriceGoods">
+      <column name="priceType_id" type="INT">
+      </column>
+    </addColumn>
+	
+	<addColumn tableName="imp_PriceGoods">
+      <column name="priceType_id" type="INT">
+      </column>
+    </addColumn>
+	
+
+	<createTable tableName="ent_PriceType">
+
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+
+      <column name="name" type="nvarchar(50)">
+        <constraints nullable="false" />
+      </column>
+
+    </createTable>
+	
+	
+	<insert tableName="ent_PriceType">
+      <column name="name" value="БАЗОВЫЙ" />
+    </insert>
+
+    <insert tableName="ent_PriceType">
+      <column name="name" value=" БАЗОВЫЙ( Плановые)" />
+    </insert>
+	
+		
+  </changeSet>
+</databaseChangeLog>

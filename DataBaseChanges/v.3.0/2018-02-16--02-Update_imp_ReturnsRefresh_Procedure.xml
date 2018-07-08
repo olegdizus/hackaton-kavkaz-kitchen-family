@@ -1,0 +1,180 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+
+  <changeSet id="Update_demo_ActualDateProcedure" author="Ura">
+    <createProcedure>
+
+      ALTER PROCEDURE  [dbo].[imp_ReturnsRefresh]
+
+      AS
+      BEGIN
+      SET NOCOUNT ON;
+
+      insert into ent_causeReturn
+      select distinct cause from imp_ReturnDetails
+      where cause not in (select name from ent_causeReturn)
+
+      declare @importId uniqueidentifier
+
+      --drop table #importIdTable
+
+      CREATE TABLE #importIdTable
+      (
+      importId uniqueidentifier
+      )
+
+      select count(*)
+      from [imp_ReturnDetails]
+      where importId not in (select importId from #importIdTable)
+
+      while 0 &lt; (select count(*)
+				from [imp_ReturnDetails]
+				where importId not in (select importId from #importIdTable))
+	begin
+		
+		set @importId = (select top 1 importId
+						from [imp_ReturnDetails]
+						where importId not in (select importId from #importIdTable)
+						order by id)
+
+		insert into #importIdTable (importId) values (@importId);
+
+		--SELECT g.id_good as good_id,
+		--d.id as return_id
+  --    ,dd.[amount]
+  --    ,dd.[weight]
+  --    ,dd.[sumPrice]
+	 -- ,cr.id as cause_id
+	 -- ,dd.recNum
+  --FROM [dbo].[imp_ReturnDetails] dd
+  --join ent_goods g on dd.goodGuid=g.[guid]
+  --join ent_returnGoods d on dd.returnGuid=d.[guid]
+  --join ent_causeReturn cr on cr.name=dd.cause
+  --where dd.id in (select max(id) from [imp_ReturnDetails] group by goodGuid, returnGuid, cause, recNum)
+  --and importId=@importId
+
+	MERGE ent_ReturnGoodsDetails AS T
+	USING 
+	(SELECT g.id_good as good_id,
+		d.id as return_id
+      ,dd.[amount]
+      ,dd.[weight]
+      ,dd.[sumPrice]
+	  ,cr.id as cause_id
+	  ,dd.recNum
+  FROM [dbo].[imp_ReturnDetails] dd
+  join ent_goods g on dd.goodGuid=g.[guid]
+  join ent_returnGoods d on dd.returnGuid=d.[guid]
+  join ent_causeReturn cr on cr.name=dd.cause
+  where dd.id in (select max(id) from [imp_ReturnDetails] group by goodGuid, returnGuid, cause, recNum)
+  and importId=@importId
+	--and d.isdeleted = 0
+   ) AS S
+  on T.return_id = S.return_id and T.recNum = S.recNum -- and T.good_id = S.good_id and T.cause_id = S.cause_id
+  WHEN MATCHED 
+  and (T.amount != S.amount
+		or T.good_id != S.good_id
+		or T.cause_id != S.cause_id
+		or T.[weight] != S.[weight]
+		or T.sumPrice != S.sumPrice)
+		THEN
+			UPDATE
+			SET 
+		
+		T.amount = S.amount
+		,T.[weight] = S.[weight]
+		,T.sumPrice = S.sumPrice
+		,T.cause_id = S.cause_id
+		,T.good_id = S.good_id
+
+	WHEN NOT MATCHED BY TARGET 
+		THEN INSERT (
+		good_id
+		,return_id
+		,amount
+		,[weight]
+		,sumPrice
+		,cause_id
+		,recNum)
+    VALUES (
+		good_id
+		,return_id
+		,amount
+		,[weight]
+		,sumPrice
+		,cause_id
+		,recNum
+		);
+
+
+
+	--delete from ent_ReturnGoodsDetails
+	--	where id not in (select rd.id 
+	--					from ent_ReturnGoodsDetails rd
+	--					join ent_ReturnGoods r on rd.return_id=r.id
+	--					join imp_ReturnDetails ir on ir.returnGuid=r.[guid]
+	--					where ir.importId=@importId)
+
+	delete from ent_ReturnGoodsDetails
+	where id in
+		 (
+			select dd.id 
+			from ent_ReturnGoodsDetails dd
+			left join (
+				select d.id, dd.recNum			-- select dd.id, dd.recNum
+				from imp_ReturnDetails dd
+					join ent_ReturnGoods d on dd.returnGuid=d.[guid]
+				where dd.importId=@importId
+				) impDD on dd.return_id = impDD.id and dd.recNum =impDD.recNum
+
+				where dd.return_id in (
+					select distinct d.id
+					from imp_ReturnDetails dd
+					join ent_ReturnGoods d on dd.returnGuid=d.[guid]
+					where dd.importId=@importId
+				) 
+				and impDD.id is null
+		)
+
+
+
+
+	insert into dsh_ImportLog
+	select @importId as [importGuid], importData.returnGuid as [guid], 
+	 case when importData.sumDiff = 0
+	 then 'Возврат импортирован успешно'
+	 else 'Сумма возврата отличается от суммы по деталям. Разница = ' +  cast(sumDiff as varchar)
+	 END 
+	 as [message],
+	GETDATE() as [hst_datetime]
+
+	from
+	(
+	  select rd.returnGuid, 
+			 sum(rd.sumPrice) as detailsSum, 
+			 max(rg.sumAll)  as returnSum, 
+			 sum(rd.sumPrice)-max(rg.sumAll) as sumDiff
+  
+	  FROM imp_ReturnDetails as rd
+		join ent_ReturnGoods as rg
+			on rg.guid = rd.returnGuid
+
+	  where rd.importId = @importId
+
+	  group by returnGuid) as importData
+
+
+	end ;	
+	delete from imp_ReturnDetails where importId in (select importId from #importIdTable);
+ 
+END
+
+    </createProcedure>
+
+  </changeSet>
+</databaseChangeLog>

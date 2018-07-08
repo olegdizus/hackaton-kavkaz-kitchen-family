@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="2017-09-04--01-CreateImportTableRouteAndDirection" author="Alexey">
+
+    <createTable tableName="imp_RoutesForwarders">
+
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+	  
+      <column name="guid" type="uniqueidentifier">
+	  <constraints nullable="false" />
+      </column>
+       
+       <column name="name" type="nvarchar(300)">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="isDeleted" type="bit">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="parentGuid" type="uniqueidentifier">
+	  <constraints nullable="true" />
+      </column>
+        
+        <column name="isGroup" type="bit">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="distance" type="int">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="outTime" type="time(7)">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="forwarderGuid" type="uniqueidentifier">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="forwarderName" type="nvarchar(300)">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="costCruise" type="int">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="logisticsNorm" type="int">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="logisticsMax" type="int">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="minInvoice" type="int">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="minAverageInvoice" type="int">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="directDelivery" type="bit">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="regionGuid" type="uniqueidentifier">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="directionGuid" type="uniqueidentifier">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="contragentGuid" type="uniqueidentifier">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="contragentName" type="nvarchar(300)">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="user1C" type="nvarchar(300)">
+        <constraints nullable="true" />
+      </column>
+      
+      <column name="typeObject" type="nvarchar(300)">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="importId" type="uniqueidentifier">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="hst_datetime" type="datetime">
+        <constraints nullable="true" />
+      </column>
+
+
+    </createTable>
+      
+     <createTable tableName="imp_Directions">
+
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+	  
+      <column name="guid" type="uniqueidentifier">
+	  <constraints nullable="false" />
+      </column>
+      
+       <column name="name" type="nvarchar(100)">
+        <constraints nullable="false" />
+      </column>
+         
+        <column name="isDeleted" type="bit">
+        <constraints nullable="false" />
+      </column>
+         
+        <column name="user1C" type="nvarchar(20)">
+        <constraints nullable="false" />
+      </column>
+         
+        <column name="typeObject" type="nvarchar(20)">
+        <constraints nullable="false" />
+      </column>
+        
+        <column name="importId" type="uniqueidentifier">
+        <constraints nullable="true" />
+      </column>
+
+        <column name="hst_datetime" type="datetime">
+        <constraints nullable="true" />
+      </column>
+
+    </createTable>
+
+      
+  </changeSet>
+</databaseChangeLog>
+

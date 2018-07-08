@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="InsertNoManagerContactToCorrectData" author="Andrey">
+
+
+    <insert tableName="ent_CorrectDataType">
+      <column name="id" value="111"/>
+      <column name="Name" value="Иерархия подчинения сотрудника не соответствует в Сатурн CRM и 1С" />
+      <column name="System" value="1С" />
+      <column name="Destination" value="Администрирование/Пользователи" />
+      <column name="Description" value="Контрагенту &lt;код, имя&gt; в 1С назначены сотрудники: &lt;должность, ФИО сотрудника 1С&gt;; а в Сатурн CRM: &lt;должность, ФИО сотрудника Сатурн&gt;" />
+      <column name="idName" value="NoSameHierarhyForIncorrectContactManager"/>
+    </insert>
+
+
+  </changeSet>
+
+</databaseChangeLog>

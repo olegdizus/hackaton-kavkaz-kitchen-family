@@ -1,0 +1,52 @@
+﻿@using DynamicPermissions.DynamicPermissions
+@{
+    ViewBag.Title = "Матрица ключевых показателей результативности (KPI)";
+}
+
+@section styles
+{
+    @Styles.Render(Dashboard.Bundles.Kendo.kendo.Css.Key)
+    @*TODO: находится времено, пока не сделали редизайн*@
+    <style>
+        th {
+            vertical-align: top !important;
+        }
+    </style>
+}
+<h2>@ViewBag.Title</h2>
+
+@Html.Partial("~/Views/Shared/ProductionMonthControl.cshtml")
+
+<table >
+    <tr>
+        <td style="vertical-align: top">
+            @Html.Partial("~/Views/Shared/HierarchyMenuControl.cshtml")
+        </td>
+        <td style="vertical-align: top">
+
+
+            @Html.ActionLink("Перейти к вводу планов", "Index", "SalesPlansKpi")
+            @if (PermissionHelper.HasAccess("ВариантыKPI"))
+            {
+                <br />
+                @Html.ActionLink("Справочник вариантов", "Index", "KpiVariants")
+            }
+            <br />
+            @Html.Label("Отображать показатели мотивации")
+            @Html.CheckBox("cbViewAllIndicator", false)
+            <div id="grid"></div>
+
+        </td>
+    </tr>
+</table>
+
+@section Scripts
+    {
+
+    @Scripts.Render(
+            Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+            Dashboard.Bundles.Knockout.Scripts.Key,
+            Dashboard.Bundles.Reports.MatrixKPI.Scripts.Key,
+            Dashboard.Bundles.Extentions.Scripts.Key
+            )
+}

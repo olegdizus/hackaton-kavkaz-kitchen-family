@@ -1,0 +1,333 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+
+  <changeSet id="Update_demo_ActualDateProcedure" author="Ura">
+    <createProcedure>
+
+      ALTER PROCEDURE [dbo].[demo_ActualDate]
+      -- Add the parameters for the stored procedure here
+      AS
+      BEGIN
+      -- SET NOCOUNT ON added to prevent extra result sets from
+      -- interfering with SELECT statements.
+      SET NOCOUNT ON;
+
+      -- Insert statements for procedure here
+      /****** Скрипт для команды SelectTopNRows из среды SSMS  ******/
+      declare @maxDate datetime
+      declare @dateDif int
+
+      declare @ExtraDays int = 2
+
+
+      print 'обновление [dbo].[ent_Delivery]'
+
+      SELECT @maxDate=max([date])
+      FROM [dbo].[ent_Delivery]
+
+      select @maxDate as maxDate
+
+      set @dateDif=DATEDIFF(DAY, @maxDate, Getdate()) + @ExtraDays
+
+      select @dateDif as dateDif
+
+      SELECT DATEADD(day, @dateDif, max([date]))
+      FROM [dbo].[ent_Delivery]
+
+      update [dbo].[ent_Delivery]
+      set
+      [date]=DATEADD(day, @dateDif, [date])
+
+
+
+      print 'обновление [dbo].[dsh_reportCauseReturn]'
+
+      SELECT DATEADD(day, @dateDif, max([period]))
+      FROM [dbo].[dsh_reportCauseReturn]
+
+      update [dbo].[dsh_reportCauseReturn]
+      set [period]=DATEADD(day, @dateDif, [period])
+
+
+      print 'обновление [dbo].[dsh_reportDaysData]'
+
+      SELECT DATEADD(day, @dateDif, max([period]))
+      FROM [dbo].[dsh_reportDaysData]
+
+      update [dbo].[dsh_reportDaysData]
+      set [period]=DATEADD(day, @dateDif, [period])
+
+
+
+      print 'обновление [dbo].[dsh_reportProfit]'
+
+      SELECT DATEADD(day, @dateDif, max([period]))
+      FROM [dbo].[dsh_reportProfit]
+
+      update [dbo].[dsh_reportProfit]
+      set [period]=DATEADD(day, @dateDif, [period])
+
+
+      print 'обновление [dbo].[dsh_Salary]'
+
+
+      update [dbo].[dsh_Salary]
+
+      set [month]=DATEADD(	day,
+      -DATEDIFF(
+      DAY,
+      (
+      select top 1 date
+      from ProductionDates fpd
+      where fpd.yearProd =
+      (
+      select pd.yearProd
+      from ProductionDates pd
+      where date = DATEADD(day, @dateDif, [month])
+      )
+      and fpd.monthNumberProd = (
+      select pd.monthNumberProd
+      from ProductionDates pd
+      where date = DATEADD(day, @dateDif, [month])
+      )
+      ),
+      [month])
+      ,[month])
+
+      --SELECT DATEADD(day, @dateDif, max([month]))
+      --FROM [dbo].[dsh_Salary]
+
+      --update [dbo].[dsh_Salary]
+      --set [month]=DATEADD(day, @dateDif, [month])
+
+
+      print 'обновление [dbo].[ent_Agreement]'
+
+      SELECT DATEADD(day, @dateDif, max([date]))
+      FROM [dbo].[ent_Agreement]
+
+      update [dbo].[ent_Agreement]
+      set [date]=DATEADD(day, @dateDif, [date]),
+      [balanceDate]=DATEADD(day, @dateDif, [balanceDate]),
+      [changeDate]=DATEADD(day, @dateDif, [changeDate]),
+      [recalculateDate]=DATEADD(day, @dateDif, [recalculateDate]),
+      [recalculateFromDate]=DATEADD(day, @dateDif, [recalculateFromDate])
+
+
+      print 'обновление [dbo].[ent_ChangeBalance]'
+
+      SELECT DATEADD(day, @dateDif, max([date]))
+      FROM [dbo].[ent_ChangeBalance]
+
+      update [dbo].[ent_ChangeBalance]
+      set [date]=DATEADD(day, @dateDif, [date]),
+      [dateCompensation]=DATEADD(day, @dateDif, [dateCompensation]),
+      [DebitoreDocumentDate]=DATEADD(day, @dateDif, [DebitoreDocumentDate])
+
+
+      --	print 'обновление [dbo].[ent_ContactCategory]'
+      --	print 'обновление [dbo].[ent_ContactGroups]'
+
+
+
+      print 'обновление [dbo].[ent_CorrectDebitore]'
+
+      SELECT DATEADD(day, @dateDif, max([date]))
+      FROM [dbo].[ent_CorrectDebitore]
+
+      update [dbo].[ent_CorrectDebitore]
+      set [date]=DATEADD(day, @dateDif, [date])
+
+
+      print 'обновление [dbo].[ent_Payment]'
+
+      SELECT DATEADD(day, @dateDif, max([date]))
+      FROM [dbo].[ent_Payment]
+
+      update [dbo].[ent_Payment]
+      set [date]=DATEADD(day, @dateDif, [date])
+
+
+
+      print 'обновление [dbo].[ent_PaymentOrder]'
+
+      SELECT DATEADD(day, @dateDif, max([date]))
+      FROM [dbo].[ent_PaymentOrder]
+
+      update [dbo].[ent_PaymentOrder]
+      set [date]=DATEADD(day, @dateDif, [date]),
+      [paymentDate]=DATEADD(day, @dateDif, [paymentDate])
+
+
+
+      print 'обновление [dbo].[ent_PaymentOrderOutcome]'
+
+      SELECT DATEADD(day, @dateDif, max([date]))
+      FROM [dbo].[ent_PaymentOrderOutcome]
+
+      update [dbo].[ent_PaymentOrderOutcome]
+      set [date]=DATEADD(day, @dateDif, [date])
+
+      declare @d datetime = getdate()
+
+
+      print 'обновление [dbo].[ent_Plan]'
+
+      SELECT DATEADD(day, @dateDif, max([month]))
+      FROM [dbo].[ent_Plan]
+
+      update [dbo].[ent_Plan]
+      set [month]=dateadd(day, - datepart(day, @d) + 1, convert(date, @d))
+
+
+      print 'обновление [dbo].[ent_PriceGoods]'
+
+      SELECT DATEADD(day, @dateDif, max([date]))
+      FROM [dbo].[ent_PriceGoods]
+
+      update [dbo].[ent_PriceGoods]
+      set [date]=DATEADD(day, @dateDif, [date])
+
+
+      print 'обновление [dbo].[ent_ReturnGoods]'
+
+      SELECT DATEADD(day, @dateDif, max([date]))
+      FROM [dbo].[ent_ReturnGoods]
+
+      update [dbo].[ent_ReturnGoods]
+      set [date]=DATEADD(day, @dateDif, [date])
+
+
+
+
+
+      print 'обновление [dbo].[ent_SalesPlans]'
+
+      --SELECT DATEADD(day, @dateDif, max([month]))
+      --FROM [dbo].[ent_SalesPlans]
+
+
+      --declare @prodMaxDate datetime
+
+
+      update [dbo].[ent_SalesPlans]
+
+      set [month]=DATEADD(	day,
+      -DATEDIFF(
+      DAY,
+      (
+      select top 1 date
+      from ProductionDates fpd
+      where fpd.yearProd =
+      (
+      select pd.yearProd
+      from ProductionDates pd
+      where date = DATEADD(day, @dateDif, [month])
+      )
+      and fpd.monthNumberProd = (
+      select pd.monthNumberProd
+      from ProductionDates pd
+      where date = DATEADD(day, @dateDif, [month])
+      )
+      ),
+      [month])
+      ,[month])
+
+
+      --print 'обновление [dbo].[kpi_ApproveHistory]'
+
+      --SELECT DATEADD(day, @dateDif, max([hst_datetime]))
+      --FROM [dbo].[kpi_ApproveHistory]
+
+      --update [dbo].[kpi_ApproveHistory]
+      --set [hst_datetime]=DATEADD(day, @dateDif, [hst_datetime])
+
+
+
+      print 'обновление [dbo].[kpi_EmployeeVariantsByMonth]'
+
+      update [dbo].[kpi_EmployeeVariantsByMonth]
+
+      set [month]=DATEADD(	day,
+      -DATEDIFF(
+      DAY,
+      (
+      select top 1 date
+      from ProductionDates fpd
+      where fpd.yearProd =
+      (
+      select pd.yearProd
+      from ProductionDates pd
+      where date = DATEADD(day, @dateDif, [month])
+      )
+      and fpd.monthNumberProd = (
+      select pd.monthNumberProd
+      from ProductionDates pd
+      where date = DATEADD(day, @dateDif, [month])
+      )
+      ),
+      [month])
+      ,[month])
+
+
+
+
+      --SELECT DATEADD(day, @dateDif, max([month]))
+      --FROM [dbo].[kpi_EmployeeVariantsByMonth]
+
+      --update [dbo].[kpi_EmployeeVariantsByMonth]
+      --set [month]=DATEADD(day, @dateDif, [month])
+
+
+
+      print 'обновление [dbo].[kpi_Matrix]'
+
+
+      update [dbo].[kpi_Matrix]
+
+      set [month]=DATEADD(	day,
+      -DATEDIFF(
+      DAY,
+      (
+      select top 1 date
+      from ProductionDates fpd
+      where fpd.yearProd =
+      (
+      select pd.yearProd
+      from ProductionDates pd
+      where date = DATEADD(day, @dateDif, [month])
+      )
+      and fpd.monthNumberProd = (
+      select pd.monthNumberProd
+      from ProductionDates pd
+      where date = DATEADD(day, @dateDif, [month])
+      )
+      ),
+      [month])
+      ,[month])
+
+
+
+
+      --SELECT DATEADD(day, @dateDif, max([month]))
+      --FROM [dbo].[kpi_Matrix]
+
+      --update [dbo].[kpi_Matrix]
+      --set [month]=DATEADD(day, @dateDif, [month])
+
+
+
+
+
+      END
+      
+
+    </createProcedure>
+
+  </changeSet>
+</databaseChangeLog>

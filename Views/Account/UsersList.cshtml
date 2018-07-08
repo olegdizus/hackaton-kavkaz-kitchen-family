@@ -1,0 +1,80 @@
+﻿@model PagedList.IPagedList<UserViewModel>
+@using System.Activities.Statements
+@using Dashboard.Models
+@using DynamicPermissions.DynamicPermissions
+@using Kendo.Mvc.UI
+@{
+	ViewBag.Title = "Пользователи";
+}
+
+@section styles
+{
+    @Styles.Render(Dashboard.Bundles.Kendo.KendoStandart.Css.Key,
+        Dashboard.Bundles.Fontawesome.Css.Key)
+
+}
+
+@section Scripts
+{
+    @Scripts.Render(
+        Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+        Dashboard.Bundles.Kendo.kendoHelp.Scripts.Key
+    )
+}
+
+
+<h2>@ViewBag.Title</h2>
+<p>
+    @if (PermissionHelper.HasAccess("Account", "Create"))
+    {
+        @Html.ActionLink("Добавить пользователя", "Create")
+    }
+</p>
+
+<div>
+    @{
+        var IsAdmin = User.IsInRole("Administrator");
+        var IsSmallAdmin = User.IsInRole("SmallAdmin");
+    }
+
+    @(Html.Kendo().Grid<UserViewModel>()
+          .Name("Grid")
+          .Columns(columns =>
+          {
+              columns.Bound(p => p.UserName)
+                  .Filterable(true)
+                  .Groupable(false);
+              columns.Bound(p => p.Email)
+                  .ClientTemplate("<a href='mailto:#=Email#'>#=Email#</a>")
+                  .Filterable(true)
+                  .Groupable(false);
+              columns.Bound(p => p.Role)
+                  .Filterable(true);
+              if (PermissionHelper.HasAccess("Account", "Edit"))
+              {
+                  columns.Bound(p => p.Id)
+                      .Filterable(false)
+                      .Groupable(false)
+                      .Title("")
+                      .Sortable(false)
+                      .Template(t => { })
+                      .ClientTemplate(
+                           "#=getClientTemplateEditDelete(Id, UserName,'Account', " + IsAdmin.ToString().ToLower() + "||"
+                          + IsSmallAdmin.ToString().ToLower() + "&& Role!='Administrator'&& Role!='SmallAdmin')#") //как сделать лучше?
+                      .Width(200);
+              }
+          })
+          .DataSource(dataSource => dataSource
+              .Ajax()
+              .Events(events => events.Error("error_handler"))
+              .Read(read => read.Action("AllIndicatorsAccounts", "Account"))
+              .PageSize(30)
+              .Total(0)
+              .Group(g => g.Add(c => c.Role))
+          )
+          .Pageable()
+          .Sortable()
+          .Filterable()
+          .Groupable()
+          )
+</div>

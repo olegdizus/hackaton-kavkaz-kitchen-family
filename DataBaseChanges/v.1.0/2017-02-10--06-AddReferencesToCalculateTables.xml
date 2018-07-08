@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="AddReferencesToCalculateTables" author="zelim">
+
+    <!-- Сначала переименуем столбцы с indicator_new_id на indicator_id -->
+    <renameColumn tableName="tst_CalculateData"
+                  oldColumnName="indicator_new_id"
+                  newColumnName="indicator_id"/>
+
+    <renameColumn tableName="tst_CalculateDataByContacts"
+                  oldColumnName="indicator_new_id"
+                  newColumnName="indicator_id"/>
+
+    <!-- После этого добавим внешние ключи -->
+    <addForeignKeyConstraint referencedColumnNames="id" referencedTableName="rpt_ByPeriods_Indicators"
+                         baseColumnNames="indicator_id" baseTableName="tst_CalculateData"
+                   constraintName="FK_CalculateData_ByPeriods_Indicators" onDelete="NO ACTION"/>
+
+    <addForeignKeyConstraint referencedColumnNames="id" referencedTableName="rpt_ByPeriods_Indicators"
+                     baseColumnNames="indicator_id" baseTableName="tst_CalculateDataByContacts"
+               constraintName="FK_CalculateDataByContacts_ByPeriods_Indicators" onDelete="NO ACTION"/>
+    
+  </changeSet>
+</databaseChangeLog>

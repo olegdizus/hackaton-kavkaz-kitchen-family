@@ -1,0 +1,12 @@
+﻿<div ng-controller="hierarchyMenuController">
+    <div class="btn-group-vertical">
+        <a ng-repeat="menuItem in menuItems"
+           ng-click="selectMenuItem(menuItem)"
+           style="text-align: left;"
+           ng-style="getItemStyle(menuItem)"
+           class="btn btn-menu hieracrhy-menu-item"
+           ng-class="{ 'btn-menu-selected': menuItem.id == selectedItemId}">
+            {{menuItem.name}}
+        </a>
+    </div>
+</div>

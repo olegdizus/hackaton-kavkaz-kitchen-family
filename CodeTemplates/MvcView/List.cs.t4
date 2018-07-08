@@ -1,0 +1,109 @@
+﻿@using Kendo.Mvc.UI;
+@using Dashboard.DB.Models;
+@using System.Web.Mvc;
+
+@section Scripts
+{
+	@Scripts.Render(
+        "~/bundles/kendo",
+                "~/bundles/kendoHelp")
+}
+
+@section styles
+{
+	@Styles.Render("~/Content/kendoBlack/css",
+	"~/font-awesome/css") 
+}
+
+@Html.Partial("DeleteModalWindow")
+<#
+// The following chained if-statement outputs the file header code and markup for a partial view, a view using a layout page, or a regular view.
+//Literl Name Constants 
+string pageNameText = "Список";
+string createOperationNameText = "Создать";
+string editOperationNameText = "Редактировать";
+string detailsOperationNameText = "Детали";
+string deleteOperationNameText = "Удалить";
+string backwardNameText = "Назад";
+string gridModelName = ViewDataTypeName.Split('.').Last() ;
+if(IsPartialView) {
+#>
+<#
+} else if(IsLayoutPageSelected) {
+#>
+@{
+<#
+if (!String.IsNullOrEmpty(LayoutPageFile)) {
+#>
+    Layout = "<#= LayoutPageFile#>";
+<#
+}
+#>
+}
+<#
+} else {
+#>
+<#
+    PushIndent("    ");
+}
+#>
+@{
+	ViewBag.Title = "<#= pageNameText #>";
+}
+<h2>@ViewBag.Title</h2>
+
+<div class="form-horizontal">
+<p>
+    @Html.ActionLink("<#= createOperationNameText #>", "Create")
+</p>
+
+<div>
+		 @(Html.Kendo().Grid<<#= gridModelName #>>()
+        .Name("Grid")
+        .Columns(columns =>
+        {
+<#
+IList<PropertyMetadata> properties = ModelMetadata.Properties;
+foreach (var property in properties){
+#>
+<#
+	if (property.Scaffold && !property.IsPrimaryKey && !property.IsForeignKey) {
+		if (property.IsAssociation && GetRelatedModelMetadata(property) == null) {
+			continue;
+		}
+#>
+			columns.Bound(p => p.<#= property.PropertyName #>);
+<#
+	}
+}#>			columns.Bound(p => p.<#= GetPrimaryKeyName() #>)
+            .Title("")
+            .Filterable(false)
+            .Sortable(false)
+			.Template(t => { })
+			.ClientTemplate("#=getClientTemplate(<#= GetPrimaryKeyName() #>, <#= GetNameAfterPrimaryKey() #>,'<#= gridModelName #>s')#");
+        })
+        .DataSource(dataSource => dataSource
+					.Ajax()
+					.Events(events => events.Error("error_handler"))
+					.Read(read => read.Action("All<#= gridModelName #>s", "<#= gridModelName #>s"))
+					.PageSize(30)
+					.Total(0))					
+				.Pageable()
+				.Sortable()
+				.Filterable()
+					)
+</div>
+</div>
+
+<#
+if(!IsPartialView && !IsLayoutPageSelected) {
+    ClearIndent();
+#>
+<#
+}
+#>
+
+<#@ template language="C#" HostSpecific="True" #>
+<#@ output extension=".cshtml" #>
+<#@ include file="Imports.include.t4" #>
+<#@ include file="ModelMetadataFunctions.cs.include.t4" #>

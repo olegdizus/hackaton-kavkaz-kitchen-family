@@ -1,0 +1,61 @@
+﻿@using Dashboard.DB.Models.KPI
+@using Kendo.Mvc.UI;
+
+@section styles
+{
+    @Styles.Render(
+        Dashboard.Bundles.Kendo.KendoStandart.Css.Key,
+        Dashboard.Bundles.Fontawesome.Css.Key
+    )
+}
+
+@section Scripts
+{
+    @Scripts.Render(
+        Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+        Dashboard.Bundles.Kendo.kendoHelp.Scripts.Key
+    )
+}
+
+@Html.Partial("DeleteModalWindow")
+@{
+    ViewBag.Title = "Варианты расчета";
+}
+
+<h2>@ViewBag.Title</h2>
+
+<div class="form-horizontal">
+    <p>
+        @Html.ActionLink("Создать", "Create")
+    </p>
+
+    <div>
+        @(Html.Kendo().Grid<KpiVariant>()
+            .Name("Grid")
+            .Columns(columns =>
+            {
+                columns.Bound(p => p.name);
+                columns.Bound(p => p.description);
+                columns.Bound(p => p.Position);
+                columns.Bound(p => p.id)
+                .Title("")
+                .Filterable(true)
+                .Sortable(true)
+                .Template(t => { })
+                .ClientTemplate("#=getClientTemplate(id, name,'KpiVariants')#");
+            })
+            .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .Group(g => g.Add(c => c.Position))
+                        .Events(events => events.Error("error_handler"))
+                        .Read(read => read.Action("AllKpiVariants", "KpiVariants"))
+                        .PageSize(30)
+                        .Total(0))
+                        
+                    .Pageable()
+                    .Sortable()
+                    .Groupable()
+                    .Filterable()
+        )
+    </div>
+</div>

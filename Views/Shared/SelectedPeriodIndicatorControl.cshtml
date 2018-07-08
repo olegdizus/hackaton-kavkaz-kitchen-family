@@ -1,0 +1,51 @@
+﻿<div class="row">
+    @Html.Partial("~/Views/Shared/DateRangeFilter.cshtml")
+
+    <div class="col-lg-1 col-md-1 col-xs-1 col-sm-1 right-align">
+        <h5 id="periodTypeListLabel">Тип периода:</h5>
+    </div>
+    <div class="col-lg-2 col-md-2 col-xs-2 col-sm-2">
+        @Html.DropDownList("periodTypes", null, new { @class = "form-control", @id = "periodTypeList" })
+    </div>
+</div>
+<div class="row" style="padding: 5px 0 5px">
+    <div class="col-lg-1 col-md-1 col-xs-1 col-sm-1 right-align">
+        <h5>Темп роста:</h5>
+    </div>
+    <div class="col-lg-2 col-md-2 col-xs-2 col-sm-2">
+        @Html.DropDownList("previousPeriods", null, new { @class = "form-control", @id = "previousPeriodsList" })
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-1 col-md-1 col-xs-1 col-sm-1 right-align">
+        <h5>Показатель:</h5>
+    </div>
+    <div class="col-lg-2 col-md-2 col-xs-2 col-sm-2">
+       <select class="form-control activateRefreshButton tooltip" id="indicatorsList" name="indicators">
+            @foreach (var i in @ViewBag.indicators)
+            {
+                <option value="@(i.id)" measureName="@(i.measureName)"  title="@(i.description)">
+                    @(i.bkgName)
+                </option>
+            }
+        </select>
+    </div>
+</div>
+<script>
+    $(document).ready(function() {
+        $('.tooltip').tooltipster(
+            {
+                content: 'Loading...',
+                theme: 'tooltipster-light',
+                functionBefore: function(instance, helper) {
+
+                    var $origin = $(helper.origin);
+                    var attributes = $(helper.origin).find("option:selected").attr("measureName");
+                     
+                    getTooltipAjax(instance, $origin, attributes);
+
+                }
+            }
+        );
+    });
+</script>

@@ -1,0 +1,281 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+
+  <changeSet id="Update_imp_GoodsRefreshProcedure" author="ura">
+    <createProcedure>
+
+      ALTER PROCEDURE [dbo].[imp_GoodsRefresh]
+      -- Add the parameters for the stored procedure here
+      AS
+      BEGIN
+      -- SET NOCOUNT ON added to prevent extra result sets from
+      -- interfering with SELECT statements.
+      SET NOCOUNT ON;
+
+
+      declare @importId uniqueidentifier
+
+      CREATE TABLE #importIdTable
+      (
+      importId uniqueidentifier
+      )
+
+      while 0 &lt; (select count(*)
+				from [imp_Goods]
+				where importId not in (select importId from #importIdTable))
+	begin
+		
+		set @importId = (select top 1 importId
+						from [imp_Goods]
+						where importId not in (select importId from #importIdTable)
+						order by id)
+
+		insert into #importIdTable (importId) values (@importId);
+
+	--Запишем значения в БКГ
+	MERGE ent_BKG AS T
+	USING (SELECT distinct BKG as name,
+				BKG_guid as guid	  
+			FROM [dbo].[imp_Goods] i
+			where i.id in (select max(id) from [imp_Goods] group by guid)
+				and importId=@importId
+				and BKG_guid is not null
+			) AS S
+	ON T.guid = S.guid	 
+	WHEN MATCHED 
+	and (T.name != S.name or T.name is not null and S.name is null or T.name is null and S.name is not null)
+	  THEN UPDATE SET T.name = S.name
+	WHEN NOT MATCHED BY TARGET 
+		THEN INSERT ([guid], name) VALUES ([guid], name);
+
+	--Запишем значения в Вид упаковки
+	MERGE ent_KindPacking AS T
+	USING (SELECT distinct KindPacking as name,
+				KindPacking_guid as guid	  
+			FROM [dbo].[imp_Goods] i
+			where i.id in (select max(id) from [imp_Goods] group by guid)
+				and importId=@importId
+				and KindPacking_guid is not null
+			) AS S
+	ON T.guid = S.guid	 
+	WHEN MATCHED 
+	and (T.name != S.name or T.name is not null and S.name is null or T.name is null and S.name is not null)
+	  THEN UPDATE SET T.name = S.name
+	WHEN NOT MATCHED BY TARGET 
+		THEN INSERT ([guid], name) VALUES ([guid], name);
+
+	--Запишем значения в группу НМК
+	MERGE ent_GroupNMK AS T
+	USING (SELECT distinct groupNMK as name,
+				groupNMK_guid as guid	  
+			FROM [dbo].[imp_Goods] i
+			where i.id in (select max(id) from [imp_Goods] group by guid)
+				and importId=@importId
+				and groupNMK_guid is not null
+			) AS S
+	ON T.guid = S.guid	 
+	WHEN MATCHED 
+	and (T.name != S.name or T.name is not null and S.name is null or T.name is null and S.name is not null)
+	  THEN UPDATE SET T.name = S.name
+	WHEN NOT MATCHED BY TARGET 
+		THEN INSERT ([guid], name) VALUES ([guid], name);
+
+	--Запишем значения в подгруппу НМК
+	MERGE ent_subgroupNMK AS T
+	USING (SELECT distinct subgroupNMK as name,
+				subgroupNMK_guid as guid	  
+			FROM [dbo].[imp_Goods] i
+			where i.id in (select max(id) from [imp_Goods] group by guid)
+				and importId=@importId
+				and subgroupNMK_guid is not null
+			) AS S
+	ON T.guid = S.guid	 
+	WHEN MATCHED 
+	and (T.name != S.name or T.name is not null and S.name is null or T.name is null and S.name is not null)
+	  THEN UPDATE SET T.name = S.name
+	WHEN NOT MATCHED BY TARGET 
+		THEN INSERT ([guid], name) VALUES ([guid], name);
+
+	--Первый обход. Импортируем номенклатуру без ссылки на родителя
+	MERGE ent_Goods AS T
+	USING 
+		(SELECT i.[guid]
+				  ,i.[binaryGuid]
+				  ,i.[goodKey]
+				  ,i.[name]
+				  ,i.[fullName]
+				  ,i.[comment]
+				  ,i.[isGroup]
+				  ,i.[user1c]
+					,i.[isDeleted]
+					,bkg.id as BKG_id
+					,gnmk.id as groupNMK_id		  
+					,sgnmk.id as subgroupNMK_id		  
+					,kindPacking.id as kindPacking_id		  
+					,br.id as brend_id		  
+			FROM [dbo].[imp_Goods] i
+		  left join ent_BKG bkg on (bkg.guid = i.BKG_guid)
+		  left join ent_kindPacking kindPacking on (kindPacking.guid = i.kindPacking_guid)
+		  left join ent_GroupNMK gnmk on (gnmk.guid = i.groupNMK_guid)
+		  left join ent_subgroupNMK sgnmk on (sgnmk.guid = i.subgroupNMK_guid)
+		  left join ent_Brends br on (br.guid = i.brend_guid)
+		  where i.id in (select max(id) from [imp_Goods] group by guid)
+	  and importId=@importId
+	) AS S
+
+	ON T.guid = S.guid	 
+	WHEN MATCHED 
+	and (T.[goodKey] != S.[goodKey] or T.[goodKey] is not null and S.[goodKey] is null or T.[goodKey] is null and S.[goodKey] is not null
+      or T.[binaryGuid] != S.[binaryGuid] or T.[binaryGuid] is not null and S.[binaryGuid] is null or T.[binaryGuid] is null and S.[binaryGuid] is not null
+      or T.[name] != S.[name] or T.[name] is not null and S.[name] is null or T.[name] is null and S.[name] is not null
+      or T.[fullName] != S.[fullName] or T.[fullName] is not null and S.[fullName] is null or T.[fullName] is null and S.[fullName] is not null
+      or T.[comment] != S.[comment] or T.[comment] is not null and S.[comment] is null or T.[comment] is null and S.[comment] is not null
+      or T.[isGroup] != S.[isGroup] or T.[isGroup] is not null and S.[isGroup] is null or T.[isGroup] is null and S.[isGroup] is not null
+      or T.[user1c] != S.[user1c] or T.[user1c] is not null and S.[user1c] is null or T.[user1c] is null and S.[user1c] is not null
+      or T.BKG_id != S.BKG_id or T.BKG_id is not null and S.BKG_id is null or T.BKG_id is null and S.BKG_id is not null
+      or T.groupNMK_id != S.groupNMK_id or T.groupNMK_id is not null and S.groupNMK_id is null or T.groupNMK_id is null and S.groupNMK_id is not null
+      or T.subgroupNMK_id != S.subgroupNMK_id or T.subgroupNMK_id is not null and S.subgroupNMK_id is null or T.subgroupNMK_id is null and S.subgroupNMK_id is not null
+      or T.[isDeleted] != S.[isDeleted] or T.[isDeleted] is not null and S.[isDeleted] is null or T.[isDeleted] is null and S.[isDeleted] is not null
+      or T.brend_id != S.brend_id or T.brend_id is not null and S.brend_id is null or T.brend_id is null and S.brend_id is not null
+      or T.kindPacking_id != S.kindPacking_id or T.kindPacking_id is not null and S.kindPacking_id is null or T.kindPacking_id is null and S.kindPacking_id is not null
+     ) 
+		THEN
+			UPDATE
+			SET T.[goodKey] = S.[goodKey] ,
+			   T.[binaryGuid] = S.[binaryGuid] ,
+			   T.[name] = S.[name] ,
+			   T.[fullName] = S.[fullName] ,
+			   T.[comment] = S.[comment] ,
+			   T.[isGroup] = S.[isGroup] ,
+			   T.BKG_id = S.BKG_id,
+			   T.groupNMK_id = S.groupNMK_id,
+			   T.subgroupNMK_id = S.subgroupNMK_id,
+			   T.[user1c] = S.[user1c],
+			   T.[hst_datetime] = getdate(),
+			  T.[isDeleted] = S.[isDeleted],  
+			  T.kindPacking_id = S.kindPacking_id,  
+			  T.brend_id = S.brend_id
+	WHEN NOT MATCHED BY TARGET 
+		THEN INSERT (
+				[guid]
+			  ,[binaryGuid]
+			  ,[goodKey]
+			  ,[name]
+			  ,[fullName]
+			  ,[hst_datetime]
+			  ,[comment]
+			  ,[isGroup]
+			  ,[user1c]
+			  ,BKG_id   
+			  ,groupNMK_id   
+			  ,subgroupNMK_id   
+			  ,[isDeleted]   
+			  ,brend_id
+			  ,kindPacking_id
+				  )
+			 VALUES (
+				 [guid]
+			  ,[binaryGuid]
+			  ,[goodKey]
+			  ,[name]
+			  ,[fullName]
+			  ,getdate() 
+			  ,[comment]
+			  ,[isGroup]
+			  ,[user1c]   
+			  ,BKG_id   
+			  ,groupNMK_id   
+			  ,subgroupNMK_id   
+			  ,[isDeleted]
+			  ,brend_id   
+			  ,kindPacking_id
+				);
+
+	end ;
+
+	--Второй обход. Проставляем ссылки на родителя
+	MERGE ent_Goods AS T
+	USING 
+		(SELECT i.[guid]
+				  ,e.id_good as [parentId]
+		  FROM [dbo].[imp_Goods] i
+		  left join ent_goods e on (e.guid = i.[parentGuid])
+		  where i.id in (select max(id) from [imp_Goods] group by guid)
+		 -- and i.isdeleted = 0
+		) AS S
+
+	ON T.guid = S.guid	 
+	WHEN MATCHED 
+	and (T.[parentId] != S.[parentId] or T.[parentId] is not null and S.[parentId] is null or T.[parentId] is null and S.[parentId] is not null
+     ) 
+		THEN
+			UPDATE
+			SET T.[parentId] = S.[parentId];
+
+--проверяем количество обработанных данных	
+		insert into imp_importLog ([date]
+           ,[entity]
+           ,[key])
+		select getdate(),
+			 'Номенклатура',
+			  i.GoodKey  
+		from imp_Goods i
+		where 
+			i.guid not in (
+				select guid 
+				from ent_Goods);
+
+delete from [imp_Goods] where importId in (select importId from #importIdTable);
+
+
+	--Третий обход. Строим материализованный путь
+
+	WITH Tree (ID_good, treeKey) AS
+    (
+        SELECT ID_good,   CONVERT(varchar(255), ID_good) as treeKey         
+        FROM ent_goods
+        WHERE parentId is null
+        UNION ALL
+        SELECT g.ID_good, 
+         CONVERT(varchar(255), Parent.treeKey  + '.' + CONVERT(varchar(255), g.ID_good)) AS treeKey
+
+        FROM ent_goods g
+        INNER JOIN Tree as Parent ON Parent.ID_good = g.parentId
+    )
+	MERGE ent_Goods AS T
+	USING (
+	
+    SELECT ID_good, treeKey FROM Tree) AS S
+
+	ON T.id_good = S.id_good	 
+	WHEN MATCHED 
+	and (T.treeKey != S.treeKey or T.treeKey is not null and S.treeKey is null or T.treeKey is null and S.treeKey is not null
+     ) 
+		THEN
+			UPDATE
+			SET T.treeKey = S.treeKey;
+
+
+	-- обновляем поле goodsType_id (тип продукции)
+      UPDATE ent_Goods
+		SET goodsType_id = 3
+			WHERE treeKey like '2.%' or treeKey like '8.%' or treeKey like '624.%'
+
+      UPDATE ent_Goods
+		SET goodsType_id = 2
+			WHERE  treeKey like '1.%' or treeKey like '304.%'
+
+	
+END
+
+        
+
+    </createProcedure>
+
+  </changeSet>
+</databaseChangeLog>

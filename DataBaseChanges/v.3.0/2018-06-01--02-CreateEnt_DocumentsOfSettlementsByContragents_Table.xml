@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="CreateEnt_DocumentsOfSettlementsByContragents" author="Andrey">
+
+  <createTable tableName="ent_DocumentsOfSettlementsByContragents">
+
+      <column name="id"  type="bigint" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+
+	  <column name="DocumentBinID"  type="binary(16)">
+        <constraints nullable="false" />
+      </column>
+	  
+      <column name="Period" type="datetime2(7)">
+		<constraints nullable="false"/>
+      </column>
+
+      <column name="DocumentNameId"  type="INT">
+		<constraints nullable="false"/>
+      </column>
+	  
+	  <column name="DocNumber"  type="nvarchar(50)">
+		<constraints nullable="true"/>
+      </column>
+	  
+	  <column name="contragent_id"  type="INT">
+		<constraints nullable="false"/>
+      </column>
+	  
+	  <column name="agreement_Id"  type="INT">
+		<constraints nullable="false"/>
+      </column>
+	  
+	  <column name="Money"  type="money">
+		<constraints nullable="false"/>
+      </column>
+
+    </createTable>
+    
+	<addForeignKeyConstraint referencedColumnNames="id" referencedTableName="ent_Agreement"
+		 baseColumnNames="agreement_Id" baseTableName="ent_DocumentsOfSettlementsByDocuments"
+		 constraintName="FK_DocumentsOfSettlementsByContragents_Agreement_agreementId" onDelete="NO ACTION"/>
+		 
+	<addForeignKeyConstraint referencedColumnNames="id_contact" referencedTableName="ent_Contacts"
+		 baseColumnNames="contragent_id" baseTableName="ent_DocumentsOfSettlementsByDocuments"
+		 constraintName="FK_DocumentsOfSettlementsByContragents_Contacts_contragentId" onDelete="NO ACTION"/>
+	
+	<sql>
+	CREATE NONCLUSTERED INDEX [IX_ByContragents_AgreementId_Period_Include]
+	ON [dbo].[ent_DocumentsOfSettlementsByContragents] ([agreement_Id],[Period])
+	INCLUDE ([contragent_id],[Money])
+	</sql>
+	
+	<sql>
+	CREATE NONCLUSTERED INDEX [IX_ByContragents_Period_Include]
+	ON [dbo].[ent_DocumentsOfSettlementsByContragents] ([Period])
+	INCLUDE ([contragent_id],[agreement_Id],[Money])
+	</sql>
+    
+  </changeSet>
+</databaseChangeLog>

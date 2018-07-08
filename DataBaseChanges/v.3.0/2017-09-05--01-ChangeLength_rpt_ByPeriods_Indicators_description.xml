@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  
+  <changeSet id="ChangeLength_rpt_ByPeriods_Indicators_description" author="Ura">
+
+    <modifyDataType
+                    tableName="rpt_ByPeriods_Indicators"
+                    columnName="description"
+                    newDataType="nvarchar(250)"
+                    ></modifyDataType>
+
+  </changeSet>
+</databaseChangeLog>

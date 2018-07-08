@@ -1,0 +1,39 @@
+﻿<script type="text/html" id="salesIndicatorTemplate">
+    <div data-bind="attr: { id: indicatorCardId }" class=" sales-indicator section-card">
+        <table>
+            <tr>
+                <td class="main-indicator-name text-right" colspan="2" data-bind=" style: { color: color }, text: mainIndicatorName"></td>
+                <td class="main-indicator-value text-center" colspan="2" data-bind="numericText: mainIndicatorValue"></td>
+            </tr>
+            
+            <tr data-bind="if: averIndicatorName">
+                <td class="aver-indicator-name text-right" colspan="2" data-bind="text: averIndicatorName"></td>
+                <td class="aver-indicator-value text-center" colspan="2" data-bind="numericText: averIndicatorValue"></td>
+            </tr>
+
+            <tr>
+                <td></td>
+                <td></td>
+                <td class="with-border" data-bind="text: indicatorTableNameUnitOfMeasurement"></td>
+                <td class="with-border">%</td>
+            </tr>
+            <tbody class="secondIndicators" data-bind="foreach: secondIndicators">
+                <tr>
+                    <td class="text-right second-indicator-name" data-bind="text:  $parent.secondIndicatorsNames[$index()]"></td>
+                    <td>
+                        <!-- ko if: indicatorValue > 0 -->
+                        <img src="@Href("~/Images/Arrows/up.png")" />
+                        <!-- /ko -->
+                        <!-- ko if: indicatorValue < 0 -->
+                        <img src="@Href("~/Images/Arrows/down.png")" />
+                        <!-- /ko -->
+                    </td>
+                    <td class="with-border large">
+                        <span data-bind="numericText: indicatorValue"></span>
+                    </td>
+                    <td class="with-border large" data-bind="percentage: indicatorPersendage"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</script>

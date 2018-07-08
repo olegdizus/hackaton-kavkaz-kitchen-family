@@ -1,0 +1,464 @@
+﻿<#@ template language="C#" HostSpecific="True" Debug="True" #>
+<#@ output extension="cs" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Data.Linq" #>
+<#@ assembly name="System.Runtime.Serialization" #>
+<#@ include file="...\MvcView\ModelMetadataFunctions.cs.include.t4" #>
+<#@ ScaffoldingAssembly Processor="ScaffoldingAssemblyLoader" #>
+<#
+string routePrefix;
+if (String.IsNullOrEmpty(AreaName)) 
+{
+    routePrefix = ControllerRootName;
+}
+else
+{
+    routePrefix = AreaName + "/" + ControllerRootName;
+}
+#>
+<#@ import namespace="System.Collections" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="Microsoft.AspNet.Scaffolding.Core.Metadata" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Text" #>
+
+<#@ parameter type="System.String" name="ControllerName" #>
+<#@ parameter type="System.String" name="ControllerRootName" #>
+<#@ parameter type="System.String" name="Namespace" #>
+<#@ parameter type="System.String" name="AreaName" #>
+<#@ parameter type="System.String" name="ContextTypeName" #>
+<#@ parameter type="System.String" name="ModelTypeName" #>
+<#@ parameter type="System.String" name="ModelVariable" #>
+<#@ parameter type="Microsoft.AspNet.Scaffolding.Core.Metadata.ModelMetadata" name="ModelMetadata" #>
+<#@ parameter type="System.String" name="EntitySetVariable" #>
+<#@ parameter type="System.Boolean" name="UseAsync" #>
+<#@ parameter type="System.Boolean" name="IsOverpostingProtectionRequired" #>
+<#@ parameter type="System.String" name="BindAttributeIncludeText" #>
+<#@ parameter type="System.String" name ="OverpostingWarningMessage" #>
+<#@ parameter type="System.Collections.Generic.HashSet<System.String>" name="RequiredNamespaces" #>
+using System.Collections.Generic;
+using System.Linq;
+<# if (UseAsync) { #>
+using System.Threading.Tasks;
+<# } #>
+using System;
+using System.Web.Mvc;
+using Kendo.Mvc.UI;
+using Kendo.Mvc.Extensions;
+<# foreach (var namespaceName in RequiredNamespaces) { #>
+using <#= namespaceName #>;
+<# } #>
+
+namespace <#= Namespace #>
+{
+<#
+    var contextTypeName = ContextTypeName;
+    var entitySetName = ModelMetadata.EntitySetName;
+    var entitySetVar = EntitySetVariable ?? (String.IsNullOrEmpty(entitySetName) ? entitySetName : (entitySetName.Substring(0, length:1).ToLowerInvariant() + entitySetName.Substring(1)));
+    var primaryKeyName = ModelMetadata.PrimaryKeys[0].PropertyName;
+    var primaryKeyShortTypeName = ModelMetadata.PrimaryKeys[0].ShortTypeName;
+    var primaryKeyDefaultValue = ModelMetadata.PrimaryKeys[0].DefaultValue;
+    var primaryKeyType = ModelMetadata.PrimaryKeys[0].TypeName;
+    var primaryKeyNullableTypeName = GetNullableTypeName(primaryKeyType, primaryKeyShortTypeName);
+    var lambdaVar = ModelVariable[0];
+    var relatedProperties = ModelMetadata.RelatedEntities.ToDictionary(item => item.AssociationPropertyName);
+
+    string bindAttribute;
+    if (IsOverpostingProtectionRequired)
+    {
+        bindAttribute = String.Format("[Bind(Include = \"{0}\")] ", BindAttributeIncludeText);
+    }
+    else
+    {
+        bindAttribute = String.Empty;
+    }
+
+	//CONSTANTS
+	var gridPageSeze = 10;
+#>
+    public class <#= ControllerName #> : BaseController
+    {
+        // GET: <#= routePrefix #>
+<# if (UseAsync) { #>
+        public async Task<ActionResult> Index()
+<# } else { #>
+        public ActionResult Index()
+<# } #>
+        {
+<#	var includeExpressions = "";
+	var orderField = "id";
+	if(ModelMetadata.Properties.Any(el=>el.PropertyName == "name")){
+		orderField = "name";
+    }
+	includeExpressions = String.Join("", relatedProperties.Values.Select(property => String.Format(".Include({0} => {0}.{1})", lambdaVar, property.AssociationPropertyName)));
+	includeExpressions = String.Join(includeExpressions, relatedProperties.Values.Select(property => String.Format(".OrderBy({0} => {0}.{1})", lambdaVar, orderField))); 
+	if(!String.IsNullOrEmpty(includeExpressions)) {  
+		if (UseAsync) { #>
+            return View(await <#= entitySetVar #>.ToListAsync());
+<#		} else { #>
+			try
+            {
+				return View();
+            }
+            catch (Exception exception)
+            {
+                logger.WebError("При обращении к Index произошла ошибка", exception);
+                
+				return View("Error");
+            }          
+<#		} #>
+<# } else { #>
+<#		if (UseAsync) { #>
+            return View(await Db.<#= entitySetName #><#= includeExpressions #>.ToListAsync());
+<#		} else { #>
+			try
+			{
+				return View();
+			}
+            catch (Exception exception)
+            {
+                logger.WebError("При обращении к Index произошла ошибка", exception);
+
+                return View("Error");
+            }   
+<#		} #>
+<# } #>
+        }
+
+				
+		// GET: <#= routePrefix #>
+<# if (UseAsync) { #>
+        public async Task<ActionResult> All<#= entitySetName#>(
+			int page,
+            [DataSourceRequest] DataSourceRequest request, 
+			string sort = null)
+<# } else { #>
+        public ActionResult All<#= entitySetName#>(
+			int page,
+            [DataSourceRequest] DataSourceRequest request, 
+			string sort = null) 
+<# } #>
+        {
+			try
+            {
+                var <#= entitySetName.ToLower() #> = Db.<#= entitySetName #>
+					.Select(
+                        s => new
+                        {			
+<#
+IEnumerable<PropertyMetadata> properties = ModelMetadata.Properties;
+foreach (var property in properties){
+	if (property.Scaffold && !property.IsPrimaryKey && !property.IsForeignKey) {
+#>
+<#
+		if (property.IsAssociation && GetRelatedModelMetadata(property) == null) {
+			continue;
+		}
+#>
+                            <#= property.PropertyName #> = s.<#= property.PropertyName #>,
+<#
+	}
+}#>							id = s.id					
+                        }).ToArray();
+									
+				var data = <#= entitySetName.ToLower()#>.ToDataSourceResult(request);
+
+                return Json(data);
+			}
+			catch (Exception exception)
+            {
+                logger.WebError(string.Format(
+                    "При запросе полного списка записей для справочника {0} произошла ошибка ", "<#= entitySetName #>"), exception);
+
+                return View("Error");
+            }
+		}
+
+
+        // GET: <#= routePrefix #>/Details/5
+<# if (UseAsync) { #>
+        public async Task<ActionResult> Details(<#= primaryKeyNullableTypeName #> id)
+<# } else { #>
+        public ActionResult Details(<#= primaryKeyNullableTypeName #> id)
+<# } #>
+        {
+            if (id == null)
+            {
+                logger.WebError(string.Format("В метод {0} - 'Details' передан параметр id = null", "<#= entitySetName #>"));
+                
+				return View("Error");
+            }
+
+<# if (UseAsync) { #>
+            <#= ModelTypeName #> <#= ModelVariable #> = await Db.<#= entitySetName #>.FirstOrDefaultAsync(el => el.id == id);
+<# } else { #>
+            <#= ModelTypeName #> <#= ModelVariable #> = Db.<#= entitySetName #>.FirstOrDefault(el => el.id == id);
+<# } #>
+            
+			if (<#= ModelVariable #> == null)
+            {
+                logger.WebError(string.Format("Не удалось найти запись {0} с id = {1}", "<#= entitySetName #>", id));
+                
+				return View("Error");
+            }
+
+            return View(<#= ModelVariable #>);
+        }
+
+        // GET: <#= routePrefix #>/Create
+        public ActionResult Create()
+        {
+			InitLists();
+            
+			return View();
+        }
+
+        // POST: <#= routePrefix #>/Create
+<# if (IsOverpostingProtectionRequired) {
+    foreach (var line in OverpostingWarningMessage.Split(new string[] { Environment.NewLine }, StringSplitOptions.None)) { 
+#>
+        // <#= line #>
+<# } } #>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+<# if (UseAsync) { #>
+        public async Task<ActionResult> Create(<#= bindAttribute #><#= ModelTypeName #> <#= ModelVariable #>)
+<# } else { #>
+        public ActionResult Create(<#= bindAttribute #><#= ModelTypeName #> <#= ModelVariable #>)
+<# } #>
+        {
+            if (ModelState.IsValid)
+            {
+				try
+                {
+<# if(!String.IsNullOrEmpty(primaryKeyType) && String.Equals("System.Guid", primaryKeyType, StringComparison.OrdinalIgnoreCase)) { #>
+                <#= ModelVariable #>.<#= primaryKeyName #> = Guid.NewGuid();
+<# } #>
+					Db.<#= entitySetName #>.Add(<#= ModelVariable #>);
+<# if (UseAsync) {#>
+					await Db.SaveChangesAsync();
+<# } else { #>
+					Db.SaveChanges();
+<# } #>
+					
+					return RedirectToAction("Index");
+				}
+				catch (Exception exception)
+                {
+                    logger.WebError(string.Format("Не удалось выполнить операцию {0} - 'Create'. Ошибка: {1}", "<#= entitySetName #>", exception));
+                    
+					return View("Error");
+                }
+            }
+
+			InitLists(<#= ModelVariable #>);
+
+            return View(<#= ModelVariable #>);
+        }
+
+        // GET: <#= routePrefix #>/Edit/5
+<# if (UseAsync) { #>
+        public async Task<ActionResult> Edit(<#= primaryKeyNullableTypeName #> id)
+<# } else { #>
+        public ActionResult Edit(<#= primaryKeyNullableTypeName #> id)
+<# } #>
+        {
+            if (id == null)
+            {
+                logger.WebError(string.Format("В метод {0} - 'Edit' передан параметр id = null", "<#= entitySetName #>"));
+                
+				return View("Error");
+            }
+
+<# if (UseAsync) { #>
+            <#= ModelTypeName #> <#= ModelVariable #> = await Db.<#= entitySetName #>.FirstOrDefaultAsync(el => el.id == id);
+<# } else { #>
+            <#= ModelTypeName #> <#= ModelVariable #> = Db.<#= entitySetName #>.FirstOrDefault(el => el.id == id);
+<# } #>
+            
+			if (<#= ModelVariable #> == null)
+            {
+                logger.WebError(string.Format("Не удалось найти запись {0} с id = {1}", "<#= entitySetName #>", id));
+                
+				return View("Error");
+            }
+			
+			InitLists(<#= ModelVariable #>);
+
+            return View(<#= ModelVariable #>);
+        }
+
+        // POST: <#= routePrefix #>/Edit/5
+<# if (IsOverpostingProtectionRequired) {
+    foreach (var line in OverpostingWarningMessage.Split(new string[] { Environment.NewLine }, StringSplitOptions.None)) { 
+#>
+        // <#= line #>
+<# } } #>
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+<# if (UseAsync) { #>
+        public async Task<ActionResult> Edit(<#= bindAttribute #><#= ModelTypeName #> <#= ModelVariable #>)
+<# } else { #>
+        public ActionResult Edit(<#= bindAttribute #><#= ModelTypeName #> <#= ModelVariable #>)
+<# }
+ #>
+        {
+            if (ModelState.IsValid)
+            {
+				try
+				{
+				<# if (UseAsync) { #>
+	<#= ModelTypeName #> <#= ModelVariable #> = await Db.<#= entitySetName #>.FirstOrDefaultAsync(el => el.id == <#= ModelVariable #>.id);
+<# } else { #>
+	<#= ModelTypeName #> <#= ModelVariable #>Db = Db.<#= entitySetName #>.FirstOrDefault(el => el.id == <#= ModelVariable #>.id);
+<# } #>
+					
+					if (<#= ModelVariable #>Db == null)
+					{
+						logger.WebError(string.Format("Не удалось найти запись {0} с id = {1}", "<#= entitySetName #>", <#= ModelVariable #>.id));
+                
+						return View("Error");
+					}
+
+<# var propertiesNames=
+	ModelMetadata
+	.Properties
+	.Where(prop=>prop.RelatedModel==null&&prop.PropertyName.ToLower()!="id"&&!prop.IsAutoGenerated)
+	.Select(prop=>prop.PropertyName);
+
+foreach(var propName in propertiesNames)
+{ #>
+					<#= ModelVariable #>Db.<#= propName #>=<#= ModelVariable #>.<#= propName #>;
+<#} #>
+				
+<# if (UseAsync) { #>
+					await Db.SaveChangesAsync();
+<# } else { #>
+					Db.SaveChanges();
+<# } #>
+					
+					return RedirectToAction("Index");
+				}
+				catch (Exception exception)
+                {
+                    logger.WebError(string.Format("Не удалось выполнить операцию {0} - 'Edit'. Ошибка: {1}", "<#= entitySetName #>", exception));
+                    
+					return View("Error");
+                }
+            }
+
+			InitLists(<#= ModelVariable #>);
+            
+			return View(<#= ModelVariable #>);
+        }
+
+		void InitLists(<#= ModelTypeName #> <#= ModelVariable #> = null)
+		{
+<# foreach (var property in relatedProperties.Values) { #>
+			ViewBag.<#= property.ForeignKeyPropertyNames[0] #> = new SelectList(Db.<#= property.EntitySetName #>, "<#= property.PrimaryKeyNames[0] #>", "<#= property.DisplayPropertyName #>", 
+				<#= ModelVariable #>==null?-1:<#= ModelVariable #>.<#= property.ForeignKeyPropertyNames[0] #>);
+<# } #>
+		}
+
+        // GET: <#= routePrefix #>/Delete/5
+<# if (UseAsync) { #>
+        public async Task<ActionResult> Delete(<#= primaryKeyNullableTypeName #> id)
+<# } else { #>
+        public ActionResult Delete(<#= primaryKeyNullableTypeName #> id)
+<# } #>
+        {
+            if (id == null)
+            {
+                logger.WebError(string.Format("В метод {0} - 'Delete' передан параметр id = null", "<#= entitySetName #>"));
+                
+				return View("Error");
+            }
+
+<# if (UseAsync) { #>
+            <#= ModelTypeName #> <#= ModelVariable #> = await Db.<#= entitySetName #>.FirstOrDefaultAsync(el => el.id == id);
+<# } else { #>
+            <#= ModelTypeName #> <#= ModelVariable #> = Db.<#= entitySetName #>.FirstOrDefault(el => el.id == id);
+<# } #>
+            
+			if (<#= ModelVariable #> == null)
+            {
+                logger.WebError(string.Format("Не удалось найти запись {0} с id = {1}", "<#= entitySetName #>", id));
+                
+				return View("Error");
+            }
+
+            return View(<#= ModelVariable #>);
+        }
+
+        // POST: <#= routePrefix #>/Delete/5
+        [HttpPost] 
+		[ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+<# if (UseAsync) { #>
+        public async Task<ActionResult> DeleteConfirmed(<#= primaryKeyShortTypeName #> id)
+<# } else { #>
+        public ActionResult DeleteConfirmed(<#= primaryKeyShortTypeName #> id)
+<# } #>
+        {
+			try
+			{
+<# if (UseAsync) { #>
+				<#= ModelTypeName #> <#= ModelVariable #> = await Db.<#= entitySetName #>.FirstOrDefaultAsync(el => el.id == id);
+<# } else { #>
+				<#= ModelTypeName #> <#= ModelVariable #> = Db.<#= entitySetName #>.FirstOrDefault(el => el.id == id);
+<# } #>
+				
+				if (<#= ModelVariable #> == null)
+				{
+					logger.WebError(string.Format("Не удалось найти запись {0} с id = {1}", "<#= entitySetName #>", id));
+                
+					return View("Error");
+				}						
+				
+				Db.<#= entitySetName #>.Remove(<#= ModelVariable #>);
+<# if (UseAsync) { #>
+				await Db.SaveChangesAsync();
+<# } else { #>
+				Db.SaveChanges();
+<# } #>
+				
+				return Json(new { success = true }); 
+
+			}
+			catch (Exception exception)
+            {
+                logger.WebError(string.Format("Не удалось выполнить операцию {0} - 'DeleteConfirmed'. Ошибка: {1}", 
+					"<#= entitySetName #>", exception));
+                
+				return Json(new { success = true });
+            }
+        }
+    }
+}
+<#+
+// This function converts the primary key short type name to its nullable equivalent when possible. This is required to make
+// sure that an HTTP 400 error is thrown when the user tries to access the edit, delete, or details action with null values.
+    string GetNullableTypeName(string typeName, string shortTypeName)
+    {
+        // The exceptions are caught because if for any reason the type is user defined, then the short type name will be used.
+        // In that case the user will receive a server error if null is passed to the edit, delete, or details actions.
+        Type primaryKeyType = null;
+        try
+        {
+            primaryKeyType = Type.GetType(typeName);
+        }
+        catch
+        {
+        }
+        if (primaryKeyType != null && (primaryKeyType.IsPrimitive || IsGuid(typeName)))
+        {
+            return shortTypeName + "?";
+        }
+        return shortTypeName;
+    }
+
+    bool IsGuid(string typeName) {
+        return String.Equals("System.Guid", typeName, StringComparison.OrdinalIgnoreCase);
+    }
+#>

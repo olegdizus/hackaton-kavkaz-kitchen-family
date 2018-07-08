@@ -1,0 +1,492 @@
+﻿<style>
+    td .center-cell {
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .table-header {
+        font-weight: bold;
+        background-color: #d9d9d9;
+    }
+
+    td .number-header {
+        background-color: #b6b1b1;
+        font-size: smaller;
+    }
+
+    span .bold {
+        font-weight: bold;
+    }
+
+    span .red-text {
+        color: rgb(211, 20, 20);
+    }
+
+    span .blue-text {
+        color: rgb(15, 143, 226);
+    }
+
+    span .green-text {
+        color: green;
+    }
+
+    span .red-underline {
+        text-decoration: underline;
+        -moz-text-decoration-color: rgb(211, 20, 20);
+        -webkit-text-decoration-color: rgb(211, 20, 20);
+        -ms-text-decoration-color: rgb(211, 20, 20);
+        -o-text-decoration-color: rgb(211, 20, 20);
+        text-decoration-color: rgb(211, 20, 20);
+    }
+
+    span .blue-underline {
+        text-decoration: underline;
+        -moz-text-decoration-color: rgb(15, 143, 226);
+        -webkit-text-decoration-color: rgb(15, 143, 226);
+        -ms-text-decoration-color: rgb(15, 143, 226);
+        -o-text-decoration-color: rgb(15, 143, 226);
+        text-decoration-color: rgb(15, 143, 226);
+    }
+    
+</style>
+
+<!-- Убрать id, когда плагин с датами будет перенесен в AngularJS -->
+<div id="salaryCalculatorController" ng-controller="salaryCalculatorController">
+    <div style="padding-top: 15px; padding-left: 10px;" 
+         ng-show="!showHierarchyMenu">
+        <button type="button"
+                style="height: 36px;"
+                class="btn btn-default btn-sm"
+                ng-click="displayHierarchyMenu(true)">
+            <span>Выбрать сотрудника</span>
+        </button>
+    </div>
+    <table>
+        <tr>
+            <td></td>
+            <td ng-show="showHierarchyMenu"></td>
+            
+            <td></td>
+            <!--<td align="left"  style="vertical-align: top" ng-show="!showHierarchyMenu">
+                    <a href="#" ng-click="displayHierarchyMenu(true)">Выбрать сотрудника</a>
+                </td>-->
+        </tr>
+        <tr>
+            <td style="vertical-align: top" ng-show="showHierarchyMenu">
+                              
+                <!--<hierarchy-menu></hierarchy-menu>-->
+
+            </td>
+            <td colspan="3">
+                <div ng-show="employee.id > 0">
+                    <table width="100%">
+                        <tr>
+                            <td width="50%" style="vertical-align: top">
+                                <h3>Начислено:</h3>
+                                <table width="100%" class="table-bordered">
+                                    <thead class="table-header">
+                                        <tr>
+                                            <th></th>
+                                            <th>КТУ</th>
+                                            <th>Начислено</th>
+                                            <th>Удержано (штраф)</th>
+                                            <th>Доп. премия ***</th>
+                                            <th>ИТОГО начислено</th>
+                                            <th>Итого % от ТО</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Постоянная часть</td>
+                                            <td></td>
+                                            <td class="center-cell">{{formattedNumber(calculationItems[0].value)}}</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td>Бонусная часть</td>
+                                            <td></td>
+                                            <td class="center-cell">{{formattedNumber(salary.bonusPartCalculates)}}</td>
+                                            <td class="center-cell" ng-style="setRedStyle(bonusDescentTotal(false, false) < 0)">
+                                                {{formattedNumber(bonusDescentTotal(false, false))}}
+                                            </td>
+                                            <td class="center-cell">{{formattedNumber(bonusDescentTotal(true, false))}}</td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot class="table-header">
+                                        <tr>
+                                            <td>Итого:</td>
+                                            <td></td>
+                                            <td class="center-cell">{{formattedNumber(chargeTableChargeTotal())}}</td>
+                                            <td class="center-cell"
+                                                ng-style="setRedStyle(chargeTableHoldTotal() < 0)">
+                                                {{formattedNumber(chargeTableHoldTotal())}}
+                                            </td>
+                                            <td class="center-cell">{{formattedNumber(chargeTableBonusTotal())}}</td>
+                                            <td class="center-cell">{{formattedNumber(chargeTableTotal())}}</td>
+                                            <td class="center-cell">{{formattedNumber(chargeTablePercentTotal())}}</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+
+                                <h3>Данные для расчета:</h3>
+                                <table width="100%" class="table">
+                                    <tr ng-repeat="item in calculationItems">
+                                        <td width="50%" style="font-weight: bold;">{{item.name}}</td>
+                                        <td width="40%">
+                                            <div ng-show="calculationEditIndex != $index">
+                                                {{formattedNumber(item.value)}}
+                                            </div>
+                                            <div ng-show="calculationEditIndex == $index">
+                                                <input type="number" class="form-control" ng-model="item.value" />
+                                            </div>
+                                        </td>
+                                        <td width="10%">
+                                            <div ng-show="salary.canEditSalary && salary.isNeedRecalculate && calculationEditIndex == -1">
+                                                <button type="button"
+                                                        class="btn btn-default btn-sm"
+                                                        ng-click="CalculationTableEdit(item, $index)">
+                                                    <span class="glyphicon glyphicon-pencil"></span>
+                                                </button>
+                                            </div>
+                                            <div ng-show="calculationEditIndex == $index">
+                                                <button type="button"
+                                                        class="btn btn-default btn-sm"
+                                                        ng-click="CalculationTableSave(item, $index)">
+                                                    <span class="glyphicon glyphicon-ok"></span>
+                                                </button>
+                                                <button type="button"
+                                                        class="btn btn-default btn-sm"
+                                                        ng-click="CalculationTableCancel(item, $index)">
+                                                    <span class="glyphicon glyphicon-ban-circle"></span>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr ng-if="salary.canEditSalary && salary.isNeedRecalculate">
+                                        <td></td>
+                                        <td style="text-align: right">
+                                            <button type="button"
+                                                    class="btn btn-default btn-sm"
+                                                    ng-click="copyPrevMonthParam()">
+                                                <span>Скопировать <br />с прошлого месяца</span>
+                                            </button>
+                                        </td>
+                                        <td>
+                                            <button type="button"
+                                                    class="btn btn-default btn-sm"
+                                                    ng-click="recalculate()"
+                                                    style="height: 48px;">
+                                                <span>Пересчитать</span>
+                                            </button>
+
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td width="50%" style="vertical-align: top">
+                                <h3 style="margin-left:20px;">Сотрудник:</h3>
+                                <!-- Можно вынести отдельным модулем -->
+                                <div id="block">
+                                    <h1>
+                                        {{employee.name}}
+                                    </h1>
+                                    <p>
+                                        {{employee.position}}
+                                    </p>
+                                    <!--                                    <p>-->
+                                    <!--                                        Прямые продажи-->
+                                    <!--                                    </p>-->
+                                    <p>
+                                        Расчетный период: {{month.title}}
+                                    </p>
+                                    <!--                                    <p>-->
+                                    <!--                                        Начало работы в компании: 01.01.2000-->
+                                    <!--                                    </p>-->
+                                </div>
+                                <!-- Можно вынести отдельным модулем -->
+                            </td>
+                        </tr>
+                    </table>
+                    
+                        <h3 style="margin-top: 0; display: inline-block">Расчет бонуса:</h3>
+                    
+
+                    <table class="table-bordered">
+                        <thead class="table-header">
+                            <tr>
+                                <th rowspan="2">На понижение</th>
+                                <th rowspan="2">Показатель</th>
+                                <th rowspan="2">Бонус,%</th>
+                                <th rowspan="2">Сумма за 100% выполнении плана</th>
+                                <th rowspan="2">Оплачиваемый максимум,%</th>
+                                <th rowspan="2">План</th>
+                                <th rowspan="2">Факт</th>
+                                <th rowspan="2">% выполнения плана</th>
+                                <th rowspan="2">Факт предыдущего месяца</th>
+                                <th rowspan="2">Прирост факта к предыдущему месяцу</th>
+                                <th rowspan="2">Итого опл.% выполнения плановых показателей</th>
+                                <th rowspan="2">Итого бонус,%<br/>(гр.11*гр.3/100)</th>
+                                <th rowspan="2">Начислено,руб</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td ng-repeat="n in range(1,13)" 
+                                    class="center-cell number-header">
+                                    {{n}}
+                                </td>
+                            </tr>
+                           
+                            <tr ng-repeat="item in salary.bonusDetails">
+                                <td style="text-align: center">
+                                    <input type="checkbox"
+                                           id="item.id"
+                                           ng-model="item.toLower"
+                                           ng-change="changeToLower(item)"
+                                           ng-disabled="!salary.canEditSalary" />
+                                </td>
+                                <td>{{item.name}}</td>
+                                <td class="center-cell">{{formattedNumber(item.bonus)}}</td>
+                                <td class="center-cell">{{formattedNumber(getBonusSum(item.bonus))}}</td>
+                                <td class="center-cell">
+                                    <div ng-show="bonusEditIndex != $index">
+                                        {{formattedNumber(item.payedMax)}}
+                                        <button ng-show="salary.canEditSalary && salary.isNeedRecalculate && bonusEditIndex == -1"
+                                                type="button"
+                                                class="btn btn-default btn-sm"
+                                                ng-click="bonusTableEdit(item, $index)">
+                                            <span class="glyphicon glyphicon-pencil"></span>
+                                        </button>
+                                    </div>
+                                    <div ng-show="bonusEditIndex == $index">
+                                        <input type="number" class="form-control" ng-model="item.payedMax" />
+                                        <button type="button"
+                                                class="btn btn-default btn-sm"
+                                                ng-click="bonusTableSave(item, $index)">
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </button>
+                                        <button type="button"
+                                                class="btn btn-default btn-sm"
+                                                ng-click="bonusTableCancel(item, $index)">
+                                            <span class="glyphicon glyphicon-ban-circle"></span>
+                                        </button>
+                                    </div>
+                                </td>
+                                <td style="white-space: nowrap;" class="center-cell">{{formattedNumber(item.plan)}}</td>
+                                <td style="white-space: nowrap;"
+                                    class="center-cell">
+                                    <a ng-href="{{indicatorReportUrl(item.indicator_id,5,false)}}">
+                                        {{formattedNumber(item.factCurrent)}}
+                                    </a>
+                                </td>
+                                <td class="center-cell">
+                                    <a ng-href="{{indicatorReportUrl(item.indicator_id,6,false)}}"
+                                       ng-style="item.factPercent > 80 && {'color':'green'} || {'color': '#c00000'}">
+                                        {{showCompareValue(item.factPercent,80,'80%')}}
+                                    </a>
+                                </td>
+                                <td class="center-cell"
+                                    style="white-space: nowrap;">
+                                    <a ng-href="{{indicatorReportUrl(item.indicator_id,5,true)}}"
+                                       ng-style="item.toLower && {'color':'dimgray'}">
+                                        {{formattedNumber(item.factPrev)}}
+                                    </a>
+                                </td>
+                                <td class="center-cell"
+                                    ng-style="!item.toLower
+                                     && (item.factPercentPrev > 100 && {'color':'green'} || {'color': '#c00000'})
+                                     || {'color':'dimgray'}">
+                                    {{showCompareValue(item.factPercentPrev,100,'пред. периода')}}
+                                </td>
+                                <td class="center-cell">{{formattedNumber(item.payedPercent)}}</td>
+                                <td class="center-cell">{{formattedNumber(item.totalBonus)}}</td>
+                                <td class="center-cell">{{formattedNumber(bonusTableGetChargeRow(item.totalBonus))}}</td>
+                            </tr>
+                        </tbody>
+                        <tfoot class="table-header">
+                            <tr>
+                                <td></td>
+                                <td>Итого:</td>
+                                <td class="center-cell">{{formattedNumber(bonusTableBonusTotal())}}</td>
+                                <td class="center-cell">{{formattedNumber(bonusTableSumTotal())}}</td>
+                                <td colspan="7"></td>
+                                <td class="center-cell">{{formattedNumber(bonusTablePortionTotal())}}</td>
+                                <td class="center-cell">{{formattedNumber(salary.bonusPartCalculates)}}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    <table width="100%">
+                        <tr>
+                            <td width="50%" style="vertical-align: top">
+                                <h3>Премии и уменьшения премиальной части:</h3>
+
+                                <table class="table">
+                                    <thead class="table-header">
+                                        <tr>
+                                            <th>Всего:</th>
+                                            <th ng-style="setRedStyle(bonusDescentTotal(true, true) < 0)">{{formattedNumber(bonusDescentTotal(true, true))}}</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr ng-repeat="item in salary.finesDetails">
+                                            <td width="50%">
+                                                <div ng-show="bonusDescentEditIndex != $index">
+                                                    {{item.name}}
+                                                </div>
+                                                <div ng-show="bonusDescentEditIndex == $index && !salary.readOnly">
+                                                    <input type="text" class="form-control" ng-model="item.name" />
+                                                </div>
+                                                <div ng-if="item.isNotNameValid">
+                                                    <label style="color: red;">
+                                                        Введите название штрафа\премии
+                                                    </label>
+                                                </div>
+                                            </td>
+                                            <td width="40%">
+                                                <div ng-show="bonusDescentEditIndex != $index"
+                                                     ng-style="setRedStyle(item.value < 0)">
+                                                    {{formattedNumber(item.value)}}
+                                                </div>
+                                                <div ng-show="bonusDescentEditIndex == $index && !salary.readOnly">
+                                                    <input type="number" class="form-control" ng-model="item.value" />
+                                                </div>
+                                                <div ng-if="item.isNotValueValid">
+                                                    <label style="color: red;">
+                                                        Значение штрафа\премии должно быть заполнено и отлично от 0
+                                                    </label>
+                                                </div>
+                                            </td>
+                                            <td width="10%">
+                                                <div ng-show="salary.canEditSalary && salary.isNeedRecalculate && bonusDescentEditIndex == -1">
+                                                    <button type="button"
+                                                            class="btn btn-default btn-sm"
+                                                            ng-click="bonusDescentEditFunc(item, $index)">
+                                                        <span class="glyphicon glyphicon-pencil"></span>
+                                                    </button>
+                                                </div>
+                                                <div ng-show="bonusDescentEditIndex == $index">
+                                                    <button type="button"
+                                                            class="btn btn-default btn-sm"
+                                                            ng-click="bonusDescentSave(item, $index)">
+                                                        <span class="glyphicon glyphicon-ok"></span>
+                                                    </button>
+                                                    <button type="button"
+                                                            class="btn btn-default btn-sm"
+                                                            ng-click="bonusDescentDelete(item, $index)">
+                                                        <span class="glyphicon glyphicon-remove"></span>
+                                                    </button>
+                                                    <button type="button"
+                                                            class="btn btn-default btn-sm"
+                                                            ng-click="bonusDescentCancel(item, $index)">
+                                                        <span class="glyphicon glyphicon-ban-circle"></span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr ng-if="salary.canEditSalary && salary.isNeedRecalculate">
+                                            <td>
+                                                <input type="text" class="form-control" style="max-width: 50% !important;" ng-model="bonusDescentEdit.name" />
+                                            </td>
+                                            <td>
+                                                <input type="number" class="form-control" style="max-width: 50% !important;" ng-model="bonusDescentEdit.value"/>
+                                            </td>
+                                            <td>
+                                                <button type="button"
+                                                        class="btn btn-default btn-sm"
+                                                        ng-click="addBonusDescentItem()">
+                                                    <span class="glyphicon glyphicon-plus"></span>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <label id="errorBonusDescentName"
+                                                       style="color: red; display: none">
+                                                    Введите название штрафа\премии
+                                                </label>
+                                            </td>
+                                            <td>
+                                                <label id="errorBonusDescentValue"
+                                                       style ="color: red; display: none">
+                                                    Значение штрафа\премии должно быть заполнено и отлично от 0
+                                                </label>
+                                            </td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                            <td width="50%" style="vertical-align: top">
+                                <h3 style="margin-left:20px;">Описание:</h3>
+
+                                <table class="table" style="margin-left:20px;">
+                                    <tbody>
+                                        <tr>
+                                            <td width="60%">
+                                                <span>
+                                                    <span class="red-underline red-text">Если</span>:
+                                                    <span class="blue-text">План</span>
+                                                    <span class="green-text bold">&gt;=</span>  
+                                                    <span class="red-text bold">80%</span>&nbsp;
+                                                    <span class="red-text bold red-underline">И</span>
+                                                    <span class="blue-text">Факт</span> отчетного периода 
+                                                    <span class="green-text bold">&gt;=</span> факту предыдущего периода
+                                                </span>
+                                            </td>
+                                            <td width="40%">
+                                                <span>
+                                                    Показатель оплачивается по проценту выполнения плана
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td width="60%">
+                                                <span>
+                                                    <span class="red-underline red-text">Если</span>:
+                                                    <span class="blue-text">План</span> 
+                                                    <span class="red-text bold">&lt;</span> 
+                                                    <span class="red-text bold">80%</span>
+                                                    <span class="red-text bold red-underline">И</span>
+                                                    <span class="blue-text">Факт</span> отчетного периода 
+                                                    <span class="green-text bold">&gt;=</span> факту предыдущего периода
+                                                </span>
+                                            </td>
+                                            <td width="40%">
+                                                <span>
+                                                    Показатель оплачивается в размере <span class="red-text bold">50%</span> от доли бонуса
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td width="60%">
+                                                <span>
+                                                    <span class="red-underline red-text">Если</span>:
+                                                    <span class="blue-text">Факт</span> отчетного периода 
+                                                    <span class="red-text bold">&lt;</span> предыдущего периода
+                                                    <span class="blue-text blue-underline">(вне зависимости от % выполнения плана)</span>
+                                                </span>
+                                            </td>
+                                            <td width="40%">
+                                                <span>
+                                                    Показатель оплачивается в размере <span class="red-text bold">30%</span> от доли бонуса
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                    
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>

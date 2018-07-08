@@ -1,0 +1,89 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Create_dsh_compareWith1cDatabase_Procedure" author="Ura">
+    <createProcedure>
+
+      -- =============================================
+      -- Author:		Дудченко Юра
+      -- Create date: 2018.02.16
+      -- Description:
+      -- =============================================
+      CREATE PROCEDURE dsh_compareWith1cDatabase
+
+      AS
+      BEGIN
+
+      -- реализации
+
+      select
+      del.[key],
+      del.date,
+      del.guid,
+      del.binaryGuid,
+      del.sumAll,
+      del1c.sum1c,
+      DATEADD(year,-2000, del1c.date) as date1c
+      
+      from ent_Delivery as del
+
+      right join (select
+
+      _Number as [key],
+      _fld14025 as sum1c,
+      _IDRRef as binGuid,
+      _Date_Time as date
+
+      from [ka_sat].[dbo].[_Document503] as deliveryDoc
+      ) as del1c
+
+
+      on del.binaryGuid = del1c.binGuid
+
+      where del.sumAll != del1c.sum1c or del.sumAll is null
+
+      order by del1c.date
+
+
+      -- возвраты
+
+      select
+      rg.[key],
+      rg.date,
+      rg.guid,
+      rg.binaryGuid,
+      rg.sumAll,
+      ret1c.sum1c,
+      DATEADD(year,-2000, ret1c.date) as date1c,
+      ret1c.returnCause
+
+      from ent_ReturnGoods as rg
+
+      right join (select
+
+      _Number as [key],
+      _Fld5599 as sum1c,
+      _fld5605 as returnCause,
+      _IDRRef as binGuid,
+      _Date_Time as date
+
+      from [ka_sat].[dbo].[_Document308] as returnDoc
+      ) as ret1c
+
+      on rg.binaryGuid = ret1c.binGuid
+
+      where rg.sumAll != ret1c.sum1c or rg.binaryGuid is null
+
+      order by ret1c.date
+
+
+      END
+
+    </createProcedure>
+
+  </changeSet>
+</databaseChangeLog>

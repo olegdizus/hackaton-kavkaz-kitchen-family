@@ -1,0 +1,46 @@
+﻿@using Dashboard.DB.Models.Reports
+@using Kendo.Mvc.UI
+@{
+    ViewBag.Title = "Список сохраненных отчетов Excel";
+}
+
+@section styles
+{
+    @Styles.Render(Dashboard.Bundles.Kendo.kendo.Css.Key)
+}
+
+
+<h2>@ViewBag.Title</h2>
+
+<div>
+    @(Html.Kendo().Grid<ExcelSaveHistoryGrid>()
+      .Name("Grid")
+      .Columns(columns =>
+      {
+          columns.Bound(p => p.hst_datetime).Width(120);
+          columns.Bound(p => p.ReportName).Width(170);
+          columns.Bound(p => p.filters);
+          columns.Bound(p => p.user_Name).Width(120);
+          columns.Bound(p => p.fileName)
+                 .Template(t => { })
+                 .ClientTemplate("#=getLink(fileName)#");
+      })
+      .DataSource(dataSource => dataSource
+        .Ajax()
+        .Read(read => read.Action("AllExcelDocuments", "ExcelDocuments"))
+        .Sort(el => el.Add(c => c.hst_datetime).Descending())
+        .PageSize(10)
+        .Total(0))
+     .Pageable()
+     .Sortable()
+     .Filterable())
+</div>
+
+
+@section Scripts
+{
+    @Scripts.Render(
+        Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+        Dashboard.Bundles.Kendo.kendoHelp.Scripts.Key
+        )
+}

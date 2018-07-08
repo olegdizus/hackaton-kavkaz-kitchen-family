@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <include file="2017-02-13--01-AddColumnIsLargeToDimensions.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-02-15--01-AddStoredProcedureGetGroupItems.xml" relativeToChangelogFile="true"/>
+  <include file="2017-02-15--02-AddPlanDeliveryCountToContacts.xml" relativeToChangelogFile="true"/>
+  <include file="2017-02-15--03-UpdateStoredProcedureimp_ContactsRefresh.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-02-16--01-AddFiltersInUserSettings.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-02-17--01-AddColumnIsVisibleToEmployee.xml" relativeToChangelogFile="true"/>
+  <include file="2017-03-10--02-UpdateStoredProcedure_imp_PriceGoodsRefresh.xml" relativeToChangelogFile="true"/>
+  <include file="2017-03-10--03-UpdateStoredProcedure_olap_RefreshData.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-04-17--01-ChangeTypeToDecimalToSalaryTables.xml" relativeToChangelogFile="true"/>
+  <include file="2017-04-17--02-AddPlanDeliveryCountIndicator.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-04-25--01-AddColumnRewardSumToSalary.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-04-26--01-AddProfitabilityIndicator.xml" relativeToChangelogFile="true"/>
+  <include file="2017-04-26--02-SetProfitabilityIndicatorPercentType.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-05-02--01-AddColumnToLowerToSalaryIndicatorParametrs.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-05-03--01-ChangeLengthManagerKeyInImpContacts.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-05-10--01-AddProfitabilityPlanIndicator.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-05-12--01-CreateRoleIndicatorTable.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-05-15--01-AddColumnIsCommercialProductToOlap_Delivery.xml" relativeToChangelogFile="true"/>
+  <include file="2017-05-15--02-AddCommercialProductIndicator.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-05-16--01-AddGrossProfitPlanIndicator.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-05-18--01-AddGeographyToImp_Contacts.xml" relativeToChangelogFile="true"/>
+  <include file="2017-05-18--02-CreateGeographyTable.xml" relativeToChangelogFile="true"/>
+  <include file="2017-05-18--03-AddColumnGeographyGuidToEnt_Contacts.xml" relativeToChangelogFile="true"/>
+  <include file="2017-05-18--04-ChangeColumnGeographyInEnt_Contacts.xml" relativeToChangelogFile="true"/>
+  <include file="2017-05-18--05-UpdateStoredProcedure_imp_ContactsRefresh.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-05-20--01-AddColumnEndDateToEmloyee.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-05-25--01-CreateRelatedUserNamesTable.xml" relativeToChangelogFile="true"/>
+  <include file="2017-05-25--02-AddColumnRequestEmployeeIdToKpi_ApproveHistory.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-05-26--01-CreateEnt_GoodsTypeTable.xml" relativeToChangelogFile="true"/>
+  <include file="2017-05-26--02-UpdateGoodsType_idColumnInEnt_GoodsTable.xml" relativeToChangelogFile="true"/>
+  <include file="2017-05-26--03-AddGoodsTypeToRpt_Dimension.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-05-29--01-AddGoodsType_idColumnToRpt_ByPeriods_Indicators.xml" relativeToChangelogFile="true"/>
+  <include file="2017-05-29--02-UpdateGoodsType_idColumnInRpt_ByPeriods_Indicators.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-05-30--01-AddThreeCommercialProductIndicators.xml" relativeToChangelogFile="true"/>
+  <include file="2017-05-30--02-UpdateDsh_GetGroupsByPeriodProcedure.xml" relativeToChangelogFile="true"/>
+  <include file="2017-05-30--03-UpdateOlap_RefreshDataProcedure.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-05-31--01-ChangeSaturnProductNameInEnt_GoodsType.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-06-05--01-InsertContact_GroupToMdxHierarchy.xml" relativeToChangelogFile="true"/>
+  <include file="2017-06-05--02-AddContact_GroupToRpt_Dimension.xml" relativeToChangelogFile="true"/>
+  <include file="2017-06-05--03-UpdateDsh_GetGroupsByPeriodProcedure.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-06-06--01-AddIsTransferNameToServerColumnToRpt_Dimension.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-06-07--01-AddColumnFinesAnsRewardSumToSalary.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-06-13--01-UpdateOlap_RefreshDataProcedure.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-06-21--01-UpdateDsh_GetGroupItemsProcedure.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-06-28--01-AddAccountantRole.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-07-10--01-CreateDbo_demo_ActualDateProcedure.xml" relativeToChangelogFile="true"/>
+  <include file="2017-07-10--02-UpdateDsh_GetGroupsByPeriodProcedure.xml" relativeToChangelogFile="true"/>
+  <include file="2017-07-10--03-UpdateDsh_GetGroupItemsProcedure.xml" relativeToChangelogFile="true"/>
+  <include file="2017-07-10--04-UpdateContact_GroupInRpt_Dimension.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-07-12--01-AddAvgIndicators.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-07-13--01-UpdateDbo_demo_ActualDateProcedure.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-07-14--01-AddIsOnlyReportColumnToRpt_ByPeriods_Indicators.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-07-18--01-AddColumnDescription_ByPeriods_Indicators.xml" relativeToChangelogFile="true"/>
+  <include file="2017-07-18--02-InsertMeasureName_rptByPeriods_Indicators.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-07-20--01-AddCategoryAndGeographyToRpt_Dimension.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-08-29--01-Update_dsh_GetGroupsByPeriodProcedure.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-08-30--01-Update_demo_ActualDateProcedure.xml" relativeToChangelogFile="true"/>
+  <include file="2017-08-30--02-Update_olap_Dates.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-08-31--01-Update_imp_GoodsRefreshProcedure.xml" relativeToChangelogFile="true"/>
+
+</databaseChangeLog>

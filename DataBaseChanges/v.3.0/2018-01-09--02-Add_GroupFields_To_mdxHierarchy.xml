@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Add_GroupFields_To_mdxHierarchy" author="Ura">
+
+    
+    <addColumn tableName="mdxHierarchy">
+      <column name="group_id" type="int"/>     
+    </addColumn>
+
+    <addColumn tableName="mdxHierarchy">
+      <column name="isUniqueInGroup" type="bit" defaultValue="1">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+
+    <update tableName="mdxHierarchy">
+      <column name="group_id" value='1'/>
+      <where>mdxName='Contact_FirstLevel'</where>
+    </update>
+
+    <update tableName="mdxHierarchy">
+      <column name="group_id" value='1'/>
+      <where>mdxName='Contact_SecondLevel'</where>
+    </update>
+    
+    <update tableName="mdxHierarchy">
+      <column name="group_id" value='1'/>
+      <where>mdxName='Contact_ThirdLevel'</where>
+    </update>
+
+    <update tableName="mdxHierarchy">
+      <column name="group_id" value='1'/>
+      <where>mdxName='Contact_MainManager'</where>
+    </update>
+
+    <update tableName="mdxHierarchy">
+      <column name="group_id" value='1'/>
+      <where>mdxName='Contact_Manager'</where>
+    </update>
+
+    <update tableName="mdxHierarchy">
+      <column name="group_id" value='2'/>
+      <column name="isUniqueInGroup" value='0'/>
+      <where>mdxName='Contact_Region'</where>
+    </update>
+
+    <update tableName="mdxHierarchy">
+      <column name="group_id" value='3'/>
+      <column name="isUniqueInGroup" value='0'/>
+      <where>mdxName='Contact_Group'</where>
+    </update>
+
+  </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,175 @@
+﻿@Styles.Render(Dashboard.Bundles.Arcticmodal.Css.Key)
+
+<div style="display: none;">
+    <style>
+        #addTaskModalWindow {
+            width: 500px;
+        }
+         .btn-file {
+             position: relative;
+             overflow: hidden;
+         }
+        .btn-file input[type=file] {
+            position: absolute;
+            top: 0;
+            right: 0;
+            min-width: 100%;
+            min-height: 100%;
+            font-size: 100px;
+            text-align: right;
+            filter: alpha(opacity=0);
+            opacity: 0;
+            outline: none;
+            background: white;
+            cursor: inherit;
+            display: block;
+        }
+    </style>
+	<div class="box-modal" id="addTaskModalWindow">
+		<div class="box-modal_close arcticmodal-close">×</div>
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4>Добавление задачи</h4>
+			</div>
+			<div id="createTaskFormDIv" class="modal-body">
+				@Html.Partial("CreateTaskFormHorizontal")
+			</div>
+			<div class="modal-footer">
+				
+
+				<button type="button" id="closeModalButton" class="btn btn-default close-modal-button-task ">Закрыть</button>
+				<button type="button" id="saveTaskButton" class="btn btn-primary">Сохранить</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+    $(function () {
+    	includeOnce('bundles/arcticmodal');
+    	includeOnce('bundles/Task');
+
+        CreateTaskModalManager.getInstance().init();
+    });
+
+   
+    function CreateTaskModalManager() {
+    	var file;
+
+    	
+    	function changeButtonFileName(btn) {
+    		var fileButton = $(btn);
+			fileButton.prev().text(fileButton.prop('value'));
+			file = btn.files[0];
+		}
+
+    	function initUploadFileBittonChangeText() {
+    		$('#uploadFile').on('change', function () {
+    			changeButtonFileName(this);
+    		});
+    	}
+        this.init = function () {
+
+        	$('.close-modal-button-task').click(function () {
+        		closeCreateTaskModal();
+        	});
+	        initUploadFileBittonChangeText();
+            
+        }
+
+        function closeCreateTaskModal() {
+
+	        clearUploadFileBtn();
+            $('#addTaskModalWindow').arcticmodal('close');
+        }
+
+        function clearUploadFileBtn() {
+	        
+        	$('.file-input').html($('.file-input').html());
+        	$('.file-input span').text("	файл не выбран.");
+        	
+        }
+
+        this.openModal = function (onSuccessCallback, filters) {
+            setCallback(onSuccessCallback);
+            
+            clearContactGetterValues();
+
+            openCreateTaskModal();
+
+            TaskPlannerModalManager.getInstance().clearFormValues('createTaskForm', filters);
+
+            TaskPlannerModalManager.getInstance().bindOkButtonClickHandler('saveTaskButton', createNewTask);
+
+            initUploadFileBittonChangeText();
+
+        }
+
+        function setCallback(onSuccessCallback) {
+            CreateTaskModalManager.onSuccessCallback = onSuccessCallback;
+        }
+
+        function clearContactGetterValues() {
+            //EntityGetterController.GetInstance('taskContact').clearEntityNameInput();
+        }
+
+        function openCreateTaskModal() {
+            $('#addTaskModalWindow').arcticmodal();
+        }
+
+        function createNewTask() {
+            var onSuccessCallback = getOnSuccessCallback();
+
+            var values = getValues();
+
+            TaskPlannerModalManager
+                .getInstance()
+                .sendAjax({
+                        url: basePath + 'Tasks/CreateTask',
+                        data: values,
+                        filters: $('#taskFilters').val(),
+                        formId: 'createTaskFormDIv',
+                        onSuccessCallback: function(data) {
+                            onSuccessCallback(data);
+                            closeCreateTaskModal();
+                        },
+                        bindHanlersAfterAjax: function(form) {
+                            TaskPlannerModalManager
+                                .getInstance()
+                                .bindDatetimepicker(form);
+                        }
+                    }
+                );
+        }
+
+        function getValues() {
+
+//            var contactId = EntityGetterController.GetInstance('taskContact').getEntityId();
+//            taskViewModel.push({ name: "contact_id", value: contactId });
+
+	        var values = new FormData();
+
+        	var taskViewModel = $('#createTaskForm').serializeArray();
+
+        	$(taskViewModel).each(function (i, val) {
+        		values.append(val.name, val.value);
+	        });
+			
+        	values.append("attachedFile", file);
+        
+            return values;
+        }
+
+        function getOnSuccessCallback() {
+            return CreateTaskModalManager.onSuccessCallback;
+        }
+    }
+
+    CreateTaskModalManager.getInstance = function () {
+        if (!CreateTaskModalManager.instance) {
+            CreateTaskModalManager.instance = new CreateTaskModalManager();
+        }
+
+        return CreateTaskModalManager.instance;
+    }
+</script>

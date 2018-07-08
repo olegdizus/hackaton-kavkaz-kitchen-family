@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Create_dsh_GetMdxFilters_Procedure" author="Ura">
+    <createProcedure>
+
+      CREATE PROCEDURE [dbo].[dsh_GetMdxFilters]
+
+      @hierarchyId INT
+
+      AS
+      BEGIN
+
+      -- 7	1-й уровень иерархии	Contact_FirstLevel
+      -- 14	2-й уровень иерархии	Contact_SecondLevel
+      -- 15	3-й уровень иерархии	Contact_ThirdLevel
+      IF @hierarchyId = 7 or @hierarchyId = 14 or @hierarchyId = 15
+      BEGIN
+      SELECT DISTINCT fl.id AS id, fl.name, @hierarchyId as hierarchyId
+      FROM ent_FirstLevels fl
+      END
+
+
+      -- 8	Основной менеджер	Contact_MainManager
+      ELSE IF @hierarchyId = 8
+      BEGIN
+      SELECT DISTINCT mm.id AS id, mm.name, @hierarchyId as hierarchyId
+      FROM ent_MainManagers as mm
+      END
+
+      -- 9	Менеджер	Contact_Manager
+      ELSE IF @hierarchyId = 9
+      BEGIN
+      SELECT DISTINCT e.id AS id, e.name, @hierarchyId as hierarchyId
+      FROM ent_Employe as e
+      END
+
+      -- 10	Регион	Contact_Region
+      ELSE IF @hierarchyId = 10
+      BEGIN
+      SELECT DISTINCT r.id AS id, r.name, @hierarchyId as hierarchyId
+      FROM ent_Regions as r
+      END
+
+      -- 13	Группа контакта	Contact_Group
+      ELSE IF @hierarchyId = 13
+      BEGIN
+      SELECT DISTINCT cg.id AS id, cg.name, @hierarchyId as hierarchyId
+      FROM ent_ContactGroups as cg
+      END
+
+
+      END
+
+    </createProcedure>
+
+  </changeSet>
+</databaseChangeLog>

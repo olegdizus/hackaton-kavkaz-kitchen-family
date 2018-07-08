@@ -1,0 +1,537 @@
+﻿@using Dashboard
+@using Dashboard.Helpers
+
+@{
+    ViewBag.Title = "Анализ по периодам";
+
+    var selectedPeriod = ViewBag.SelectedPeriod;
+
+    var years = ViewBag.Years;
+    var selectedYear = ViewBag.SelectedYear;
+}
+
+@section styles
+{
+    @Styles.Render(
+        Dashboard.Bundles.Kendo.kendo.Css.Key,
+        Dashboard.Bundles.BootstrapTagsInput.Css.Key,
+        Dashboard.Bundles.FilterControl.Css.Key,
+        Dashboard.Bundles.Tooltipster.Css.Key)
+    @*        ,Dashboard.Bundles.Fontawesome.Css.Key)*@
+<link href="~/Content/font-awesome.css" rel="stylesheet" />
+}
+<style>
+    .tooltip {
+        position: relative;
+        font-size: 14px;
+        opacity: 1;
+    }
+    #DateValueContainer select,
+    #DateValueContainer input.datepicker{
+        padding: 6px 12px;
+        border-radius: 4px;
+        vertical-align: central;
+        border: 1px solid rgb(204, 204, 204);
+    }
+    #PreviousPeriodButton,#NextPeriodButton{
+        border: 1px solid #dddddd;
+        border-radius: 15px;
+        padding: 6px 20px;
+    }
+</style>
+
+
+@Html.Partial("UserSettingModal")
+@Html.Partial("infoModal")
+
+
+<h2>@ViewBag.Title</h2>
+
+<div class="row">
+
+    <div class="col-lg-6 col-md-6 col-xs-6 col-sm-6 data-range">
+        <button type="button" class="btn btn-default" title="Предыдущий период" id="PreviousPeriodButton">
+            <i class="fa fa-angle-double-left"></i>
+        </button>
+        <div id="DateValueContainer" style="display:inline-block;vertical-align: central;">
+            
+            <input class="datepicker" id="DateValueDayCalendarPicker" style="display: none;" />
+
+            <input class="datepicker" id="DateValueMonthCalendarPicker" style="display: none;" />
+
+            @Html.DropDownList("ProductionMonths", new SelectList(@ViewBag.ProductionMonths, "Date", "Name"), null, new { style = "display: none;" })
+                
+            @Html.DropDownList("ProductionWeeks", new SelectList(@ViewBag.ProductionWeeks, "Date", "Name"), null, new { style = "display: none;" })
+
+            <select id="DateQuaterCalendarPickerContainer" style="display: none;">
+                <option>1-й квартал</option>
+                <option>2-й квартал</option>
+                <option>3-й квартал</option>
+                <option>4-й квартал</option>
+            </select>
+
+            <select id="HalfYearCalendarPickerContainer" style="display: none;">
+                <option>I полугодие</option>
+                <option>II полугодие</option>
+            </select>
+            
+            <select id="DateYears" name="DateYears" style="display: none;">
+                @foreach (var year in years)
+                {
+                    if (selectedYear == year)
+                    {
+                        <option value="@year" selected="selected">@year год</option>
+                    }
+                    else
+                    {
+                        <option value="@year">@year год</option>
+                    }
+                }
+            </select>
+            
+        </div>
+        <button type="button" class="btn btn-default" title="Следующий период" id="NextPeriodButton">
+            <i class="fa fa-angle-double-right"></i>
+        </button>
+        <input type="button" value="Обновить" class="form-control btn btn-primary submitButton" id="refresh"/>
+        <div id="loadingFilterEnabled" style="display:none;">
+            <img alt="загрузка" src="~/Images/loading.GIF" width="30" height="30">
+        </div>
+    </div>
+    <div class="col-lg-1 col-md-1 col-xs-1 col-sm-1 right-align">
+        <h5>Показатель:</h5>
+    </div>
+    <div class="col-lg-2 col-md-2 col-xs-2 col-sm-2">
+        @*@Html.DropDownList("Indexes", null, new { @class = "form-control" })*@
+        <select class="form-control activateRefreshButton tooltip" id="Indexes" name="Indexes">
+            @foreach (var i in @ViewBag.Indexes)
+            {
+                <option value="@(i.id)" measurename="@(i.measureName)" title="@(i.description)"
+                        @(ViewBag.SelectedIndex == i.id ? "selected=\"selected\"" : "")
+                        data-aggregate-type="@(i.aggregateType)">
+                    @(i.name)
+                </option>
+            }
+        </select>
+        <font size="1" id="OnlyForPrMonthAlertForCombobox" hidden="true" color="red">R1, R2, R3, Плановая кратность или АКБ корректны только для производственного месяца</font>
+
+    </div>
+    <div class="col-lg-1 col-md-1 col-xs-1 col-sm-1 right-align period">
+        <h5>Период:</h5>
+    </div>
+    <div class="col-lg-2 col-md-2 col-xs-2 col-sm-2 select_period">
+        @Html.DropDownList("periods", null, new { @class = "form-control activateRefreshButton" })
+    </div>
+
+    <div class="col-lg-2 col-md-2 col-xs-3 col-sm-2 checkbox_report_by_per">
+        <div>
+            <a id="SaveUserSettingsLink" href="#">Поделиться отчетом</a>
+        </div>
+    </div>
+    <div class="col-lg-9 col-md-1 col-xs-1 col-sm-1 right-align">
+        <button type="button" class="btn btn-default" id="openSettingsModalButton">
+            Настройки
+        </button>
+    </div>
+</div>
+@Html.Partial("FilterControl")
+
+<br />
+
+<input id="beginDatepicker" type="hidden" value="01.01.2014" />
+<input id="endDatepicker" type="hidden" value="01.01.2049" />
+
+<div id="Grid"></div>
+
+
+
+<script type="text/javascript">
+
+    var periods = @ViewBag.periodsEnum;
+    var userSettings = JSON.parse(@Html.JsonRaw((object) ViewBag.userSettings));
+
+
+    var selectedIndicator='@ViewBag.SelectedIndex';
+
+    var selectedPeriodType=@ViewBag.SelectedPeriod;
+    var selectedDate='@ViewBag.SelectedDate';
+    var selectedProductionYear = @ViewBag.SelectedProductionYear;
+//
+    var strToParse = '@ViewBag.ProductTypeControleVisible';
+    var periodTypeControlsDictionary = JSON.parse(strToParse.replace(/&quot;/g, '"'));
+
+    var factPeriodDateValue = null;
+
+    var quaterYearDays = [
+        {value: "01.01", name:"1-й квартал"},
+        {value: "01.04", name:"2-й квартал"},
+        {value: "01.07", name:"3-й квартал"},
+        {value: "01.10", name:"4-й квартал"}
+    ];
+    var halfYearDays = [
+        {value: "01.01", name:"I-е полугодие"},
+        {value: "01.07", name:"II-е полугодие"}
+    ];
+    //временные
+    
+    var selectedControl = null;
+
+    var setParaments = function() {
+
+        if (selectedControl
+            && selectedControl.DateElement) {
+            selectedDate = $("#" + selectedControl.DateElement).val();
+        }
+
+        selectedPeriodType =Number($("#periods").val());
+        selectedIndicator = Number($("#Indexes").val());
+
+        var dateStrings = selectedDate.split(".");
+
+        if (dateStrings.length == 3) {
+            var dateJS = new Date(
+                Number(dateStrings[2]),
+                Number(dateStrings[1]) - 1,
+                Number(dateStrings[0]));
+
+            factPeriodDateValue = "";
+
+            switch (selectedPeriodType) {
+                case 1:// Пр неделя
+                case 3:// Пр. месяц 
+                    var dateElementString = $("#" + selectedControl.DateElement + " option:selected").text();
+                    var yearElementString = $("#" + selectedControl.YearElement+" option:selected").text();
+
+                    factPeriodDateValue += dateElementString.substring(0,dateElementString.indexOf(' '))+
+                        "-"
+                        +yearElementString.replace("год","");
+                    break;
+                case 2: // Кален. месяц
+                    factPeriodDateValue += dateJS.monthFormat();
+                break;
+                
+            }
+            
+        }
+        factPeriodDateValue = factPeriodDateValue.replace(/ /g,'');
+    };
+
+    // При загрузке страницы
+
+    selectedPeriodType =Number($("#periods").val());
+
+    $("#DateValueDayCalendarPicker").val(selectedDate);
+    $("#DateValueMonthCalendarPicker").val(selectedDate);
+    $("#ProductionMonths").val(selectedDate);
+    $("#ProductionWeeks").val(selectedDate);
+    $("#DateYears").val(selectedProductionYear);
+
+    $.each(periodTypeControlsDictionary, function(index, item) {
+        if (item.Period == selectedPeriodType) {
+            selectedControl = item;
+                
+            if(item.DateElement) {
+                $("#" + item.DateElement).css("display", "inline-block");
+            }
+            if(item.YearElement){
+                $("#" + item.YearElement).css("display", "inline-block");
+            }
+        }
+        if(item.isNext) {
+            $("#" + item.DateElement).change(function() {
+                setParaments();
+            });
+        }
+    });
+
+    var showNextPrevious = function() {
+        if (Number(selectedPeriodType) == 2
+            ) {
+            $("#PreviousPeriodButton").css("display", "inline-block");
+            $("#NextPeriodButton").css("display", "inline-block");
+        } else {
+            $("#PreviousPeriodButton").css("display", "none");
+            $("#NextPeriodButton").css("display", "none");
+        }
+    };
+
+    //showNextPrevious();
+
+    $("#Indexes").change(function() {
+        setParaments();
+    });
+
+    $("#DateYears").change(function() {
+
+        var periodType = $("#periods").val();
+        var year = $("#DateYears").val();
+
+        $.each(periodTypeControlsDictionary, function(idx, control) {
+            if (control.Period == periodType) {
+                selectedControl = control;
+            }
+        });
+
+        if (selectedControl
+            && selectedControl.IsDateВependsByYear) {
+
+            var curDates = {
+                periodType: periodType,
+                year: year
+            };
+
+            $.ajax({
+                url: basePath + 'AnalizeByPeriodsOLAP/GetPeriodValues',
+                type: 'post',
+                async: false,
+                data: curDates,
+                dataType: "json",
+                success: function(responseData) {
+                    if (responseData) {
+                        if (responseData.success) {
+                            var $dateElem = $("#" + selectedControl.DateElement);
+
+                            $dateElem.empty();
+
+                            $.each(responseData.data, function(idx, optElem) {
+                                var $newOption = $("<option>");
+
+                                $newOption.val(optElem.Date);
+                                $newOption.text(optElem.Name);
+                                //
+                                $dateElem.append($newOption);
+                            });
+                            setParaments();
+                        }
+                    }
+                },
+                error: function(er) {
+                    console.log('Ошибка! #DateYears change');
+                }
+            });
+        } else {
+            var dayObject = null;
+
+            if (selectedControl.Period == 4) {
+                dayObject = quaterYearDays;
+            }
+            else if (selectedControl.Period == 5) {
+                dayObject =halfYearDays;
+            }
+
+            var yearValue = $(this).val();
+
+            if (dayObject) {
+
+                var $dateElem = $("#" + selectedControl.DateElement);
+                $dateElem.empty();
+
+                $.each(dayObject, function(idx, day) {
+                    var $newOption = $("<option>");
+                    $newOption.val(day.value + "." + yearValue);
+                    $newOption.text(day.name);
+                    //
+                    $dateElem.append($newOption);
+                });
+
+                // setParaments();
+            }
+        }
+    });
+
+    // назначение обработчика смены типа периода
+    $("#periods").change(function(e) {
+
+        selectedPeriodType = Number($(this).val());
+
+        //showNextPrevious();
+
+        $("#DateValueContainer").children().css("display", "none");
+
+        $.each(periodTypeControlsDictionary, function(index, item) {
+            if (item.Period == selectedPeriodType) {
+                if(item.DateElement){
+                    $("#" + item.DateElement).css("display", "inline-block");
+                }
+                if(item.YearElement){
+                    $("#" + item.YearElement).css("display", "inline-block");
+                }
+                setParaments();
+
+                $("#DateYears").change();
+            }
+        });
+    });
+
+    $("#PreviousPeriodButton").click(function () {
+
+        var selDateString = $("#" + selectedControl.DateElement).val();
+
+        var isUpdate = false;
+
+        switch (selectedPeriodType) {
+            case 2:
+                selDateString = selDateString.split('.');
+
+                var monthsC = new Date(Number(selDateString[2]), Number(selDateString[1]) - 1, 1);
+                monthsC.setMonth(monthsC.getMonth() - 1);
+
+                var month = monthsC.getMonth() + 1;
+                var monthValue = "01." + ((month < 10 ? '0' : '') + month) + "." + monthsC.getFullYear();
+
+                $("#" + selectedControl.DateElement).val(monthValue);
+
+
+                isUpdate = true;
+
+                break;
+            case 1:
+            case 3:
+
+                changeYearOnnextPreviousPeriodDate(selDateString, selectedControl, false);
+            
+                break;
+        }
+
+        if (isUpdate) {
+            setParaments();
+            refreshGrid();
+        }
+    });
+
+    var changeYearOnnextPreviousPeriodDate = function (dateValue,selectedControl, isNext) {
+
+        var dateElementChilds = $("#" + selectedControl.DateElement).children();
+
+        var yearElement = $("#" + selectedControl.YearElement);
+
+        if (dateElementChilds.length != 0) {
+            var year = Number(yearElement.val());
+
+            
+            var startValue = dateElementChilds.eq(0).val();
+            var endValue = dateElementChilds.eq(dateElementChilds.length - 1).val();
+
+            var newYear = year;
+
+            if (isNext && dateValue == endValue) {
+                newYear +=1;
+            } 
+            else if (!isNext && dateValue == startValue) {
+                newYear -= 1;
+            }
+
+            if (newYear != year) {
+                var years = yearElement.children();
+                for (var index in years) {
+                    
+                    if ($(years).eq(index).val() == newYear) {
+                        yearElement.val(newYear);
+                        yearElement.change();
+                        return true;
+                    }
+                }
+            } 
+            else {
+                var selectedChildElement = null;
+                for(index in dateElementChilds) {
+                    var elem = dateElementChilds.eq(index);
+                    if (elem.val() == dateValue) {
+                        selectedChildElement = elem;
+                        break;
+                    }
+                };
+
+                if (selectedChildElement != null
+                    && index!=-1) {
+                    if (isNext) {
+                        $("#" + selectedControl.DateElement)
+                            .val(selectedChildElement.next().val());
+                    } else {
+                        $("#" + selectedControl.DateElement)
+                            .val(selectedChildElement.prev().val());
+                    }
+
+                }
+            }
+
+        }
+        return false;
+    }
+
+    $("#NextPeriodButton").click(function () {
+        var selDateString = $("#" + selectedControl.DateElement).val();
+
+        var isUpdate = false;
+
+        switch (Number(selectedPeriodType)) {
+            case 2:
+                selDateString = selDateString.split('.');
+
+                var monthsC = new Date(Number(selDateString[2]), Number(selDateString[1]) - 1, 1);
+                monthsC.setMonth(monthsC.getMonth() + 1);
+                var month = monthsC.getMonth() +1;
+                var monthValue = "01." + ((month < 10 ? '0' : '') + month) + "." + monthsC.getFullYear();
+
+                $("#" + selectedControl.DateElement).val(monthValue);
+                isUpdate = true;
+
+                break;
+            case 1:
+            case 3:
+                changeYearOnnextPreviousPeriodDate(selDateString, selectedControl, true);
+            
+                break;
+        }
+        if (isUpdate) {
+            setParaments();
+
+            refreshGrid();
+        }
+    }); 
+
+    
+</script>
+
+
+@section Scripts
+{
+    @Scripts.Render(
+        Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+        Dashboard.Bundles.Knockout.Scripts.Key,
+        Dashboard.Bundles.Kendo.kendoHelp.Scripts.Key,
+
+        Dashboard.Bundles.Extentions.Scripts.Key,
+        Dashboard.Bundles.bootstrapplugins.Scripts.Key,
+        Dashboard.Bundles.UserSetting.Scripts.Key,
+
+        Dashboard.Bundles.Reports.ReportHelper.Scripts.Key,
+        Dashboard.Bundles.Reports.AnalizeByPeriods.Scripts.Key,
+
+        Dashboard.Bundles.Helpers.Scripts.Key,
+        Dashboard.Bundles.PrMonthAlert.Scripts.Key,
+
+        Dashboard.Bundles.Reports.AnalizeByPeriodsOLAP.Scripts.Key,
+        Dashboard.Bundles.Tooltipster.Scripts.Key,
+        Dashboard.Bundles.Underscore.Scripts.Key
+        )
+}
+<script>
+    $(document).ready(function() {
+        $('.tooltip').tooltipster(
+            {
+                content: 'Loading...',
+                theme: 'tooltipster-light',
+                functionBefore: function(instance, helper) {
+
+                    var $origin = $(helper.origin);
+                    var attributes = $(helper.origin).find("option:selected").attr("measureName");
+
+                    getTooltipAjax(instance, $origin,attributes);
+
+                }
+            }
+        );
+    });
+</script>
+

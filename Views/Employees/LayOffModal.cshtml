@@ -1,0 +1,117 @@
+﻿
+@Styles.Render(
+    Dashboard.Bundles.Arcticmodal.Css.Key
+)
+
+@Scripts.Render(Dashboard.Bundles.Extentions.Scripts.Key)
+
+
+
+<style>
+    #LayOffModal {
+        top: 50%;
+        left: 50%;
+        width: 450px;
+        height: 159px;
+        position: absolute;
+        margin-top: -230px;
+        margin-left: -225px;
+        z-index: 99999;
+    }
+</style>
+
+<div style="display: none">
+    <div class="box-modal" id="LayOffModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 id="headerLayOffModal">Уволить сострудника?</h4>
+            </div>
+            <div id="LayOffFormDiv" class="modal-body">
+                @Html.Label("Дата увольнения:", htmlAttributes: new { @class = "control-label col-md-4" })
+                <div class="form-group">
+                    <div class="col-md-8">
+                        <input type="date" class="datepicker form-control" id="LayOffDate" name="LayOffDate">
+                    </div>
+                </div>
+                
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="closeLayOffModalButton" class="btn btn-default close-modal-button close_modal">Отмена</button>
+                <button type="button" id="LayOffModalButton" class="btn btn-primary">Уволить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    
+    var _item_id, _url, _callback;
+
+    function showLayOffModal(item_id, url, header, callback) {
+        _item_id = item_id;
+        _url = url;
+        _callback = callback,
+
+        $('#headerLayOffModal').html(header);
+
+        $('#LayOffDate').val(GetDateString());
+
+
+        $('#LayOffModalButton').click(function () {
+            //LayOff(_item_id);
+            LayOff(_item_id, _url, _callback);
+        });
+
+        $('#closeLayOffModalButton').click(function () {
+            $('#LayOffModal').arcticmodal('close');
+        });
+
+        $('#LayOffModal').arcticmodal();
+
+
+
+        
+    }
+
+    function LayOff(item_id, url, callback) {
+
+
+        if (url) {
+            $.ajax({
+                url: url,
+                dataType: 'json',
+                type: 'Post',
+                data: {
+                    __RequestVerificationToken: $("input[name=__RequestVerificationToken]").val(),
+                    id: item_id,
+                    date: $('#LayOffDate').val()
+                },
+                success: function () {
+                    if (callback) {
+                        callback();
+                    }
+
+                    $('#LayOffModal').arcticmodal('close');
+                }
+            });
+        };
+    }
+
+    // подключить через date.Ext
+    function GetDateString() {
+
+        var date = new Date();
+
+        var month = date.getMonth() + 1;
+        var day = date.getDate();
+
+        var dateAsString = date.getFullYear() + '-' +
+                    (month < 10 ? '0' : '') + month + '-' +
+                    (day < 10 ? '0' : '') + day;
+
+        return dateAsString;
+    };
+
+</script>
+

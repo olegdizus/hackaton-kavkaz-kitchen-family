@@ -1,0 +1,8 @@
+﻿@model IEnumerable<Dashboard.OLAP.DAL.Security.MdxHierarchyValueView>
+
+<select id="MdxHierarchyValues" class="form-control" name="MdxHierarchyValues">
+    @foreach (var item in Model)
+    {
+        <option value="@item.id">@item.name</option>
+    }
+</select>

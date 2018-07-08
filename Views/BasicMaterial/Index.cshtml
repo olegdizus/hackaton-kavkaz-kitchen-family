@@ -1,0 +1,77 @@
+﻿@using Kendo.Mvc.UI;
+@using Dashboard.DB.Models;
+@using System.Web.Mvc;
+@using Dashboard.Models
+
+
+@section styles
+{
+    @Styles.Render(Dashboard.Bundles.Kendo.KendoStandart.Css.Key,
+        Dashboard.Bundles.Fontawesome.Css.Key,
+        Dashboard.Bundles.Tooltipster.Css.Key)
+
+   
+}
+
+@section Scripts
+{
+    @Scripts.Render(
+        Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+        Dashboard.Bundles.Kendo.kendoHelp.Scripts.Key,
+        Dashboard.Bundles.Tooltipster.Scripts.Key)
+}
+
+@Html.Partial("DeleteModalWindow")
+    @{
+    	ViewBag.Title = "Список";
+    }
+    <h2>@ViewBag.Title</h2>
+    
+    <div class="form-horizontal">
+    <p>
+        @Html.ActionLink("Создать", "Create", null, new {@class="btn btn-default"})
+    </p>
+    
+    <div>
+    		 @(Html.Kendo().Grid<BasicMaterialViewModel>()
+            .Name("Grid")
+            .Columns(columns =>
+            {
+                columns.Bound(p => p.GoodName);
+                columns.Bound(p => p.PriceType);
+                columns.Bound(p => p.CreatedDate)
+                    .Format("{0:dd.MM.yyyy}");
+                columns.Bound(p => p.ApplyDate)
+                    .Format("{0:dd.MM.yyyy}");
+                columns.Bound(p => p.Employee);
+                columns.Bound(p => p.Price);
+                columns.Bound(p => p.id)
+                .Title("")
+                .Filterable(false)
+                .Sortable(false)
+                .Template(t => { })
+                .ClientTemplate("#=getClientTemplateForSeveralItem(id, PriceType, GoodName, ApplyDate,'BasicMaterial')#");
+            })
+            .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .Events(events => events.Error("error_handler"))
+                        .Read(read => read.Action("AllBasicMaterialPrices", "BasicMaterial"))
+                        .PageSize(30)
+                        .Total(0))
+                    .Pageable()
+                    .Sortable()
+                    .Filterable()
+    					)
+    </div>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+

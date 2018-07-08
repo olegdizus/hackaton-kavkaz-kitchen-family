@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="CteateCorrectData" author="Andrey">
+
+  <createTable tableName="ent_CorrectData">
+
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+
+	  <column name="DetectionDate"  type="datetime">
+        <constraints nullable="false" />
+      </column>
+	  
+	  <column name="type_id"  type="INT">
+        <constraints nullable="false" />
+      </column>
+	  
+	  <column name="Comment"  type="nvarchar(512)">
+        <constraints nullable="true" />
+      </column>
+	</createTable>
+	
+	<addForeignKeyConstraint referencedColumnNames="id" referencedTableName="ent_CorrectDataType"
+		 baseColumnNames="type_id" baseTableName="ent_CorrectData"
+		 constraintName="FK_CorrectDataType_CorrectData_type" onDelete="NO ACTION"/>
+		
+  </changeSet>
+</databaseChangeLog>

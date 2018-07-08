@@ -1,0 +1,111 @@
+﻿@using Dashboard.DB.Models.Reports
+@using Dashboard.Helpers
+@model SalesIndicatorsView
+
+@{
+    ViewBag.Title = "Показатели продаж";
+}
+<style>
+    .tooltip {
+        opacity: 1;
+        position: relative;
+        font-size: 14px;
+    }
+</style>
+
+
+@section styles
+{
+    @Styles.Render(
+        Dashboard.Bundles.Kendo.kendo.Css.Key, 
+        Dashboard.Bundles.BootstrapTagsInput.Css.Key,
+        Dashboard.Bundles.FilterControl.Css.Key,
+        Dashboard.Bundles.Reports.SalesIndicatorReportOLAPController.Css.Key,
+        Dashboard.Bundles.Tooltipster.Css.Key)
+
+    @Scripts.Render("~/Scripts/jquery/jquery-sortable.js")
+}
+@Html.Partial("UserSettingModal")
+@Html.Partial("infoModal")
+
+<h2>
+    @ViewBag.Title
+</h2>
+
+<div class="row">
+@Html.Partial("~/Views/Shared/DateRangeFilter.cshtml", new Tuple<string, string>(ViewBag.beginDate, ViewBag.endDate))
+	<div class="col-lg-1 col-md-2 col-xs-3 col-sm-3">
+		<button type="button" class="btn btn-default" id="openSettingsModalButton">
+			Настройки
+		</button>
+	</div>
+    
+    <div>
+        <a id="SaveUserSettingsLink" href="#">Поделиться отчетом</a>
+    </div>
+    
+    <div>
+        <a id="ExportExcelLink" href="#">Выгрузить в Excel</a>
+    </div>
+
+    <div class="col-lg-3 col-md-4 col-xs-3 col-sm-3">
+        <font size="1" id="OnlyForPrMonthAlert" hidden="true" color="red" style="padding-left: 10px">R1, R2, R3 или Плановая кратность корректны только для производственного месяца</font>
+        </div>
+    </div>
+@Html.Partial("FilterControl")
+
+<br />
+
+<div id="Grid"></div>
+
+
+@section Scripts
+{
+
+    @Scripts.Render(
+        Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+        Dashboard.Bundles.Knockout.Scripts.Key,
+        Dashboard.Bundles.Kendo.kendoHelp.Scripts.Key,
+        Dashboard.Bundles.UserSetting.Scripts.Key,
+        Dashboard.Bundles.Reports.SalesIndicatorByContactOLAP.Scripts.Key,
+        Dashboard.Bundles.Reports.SalesIndicatorByNomenclatureOLAP.Scripts.Key,
+        Dashboard.Bundles.bootstrapplugins.Scripts.Key,
+        Dashboard.Bundles.Helpers.Scripts.Key,
+        Dashboard.Bundles.Tooltipster.Scripts.Key,
+        Dashboard.Bundles.ExportExcel.Scripts.Key
+        )
+
+    @Html.Partial("BarTemplate")
+
+    <script type="text/javascript">
+
+        var userSettings = JSON.parse(@Html.JsonRaw((object) ViewBag.userSettings));
+
+        var cardType = '@(ViewBag.cardType)';
+
+        var deliveriesUrl = '@Url.Action("GetSalesIndicatorNomenclatureDeliveries")';
+
+        var deliveriesGridUrl = '@Url.Action("GetSalesIndicatorsContactDeliveries")';
+
+        var deliveriesGridUrl = '@Url.Action("GetSalesIndicatorsContactDeliveries")';
+
+        var exportExcelUrl = '@Url.Action("ExportExcel")';
+
+        var Indicators = JSON.parse(@Html.JsonRaw((object) ViewBag.Indexes));
+
+        var exportExcel = new ExportExcel(exportExcelUrl, '#ExportExcelLink', userSettings);
+
+
+    </script>
+
+
+
+
+    @Scripts.Render(
+        Dashboard.Bundles.Extentions.Scripts.Key,
+        Dashboard.Bundles.Reports.ReportHelper.Scripts.Key,
+        Dashboard.Bundles.Reports.SalesIndicatorReportOLAPContactScript.Scripts.Key,
+        Dashboard.Bundles.Underscore.Scripts.Key
+        )
+}
+

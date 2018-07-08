@@ -1,0 +1,1442 @@
+2018-07-08T00:36:56 AccountController Info Account Login Action Get Requested 
+2018-07-08T00:37:12 AccountController Info Ищем сопоставление для авторизации под пользователем Admin 
+2018-07-08T00:37:14 AccountController Info Для пользователя Admin не задано сопоставление с сотрудником 
+2018-07-08T00:37:16 Dashboard.OLAP.DAL.FaceData Info FaceData: использование календарного месяца: True 
+2018-07-08T00:37:16 DataController Info Используется MonthAccounting = Dashboard.OLAP.DAL.FaceInRoleData.CalendarMonthAccounting 
+2018-07-08T00:37:16 Dashboard.OLAP.DAL.FaceData Debug GetSaleIndicators IN 
+2018-07-08T00:37:16 StandardQuery Info Запрос reportDaysDataProduction WITH
+    MEMBER [Measures].[delKg] AS
+        Divide ([Measures].[deliverySum], [Measures].[SalesCount], 0)
+    MEMBER [Measures].[delRub] AS
+        [Measures].[deliverySum]
+    MEMBER [Measures].[delCount] AS
+        [Measures].[SalesCount]
+    MEMBER [Measures].[profitPercent] AS
+        Round ([Measures].[grossProfitCoef], 2)
+    MEMBER [Measures].[profitAverPercent] AS
+        Round ([Measures].[grossProfitCoefAver], 2)
+    MEMBER [Measures].[grossProfitSum] AS
+        [Measures].[grossProfit]
+    MEMBER [Measures].[grossProfitSumAver] AS
+        [Measures].[grossProfitAver]
+    MEMBER [Measures].[grossProfitSumAccum] AS
+        Sum (PeriodsToDate ([Dates].[Календарная].[Cal Month], [Dates].[Календарная].CurrentMember), ([Measures].[SumPrice] - [Measures].[Cost]))
+    MEMBER [Measures].[prognozProfitSum] AS
+        [Measures].[grossProfitSumAver] * [Measures].[MonthDayCount]
+SELECT
+    {
+        [Measures].[delRub],
+        [Measures].[delKg],
+        [Measures].[delCount],
+        [Measures].[prognozProfitSum]
+    }
+ON COLUMNS,
+{
+    [Dates].[Date].&[2018-04-01T00:00:00]:[Dates].[Date].&[2018-09-30T00:00:00],
+    [Dates].[Date].&[2017-04-01T00:00:00]:[Dates].[Date].&[2017-09-30T00:00:00]
+}
+ON ROWS
+FROM Dashboard 
+2018-07-08T00:37:16 DataController Error При запросе данных для среза произошла ошибка. Входные параметры date = 2018-07-08, data = {"Contact_name":[],"Good_name":[],"Goods_Type":[],"Contact_Group":[],"Board_Number":[],"Oficiant":[]} для пользователя Admin: System.Exception: При выполнении запроса WITH
+    MEMBER [Measures].[delKg] AS
+        Divide ([Measures].[deliverySum], [Measures].[SalesCount], 0)
+    MEMBER [Measures].[delRub] AS
+        [Measures].[deliverySum]
+    MEMBER [Measures].[delCount] AS
+        [Measures].[SalesCount]
+    MEMBER [Measures].[profitPercent] AS
+        Round ([Measures].[grossProfitCoef], 2)
+    MEMBER [Measures].[profitAverPercent] AS
+        Round ([Measures].[grossProfitCoefAver], 2)
+    MEMBER [Measures].[grossProfitSum] AS
+        [Measures].[grossProfit]
+    MEMBER [Measures].[grossProfitSumAver] AS
+        [Measures].[grossProfitAver]
+    MEMBER [Measures].[grossProfitSumAccum] AS
+        Sum (PeriodsToDate ([Dates].[Календарная].[Cal Month], [Dates].[Календарная].CurrentMember), ([Measures].[SumPrice] - [Measures].[Cost]))
+    MEMBER [Measures].[prognozProfitSum] AS
+        [Measures].[grossProfitSumAver] * [Measures].[MonthDayCount]
+SELECT
+    {
+        [Measures].[delRub],
+        [Measures].[delKg],
+        [Measures].[delCount],
+        [Measures].[prognozProfitSum]
+    }
+ON COLUMNS,
+{
+    [Dates].[Date].&[2018-04-01T00:00:00]:[Dates].[Date].&[2018-09-30T00:00:00],
+    [Dates].[Date].&[2017-04-01T00:00:00]:[Dates].[Date].&[2017-09-30T00:00:00]
+}
+ON ROWS
+FROM Dashboard произошла ошибка Microsoft.AnalysisServices.AdomdClient.AdomdErrorResponseException: Куб Dashboard не существует или не был обработан.
+   в Microsoft.AnalysisServices.AdomdClient.AdomdConnection.XmlaClientProvider.Microsoft.AnalysisServices.AdomdClient.IExecuteProvider.ExecuteMultidimensional(ICommandContentProvider contentProvider, AdomdPropertyCollection commandProperties, IDataParameterCollection parameters)
+   в Microsoft.AnalysisServices.AdomdClient.AdomdCommand.ExecuteCellSet()
+   в Dashboard.OLAP.DAL.MdxExecutor.RunMdx(String mdxQuery, String connectionString) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard.OLAP.DAL\MdxExecutor.cs:строка 23
+   в Dashboard.OLAP.DAL.QueryHierarchy.StandardQuery.GetResult(String olapConnection) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard.OLAP.DAL\QueryHierarchy\StandardQuery.cs:строка 34
+   в Dashboard.OLAP.DAL.QueryHierarchy.StandardQuery.GetResult(String olapConnection) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard.OLAP.DAL\QueryHierarchy\StandardQuery.cs:строка 55
+   в System.Linq.Enumerable.WhereSelectArrayIterator`2.MoveNext()
+   в Dashboard.OLAP.DAL.FaceData.ToResutlJson(IEnumerable`1 resultJsons) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard.OLAP.DAL\FaceData.cs:строка 175
+   в Dashboard.Controllers.DataController.Face(String date, String data, Nullable`1 dataPart) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard\Models\DataController.cs:строка 44 
+2018-07-08T00:37:16 DataController Error System.Exception: При запросе данных для среза произошла ошибка
+   в Dashboard.Controllers.DataController.Face(String date, String data, Nullable`1 dataPart) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard\Models\DataController.cs:строка 60
+   в lambda_method(Closure , ControllerBase , Object[] )
+   в System.Web.Mvc.ReflectedActionDescriptor.Execute(ControllerContext controllerContext, IDictionary`2 parameters)
+   в System.Web.Mvc.ControllerActionInvoker.InvokeActionMethod(ControllerContext controllerContext, ActionDescriptor actionDescriptor, IDictionary`2 parameters)
+   в System.Web.Mvc.Async.AsyncControllerActionInvoker.<BeginInvokeSynchronousActionMethod>b__39(IAsyncResult asyncResult, ActionInvocation innerInvokeState)
+   в System.Web.Mvc.Async.AsyncResultWrapper.WrappedAsyncResult`2.CallEndDelegate(IAsyncResult asyncResult)
+   в System.Web.Mvc.Async.AsyncControllerActionInvoker.EndInvokeActionMethod(IAsyncResult asyncResult)
+   в System.Web.Mvc.Async.AsyncControllerActionInvoker.AsyncInvocationWithFilters.<InvokeActionMethodFilterAsynchronouslyRecursive>b__3d()
+   в System.Web.Mvc.Async.AsyncControllerActionInvoker.AsyncInvocationWithFilters.<>c__DisplayClass46.<InvokeActionMethodFilterAsynchronouslyRecursive>b__3f()
+   в System.Web.Mvc.Async.AsyncControllerActionInvoker.EndInvokeActionMethodWithFilters(IAsyncResult asyncResult)
+   в System.Web.Mvc.Async.AsyncControllerActionInvoker.<>c__DisplayClass21.<>c__DisplayClass2b.<BeginInvokeAction>b__1c()
+   в System.Web.Mvc.Async.AsyncControllerActionInvoker.<>c__DisplayClass21.<BeginInvokeAction>b__1e(IAsyncResult asyncResult) для пользователя Admin 
+2018-07-08T00:37:17 SharedController Error Пришел exception:  для пользователя Admin 
+2018-07-08T00:37:30 MdxRunner Info WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[Weight]
+    MEMBER [Measures].[Декабрь 2016] AS
+                (
+            [Dates].[Cal Month].&[2016]&[12],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Январь 2017] AS
+                (
+            [Dates].[Cal Month].&[2017]&[1],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Декабрь 2017] AS
+                (
+            [Dates].[Cal Month].&[2017]&[12],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Январь 2018] AS
+                (
+            [Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Прогноз] AS
+        Divide (Sum ([Dates].[Date].&[2017-12-31T00:00:00]:[Dates].[Date].&[2017-12-02T00:00:00], [Measures].[field]), 30, 0) * 30
+    MEMBER [Measures].[Динамика к Январь 2017 проценты] AS
+        IIF (IsEmpty([Measures].[Прогноз]), Null, (Divide ([Measures].[Прогноз], [Measures].[Январь 2017], 2) - 1) * 100)
+    MEMBER [Measures].[Динамика к Декабрь 2017 проценты] AS
+        IIF (IsEmpty([Measures].[Прогноз]), Null, (Divide ([Measures].[Прогноз], [Measures].[Декабрь 2017], 2) - 1) * 100)
+SELECT
+    {
+        [Measures].[Декабрь 2016],
+        [Measures].[Январь 2017],
+        [Measures].[Декабрь 2017],
+        [Measures].[Январь 2018],
+        [Measures].[Прогноз],
+        [Measures].[Динамика к Январь 2017 проценты],
+        [Measures].[Динамика к Декабрь 2017 проценты]
+    }
+ON COLUMNS,
+NON EMPTY (
+    {
+        [Ent Contact Groups].[Parent Id]                  .children
+    })
+ON ROWS
+FROM Dashboard 
+2018-07-08T00:37:30 AnalizeByPeriodsOLAPController Error При получении данных по показателям продаж произошла ошибка: Microsoft.AnalysisServices.AdomdClient.AdomdErrorResponseException: Куб Dashboard не существует или не был обработан.
+   в Microsoft.AnalysisServices.AdomdClient.AdomdConnection.XmlaClientProvider.Microsoft.AnalysisServices.AdomdClient.IExecuteProvider.ExecuteMultidimensional(ICommandContentProvider contentProvider, AdomdPropertyCollection commandProperties, IDataParameterCollection parameters)
+   в Microsoft.AnalysisServices.AdomdClient.AdomdCommand.ExecuteCellSet()
+   в Dashboard.OLAP.DAL.MdxExecutor.RunMdx(String mdxQuery, String connectionString) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard.OLAP.DAL\MdxExecutor.cs:строка 23
+   в Dashboard.Controllers.Reports.AnalizeByPeriodsOLAPController.GetOlapDataInJsonFormat(AnalizeGroupParameter parametr, IndicatorsByPeriodRpt measure, Boolean isFirst) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard\Controllers\Reports\AnalizeByPeriodsOLAPController.cs:строка 529
+   в Dashboard.Controllers.Reports.AnalizeByPeriodsOLAPController.GetSubGroupsServer(AnalizeGroupParameter data) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard\Controllers\Reports\AnalizeByPeriodsOLAPController.cs:строка 369
+   в Dashboard.Controllers.Reports.AnalizeByPeriodsOLAPController.GetSubGroups(AnalizeGroupParameter data) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard\Controllers\Reports\AnalizeByPeriodsOLAPController.cs:строка 349 
+2018-07-08T00:37:31 MdxRunner Info WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[Weight]
+    MEMBER [Measures].[Декабрь 2016] AS
+                (
+            [Dates].[Cal Month].&[2016]&[12],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Январь 2017] AS
+                (
+            [Dates].[Cal Month].&[2017]&[1],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Декабрь 2017] AS
+                (
+            [Dates].[Cal Month].&[2017]&[12],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Январь 2018] AS
+                (
+            [Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Прогноз] AS
+        Divide (Sum ([Dates].[Date].&[2017-12-31T00:00:00]:[Dates].[Date].&[2017-12-02T00:00:00], [Measures].[field]), 30, 0) * 30
+    MEMBER [Measures].[Динамика к Январь 2017 проценты] AS
+        IIF (IsEmpty([Measures].[Прогноз]), Null, (Divide ([Measures].[Прогноз], [Measures].[Январь 2017], 2) - 1) * 100)
+    MEMBER [Measures].[Динамика к Декабрь 2017 проценты] AS
+        IIF (IsEmpty([Measures].[Прогноз]), Null, (Divide ([Measures].[Прогноз], [Measures].[Декабрь 2017], 2) - 1) * 100)
+SELECT
+    {
+        [Measures].[Декабрь 2016],
+        [Measures].[Январь 2017],
+        [Measures].[Декабрь 2017],
+        [Measures].[Январь 2018],
+        [Measures].[Прогноз],
+        [Measures].[Динамика к Январь 2017 проценты],
+        [Measures].[Динамика к Декабрь 2017 проценты]
+    }
+ON COLUMNS,
+NON EMPTY (
+    {
+        [Ent Goods].[Good - Name]                         .children
+    })
+ON ROWS
+FROM Dashboard 
+2018-07-08T00:37:31 AnalizeByPeriodsOLAPController Error При получении данных по показателям продаж произошла ошибка: Microsoft.AnalysisServices.AdomdClient.AdomdErrorResponseException: Куб Dashboard не существует или не был обработан.
+   в Microsoft.AnalysisServices.AdomdClient.AdomdConnection.XmlaClientProvider.Microsoft.AnalysisServices.AdomdClient.IExecuteProvider.ExecuteMultidimensional(ICommandContentProvider contentProvider, AdomdPropertyCollection commandProperties, IDataParameterCollection parameters)
+   в Microsoft.AnalysisServices.AdomdClient.AdomdCommand.ExecuteCellSet()
+   в Dashboard.OLAP.DAL.MdxExecutor.RunMdx(String mdxQuery, String connectionString) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard.OLAP.DAL\MdxExecutor.cs:строка 23
+   в Dashboard.Controllers.Reports.AnalizeByPeriodsOLAPController.GetOlapDataInJsonFormat(AnalizeGroupParameter parametr, IndicatorsByPeriodRpt measure, Boolean isFirst) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard\Controllers\Reports\AnalizeByPeriodsOLAPController.cs:строка 529
+   в Dashboard.Controllers.Reports.AnalizeByPeriodsOLAPController.GetSubGroupsServer(AnalizeGroupParameter data) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard\Controllers\Reports\AnalizeByPeriodsOLAPController.cs:строка 369
+   в Dashboard.Controllers.Reports.AnalizeByPeriodsOLAPController.GetSubGroups(AnalizeGroupParameter data) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard\Controllers\Reports\AnalizeByPeriodsOLAPController.cs:строка 349 
+2018-07-08T00:37:31 MdxRunner Info WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[Weight]
+    MEMBER [Measures].[Декабрь 2016] AS
+                (
+            [Dates].[Cal Month].&[2016]&[12],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Январь 2017] AS
+                (
+            [Dates].[Cal Month].&[2017]&[1],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Декабрь 2017] AS
+                (
+            [Dates].[Cal Month].&[2017]&[12],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Январь 2018] AS
+                (
+            [Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Прогноз] AS
+        Divide (Sum ([Dates].[Date].&[2017-12-31T00:00:00]:[Dates].[Date].&[2017-12-02T00:00:00], [Measures].[field]), 30, 0) * 30
+    MEMBER [Measures].[Динамика к Январь 2017 проценты] AS
+        IIF (IsEmpty([Measures].[Прогноз]), Null, (Divide ([Measures].[Прогноз], [Measures].[Январь 2017], 2) - 1) * 100)
+    MEMBER [Measures].[Динамика к Декабрь 2017 проценты] AS
+        IIF (IsEmpty([Measures].[Прогноз]), Null, (Divide ([Measures].[Прогноз], [Measures].[Декабрь 2017], 2) - 1) * 100)
+SELECT
+    {
+        [Measures].[Декабрь 2016],
+        [Measures].[Январь 2017],
+        [Measures].[Декабрь 2017],
+        [Measures].[Январь 2018],
+        [Measures].[Прогноз],
+        [Measures].[Динамика к Январь 2017 проценты],
+        [Measures].[Динамика к Декабрь 2017 проценты]
+    }
+ON COLUMNS,
+NON EMPTY (
+    {
+        [Ent Goods].[Good - Name]                         .children
+    })
+ON ROWS
+FROM Dashboard 
+2018-07-08T00:37:31 AnalizeByPeriodsOLAPController Error При получении данных по показателям продаж произошла ошибка: Microsoft.AnalysisServices.AdomdClient.AdomdErrorResponseException: Куб Dashboard не существует или не был обработан.
+   в Microsoft.AnalysisServices.AdomdClient.AdomdConnection.XmlaClientProvider.Microsoft.AnalysisServices.AdomdClient.IExecuteProvider.ExecuteMultidimensional(ICommandContentProvider contentProvider, AdomdPropertyCollection commandProperties, IDataParameterCollection parameters)
+   в Microsoft.AnalysisServices.AdomdClient.AdomdCommand.ExecuteCellSet()
+   в Dashboard.OLAP.DAL.MdxExecutor.RunMdx(String mdxQuery, String connectionString) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard.OLAP.DAL\MdxExecutor.cs:строка 23
+   в Dashboard.Controllers.Reports.AnalizeByPeriodsOLAPController.GetOlapDataInJsonFormat(AnalizeGroupParameter parametr, IndicatorsByPeriodRpt measure, Boolean isFirst) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard\Controllers\Reports\AnalizeByPeriodsOLAPController.cs:строка 529
+   в Dashboard.Controllers.Reports.AnalizeByPeriodsOLAPController.GetSubGroupsServer(AnalizeGroupParameter data) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard\Controllers\Reports\AnalizeByPeriodsOLAPController.cs:строка 369
+   в Dashboard.Controllers.Reports.AnalizeByPeriodsOLAPController.GetSubGroups(AnalizeGroupParameter data) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard\Controllers\Reports\AnalizeByPeriodsOLAPController.cs:строка 349 
+2018-07-08T00:37:31 MdxRunner Info SELECT
+    {
+        [Measures].[R2]
+    }
+ON COLUMNS,
+NON EMPTY (
+    {
+        [Ent Goods].[Good - Name]                         .children
+    })
+ON ROWS
+FROM Dashboard
+WHERE
+(
+    [Dates].[Date].&[2018-06-08T00:00:00.000Z]:[Dates].[Date].&[2018-06-08T00:00:00.000Z]
+) 
+2018-07-08T00:37:31 SalesIndicatorReportOLAPController Error При данных по показателям продаж произошла ошибка: Microsoft.AnalysisServices.AdomdClient.AdomdErrorResponseException: Куб Dashboard не существует или не был обработан.
+   в Microsoft.AnalysisServices.AdomdClient.AdomdConnection.XmlaClientProvider.Microsoft.AnalysisServices.AdomdClient.IExecuteProvider.ExecuteMultidimensional(ICommandContentProvider contentProvider, AdomdPropertyCollection commandProperties, IDataParameterCollection parameters)
+   в Microsoft.AnalysisServices.AdomdClient.AdomdCommand.ExecuteCellSet()
+   в Dashboard.OLAP.DAL.MdxExecutor.RunMdx(String mdxQuery, String connectionString) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard.OLAP.DAL\MdxExecutor.cs:строка 23
+   в Dashboard.Controllers.Reports.SalesIndicatorReportOLAPController.GetOlapJsons(SubGroupParameter data) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard\Controllers\Reports\SalesIndicatorReportControllerOLAP.cs:строка 256
+   в Dashboard.Controllers.Reports.SalesIndicatorReportOLAPController.GetSubGroups(SubGroupParameter parameters) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard\Controllers\Reports\SalesIndicatorReportControllerOLAP.cs:строка 240 для пользователя Admin 
+2018-07-08T16:26:55 Dashboard.OLAP.DAL.FaceData Info FaceData: использование календарного месяца: True 
+2018-07-08T16:26:55 DataController Info Используется MonthAccounting = Dashboard.OLAP.DAL.FaceInRoleData.CalendarMonthAccounting 
+2018-07-08T16:26:55 Dashboard.OLAP.DAL.FaceData Debug GetSaleIndicators IN 
+2018-07-08T16:26:55 StandardQuery Info Запрос reportDaysDataProduction WITH
+    MEMBER [Measures].[delKg] AS
+        Divide ([Measures].[SumPrice], [Measures].[DeliveryCount], 0)
+    MEMBER [Measures].[delRub] AS
+        [Measures].[SumPrice]
+    MEMBER [Measures].[delCount] AS
+        [Measures].[DeliveryCount]
+    MEMBER [Measures].[profitPercent] AS
+        Round ([Measures].[grossProfitCoef], 2)
+    MEMBER [Measures].[profitAverPercent] AS
+        Round ([Measures].[grossProfitCoefAver], 2)
+    MEMBER [Measures].[grossProfitSum] AS
+        [Measures].[grossProfit]
+    MEMBER [Measures].[grossProfitSumAver] AS
+        [Measures].[grossProfitAver]
+    MEMBER [Measures].[grossProfitSumAccum] AS
+        Sum (PeriodsToDate ([Dates].[Календарная].[Cal Month], [Dates].[Календарная].CurrentMember), ([Measures].[SumPrice] - [Measures].[Cost]))
+    MEMBER [Measures].[prognozProfitSum] AS
+        [Measures].[grossProfitSumAver] * [Measures].[MonthDayCount]
+SELECT
+    {
+        [Measures].[delRub],
+        [Measures].[delKg],
+        [Measures].[delCount],
+        [Measures].[prognozProfitSum]
+    }
+ON COLUMNS,
+{
+    [Dates].[Date].&[2018-04-01T00:00:00]:[Dates].[Date].&[2018-09-30T00:00:00],
+    [Dates].[Date].&[2017-04-01T00:00:00]:[Dates].[Date].&[2017-09-30T00:00:00]
+}
+ON ROWS
+FROM Dashboard
+WHERE
+(
+        {
+        [Delivery].[Oficiant]                             .&[Анурова Настя]
+    }
+) 
+2018-07-08T16:27:08 AccountController Info Account Login Action Get Requested 
+2018-07-08T16:27:16 AccountController Info Ищем сопоставление для авторизации под пользователем Admin 
+2018-07-08T16:27:16 AccountController Info Для пользователя Admin не задано сопоставление с сотрудником 
+2018-07-08T16:27:19 Dashboard.OLAP.DAL.FaceData Info FaceData: использование календарного месяца: True 
+2018-07-08T16:27:19 DataController Info Используется MonthAccounting = Dashboard.OLAP.DAL.FaceInRoleData.CalendarMonthAccounting 
+2018-07-08T16:27:19 Dashboard.OLAP.DAL.FaceData Debug GetSaleIndicators IN 
+2018-07-08T16:27:19 StandardQuery Info Запрос reportDaysDataProduction WITH
+    MEMBER [Measures].[delKg] AS
+        Divide ([Measures].[SumPrice], [Measures].[DeliveryCount], 0)
+    MEMBER [Measures].[delRub] AS
+        [Measures].[SumPrice]
+    MEMBER [Measures].[delCount] AS
+        [Measures].[DeliveryCount]
+    MEMBER [Measures].[profitPercent] AS
+        Round ([Measures].[grossProfitCoef], 2)
+    MEMBER [Measures].[profitAverPercent] AS
+        Round ([Measures].[grossProfitCoefAver], 2)
+    MEMBER [Measures].[grossProfitSum] AS
+        [Measures].[grossProfit]
+    MEMBER [Measures].[grossProfitSumAver] AS
+        [Measures].[grossProfitAver]
+    MEMBER [Measures].[grossProfitSumAccum] AS
+        Sum (PeriodsToDate ([Dates].[Календарная].[Cal Month], [Dates].[Календарная].CurrentMember), ([Measures].[SumPrice] - [Measures].[Cost]))
+    MEMBER [Measures].[prognozProfitSum] AS
+        [Measures].[grossProfitSumAver] * [Measures].[MonthDayCount]
+SELECT
+    {
+        [Measures].[delRub],
+        [Measures].[delKg],
+        [Measures].[delCount],
+        [Measures].[prognozProfitSum]
+    }
+ON COLUMNS,
+{
+    [Dates].[Date].&[2018-04-01T00:00:00]:[Dates].[Date].&[2018-09-30T00:00:00],
+    [Dates].[Date].&[2017-04-01T00:00:00]:[Dates].[Date].&[2017-09-30T00:00:00]
+}
+ON ROWS
+FROM Dashboard
+WHERE
+(
+        {
+        [Delivery].[Oficiant]                             .&[Анурова Настя]
+    }
+) 
+2018-07-08T16:29:24 Dashboard.OLAP.DAL.FaceData Info FaceData: использование календарного месяца: True 
+2018-07-08T16:29:24 DataController Info Используется MonthAccounting = Dashboard.OLAP.DAL.FaceInRoleData.CalendarMonthAccounting 
+2018-07-08T16:29:24 Dashboard.OLAP.DAL.FaceData Debug GetSaleIndicators IN 
+2018-07-08T16:29:24 StandardQuery Info Запрос reportDaysDataProduction WITH
+    MEMBER [Measures].[delKg] AS
+        Divide ([Measures].[SumPrice], [Measures].[DeliveryCount], 0)
+    MEMBER [Measures].[delRub] AS
+        [Measures].[SumPrice]
+    MEMBER [Measures].[delCount] AS
+        [Measures].[DeliveryCount]
+    MEMBER [Measures].[profitPercent] AS
+        Round ([Measures].[grossProfitCoef], 2)
+    MEMBER [Measures].[profitAverPercent] AS
+        Round ([Measures].[grossProfitCoefAver], 2)
+    MEMBER [Measures].[grossProfitSum] AS
+        [Measures].[grossProfit]
+    MEMBER [Measures].[grossProfitSumAver] AS
+        [Measures].[grossProfitAver]
+    MEMBER [Measures].[grossProfitSumAccum] AS
+        Sum (PeriodsToDate ([Dates].[Календарная].[Cal Month], [Dates].[Календарная].CurrentMember), ([Measures].[SumPrice] - [Measures].[Cost]))
+    MEMBER [Measures].[prognozProfitSum] AS
+        [Measures].[grossProfitSumAver] * [Measures].[MonthDayCount]
+SELECT
+    {
+        [Measures].[delRub],
+        [Measures].[delKg],
+        [Measures].[delCount],
+        [Measures].[prognozProfitSum]
+    }
+ON COLUMNS,
+{
+    [Dates].[Date].&[2018-04-01T00:00:00]:[Dates].[Date].&[2018-09-30T00:00:00],
+    [Dates].[Date].&[2017-04-01T00:00:00]:[Dates].[Date].&[2017-09-30T00:00:00]
+}
+ON ROWS
+FROM Dashboard
+WHERE
+(
+        {
+        [Delivery].[Oficiant]                             .&[Анурова Настя]
+    }
+) 
+2018-07-08T16:29:41 DebitoreReportOlapController Error При получении отчёта по ДЗ произошла ошибка: System.Data.SqlClient.SqlException (0x80131904): Конфликт инструкции INSERT с ограничением FOREIGN KEY "FK_dsh_UserSettingValue_dsh_UserSetting". Конфликт произошел в базе данных "HackDemoDashboard", таблица "dbo.dsh_UserSetting", column 'id'.
+Выполнение данной инструкции было прервано.
+   в System.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   в System.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   в System.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   в System.Data.SqlClient.SqlCommand.FinishExecuteReader(SqlDataReader ds, RunBehavior runBehavior, String resetOptionsString, Boolean isInternal, Boolean forDescribeParameterEncryption)
+   в System.Data.SqlClient.SqlCommand.RunExecuteReaderTds(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, Boolean async, Int32 timeout, Task& task, Boolean asyncWrite, Boolean inRetry, SqlDataReader ds, Boolean describeParameterEncryptionRequest)
+   в System.Data.SqlClient.SqlCommand.RunExecuteReader(CommandBehavior cmdBehavior, RunBehavior runBehavior, Boolean returnStream, String method, TaskCompletionSource`1 completion, Int32 timeout, Task& task, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry)
+   в System.Data.SqlClient.SqlCommand.InternalExecuteNonQuery(TaskCompletionSource`1 completion, String methodName, Boolean sendToPipe, Int32 timeout, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry)
+   в System.Data.SqlClient.SqlCommand.ExecuteNonQuery()
+   в Dashboard.DB.DashboardAdoNetUserSettingRepository.InsertNewUserSettingValue(String userName, Int32 userSettingGroup_id, Int32 userSetting_id, String userSettingValue, Nullable`1 settingsGuid) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard.DB\UserSettingRepository\DashboardAdoNetUserSettingRepository.cs:строка 144
+   в UserSettings.UserSettingsManager`2.<>c__DisplayClass5_0.<GetUserSettingValues>b__7(KeyValuePair`2 value) в C:\Projects\Zhukov\git2\Dashboard\ServiceProjects\UserSettings\UserSettings\UserSettingsManager.cs:строка 99
+   в System.Linq.Enumerable.WhereSelectEnumerableIterator`2.MoveNext()
+   в System.Collections.Generic.List`1.InsertRange(Int32 index, IEnumerable`1 collection)
+   в UserSettings.UserSettingsManager`2.GetUserSettingValues(String userName, TUserSettingsGroupEnum userSettingsGroup, TUserSettingsEnum[] settingsForGet) в C:\Projects\Zhukov\git2\Dashboard\ServiceProjects\UserSettings\UserSettings\UserSettingsManager.cs:строка 103
+   в UserSettings.UserSettingsJsonBuilder`2..ctor(String userName, TUserSettingGroup userSettingsGroup, IUserSettingsManager`2 userSettingManager) в C:\Projects\Zhukov\git2\Dashboard\ServiceProjects\UserSettings\UserSettings\UserSettingsJsonBuilder.cs:строка 25
+   в Dashboard.Controllers.Reports.BaseReportController.CreateUserSettingsJsonBuilder(UserSettingGroup userSettingGroup) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard\Controllers\Reports\BaseReportController.cs:строка 63
+   в Dashboard.Controllers.Reports.BaseReportController.SaveUserSettingsBuilderToViewBag(Nullable`1 guid) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard\Controllers\Reports\BaseReportController.cs:строка 72
+   в Dashboard.Controllers.Reports.DebitoreReportOlapController.Index(String date) в C:\Projects\Zhukov\git2\Dashboard\Dashboard\Dashboard\Controllers\Reports\DebitoreReportOlapController.cs:строка 23
+ClientConnectionId:03900a8e-bfb6-4d12-850c-d85fc59f6bfd
+Error Number: 547, State: 0, Class: 16 
+2018-07-08T16:29:45 MdxRunner Info SELECT
+    {
+        [Measures].[SumPrice]
+    }
+ON COLUMNS,
+NON EMPTY (
+    {
+        [Good].[Good - Comment]                           .children
+    })
+ON ROWS
+FROM Dashboard
+WHERE
+(
+    [Dates].[Date].&[2016-02-04T00:00:00.000Z]:[Dates].[Date].&[2018-06-08T00:00:00.000Z]
+) 
+2018-07-08T16:29:45 MdxRunner Info All = SELECT
+    {
+        [Measures].[SumPrice]
+    }
+ON COLUMNS
+FROM Dashboard
+WHERE
+(
+    [Dates].[Date].&[2016-02-04T00:00:00.000Z]:[Dates].[Date].&[2018-06-08T00:00:00.000Z]
+) 
+2018-07-08T16:29:45 MdxRunner Info SELECT
+    {
+        [Measures].[SumPrice]
+    }
+ON COLUMNS,
+NON EMPTY (
+    {
+        [Good].[Good - Comment]                           .children
+    })
+ON ROWS
+FROM Dashboard
+WHERE
+(
+    [Dates].[Date].&[2016-02-04T00:00:00.000Z]:[Dates].[Date].&[2018-06-08T00:00:00.000Z]
+) 
+2018-07-08T16:29:45 MdxRunner Info All = SELECT
+    {
+        [Measures].[SumPrice]
+    }
+ON COLUMNS
+FROM Dashboard
+WHERE
+(
+    [Dates].[Date].&[2016-02-04T00:00:00.000Z]:[Dates].[Date].&[2018-06-08T00:00:00.000Z]
+) 
+2018-07-08T16:30:23 AccountController Info Account Login Action Get Requested 
+2018-07-08T16:30:31 AccountController Info Ищем сопоставление для авторизации под пользователем Admin 
+2018-07-08T16:30:31 AccountController Info Для пользователя Admin не задано сопоставление с сотрудником 
+2018-07-08T16:30:32 Dashboard.OLAP.DAL.FaceData Info FaceData: использование календарного месяца: True 
+2018-07-08T16:30:32 DataController Info Используется MonthAccounting = Dashboard.OLAP.DAL.FaceInRoleData.CalendarMonthAccounting 
+2018-07-08T16:30:32 Dashboard.OLAP.DAL.FaceData Debug GetSaleIndicators IN 
+2018-07-08T16:30:32 StandardQuery Info Запрос reportDaysDataProduction WITH
+    MEMBER [Measures].[delKg] AS
+        Divide ([Measures].[SumPrice], [Measures].[DeliveryCount], 0)
+    MEMBER [Measures].[delRub] AS
+        [Measures].[SumPrice]
+    MEMBER [Measures].[delCount] AS
+        [Measures].[DeliveryCount]
+    MEMBER [Measures].[profitPercent] AS
+        Round ([Measures].[grossProfitCoef], 2)
+    MEMBER [Measures].[profitAverPercent] AS
+        Round ([Measures].[grossProfitCoefAver], 2)
+    MEMBER [Measures].[grossProfitSum] AS
+        [Measures].[grossProfit]
+    MEMBER [Measures].[grossProfitSumAver] AS
+        [Measures].[grossProfitAver]
+    MEMBER [Measures].[grossProfitSumAccum] AS
+        Sum (PeriodsToDate ([Dates].[Календарная].[Cal Month], [Dates].[Календарная].CurrentMember), ([Measures].[SumPrice] - [Measures].[Cost]))
+    MEMBER [Measures].[prognozProfitSum] AS
+        [Measures].[grossProfitSumAver] * [Measures].[MonthDayCount]
+SELECT
+    {
+        [Measures].[delRub],
+        [Measures].[delKg],
+        [Measures].[delCount],
+        [Measures].[prognozProfitSum]
+    }
+ON COLUMNS,
+{
+    [Dates].[Date].&[2018-04-01T00:00:00]:[Dates].[Date].&[2018-09-30T00:00:00],
+    [Dates].[Date].&[2017-04-01T00:00:00]:[Dates].[Date].&[2017-09-30T00:00:00]
+}
+ON ROWS
+FROM Dashboard
+WHERE
+(
+        {
+        [Delivery].[Oficiant]                             .&[Анурова Настя]
+    }
+) 
+2018-07-08T16:30:49 MdxRunner Info SELECT
+    {
+        [Measures].[SumPrice]
+    }
+ON COLUMNS,
+NON EMPTY (
+    {
+        [Good].[Good - Comment]                           .children
+    })
+ON ROWS
+FROM Dashboard
+WHERE
+(
+    [Dates].[Date].&[2016-02-04T00:00:00.000Z]:[Dates].[Date].&[2018-06-08T00:00:00.000Z]
+) 
+2018-07-08T16:30:49 MdxRunner Info All = SELECT
+    {
+        [Measures].[SumPrice]
+    }
+ON COLUMNS
+FROM Dashboard
+WHERE
+(
+    [Dates].[Date].&[2016-02-04T00:00:00.000Z]:[Dates].[Date].&[2018-06-08T00:00:00.000Z]
+) 
+2018-07-08T16:30:50 MdxRunner Info SELECT
+    {
+        [Measures].[SumPrice]
+    }
+ON COLUMNS,
+NON EMPTY (
+    {
+        [Good].[Good - Comment]                           .children
+    })
+ON ROWS
+FROM Dashboard
+WHERE
+(
+    [Dates].[Date].&[2016-02-04T00:00:00.000Z]:[Dates].[Date].&[2018-06-08T00:00:00.000Z]
+) 
+2018-07-08T16:30:50 MdxRunner Info All = SELECT
+    {
+        [Measures].[SumPrice]
+    }
+ON COLUMNS
+FROM Dashboard
+WHERE
+(
+    [Dates].[Date].&[2016-02-04T00:00:00.000Z]:[Dates].[Date].&[2018-06-08T00:00:00.000Z]
+) 
+2018-07-08T16:30:55 MdxToSaleReports Info Filter byGoods_Type = Dashboard.Models.Kendo.KendoGroupFilter 
+2018-07-08T16:30:55 MdxRunner Info SELECT
+    {
+        [Measures].[SumPrice]
+    }
+ON COLUMNS,
+NON EMPTY (
+    {
+        [Ent Contacts].[Full Name]                        .children
+    })
+ON ROWS
+FROM Dashboard
+WHERE
+(
+    [Dates].[Date].&[2016-02-04T00:00:00.000Z]:[Dates].[Date].&[2018-06-08T00:00:00.000Z],
+    [Good].[Good - Comment]                           .&[Ликеры]
+) 
+2018-07-08T16:30:58 Dashboard.OLAP.DAL.FaceData Info FaceData: использование календарного месяца: True 
+2018-07-08T16:30:58 DataController Info Используется MonthAccounting = Dashboard.OLAP.DAL.FaceInRoleData.CalendarMonthAccounting 
+2018-07-08T16:30:58 Dashboard.OLAP.DAL.FaceData Debug GetSaleIndicators IN 
+2018-07-08T16:30:58 StandardQuery Info Запрос reportDaysDataProduction WITH
+    MEMBER [Measures].[delKg] AS
+        Divide ([Measures].[SumPrice], [Measures].[DeliveryCount], 0)
+    MEMBER [Measures].[delRub] AS
+        [Measures].[SumPrice]
+    MEMBER [Measures].[delCount] AS
+        [Measures].[DeliveryCount]
+    MEMBER [Measures].[profitPercent] AS
+        Round ([Measures].[grossProfitCoef], 2)
+    MEMBER [Measures].[profitAverPercent] AS
+        Round ([Measures].[grossProfitCoefAver], 2)
+    MEMBER [Measures].[grossProfitSum] AS
+        [Measures].[grossProfit]
+    MEMBER [Measures].[grossProfitSumAver] AS
+        [Measures].[grossProfitAver]
+    MEMBER [Measures].[grossProfitSumAccum] AS
+        Sum (PeriodsToDate ([Dates].[Календарная].[Cal Month], [Dates].[Календарная].CurrentMember), ([Measures].[SumPrice] - [Measures].[Cost]))
+    MEMBER [Measures].[prognozProfitSum] AS
+        [Measures].[grossProfitSumAver] * [Measures].[MonthDayCount]
+SELECT
+    {
+        [Measures].[delRub],
+        [Measures].[delKg],
+        [Measures].[delCount],
+        [Measures].[prognozProfitSum]
+    }
+ON COLUMNS,
+{
+    [Dates].[Date].&[2018-04-01T00:00:00]:[Dates].[Date].&[2018-09-30T00:00:00],
+    [Dates].[Date].&[2017-04-01T00:00:00]:[Dates].[Date].&[2017-09-30T00:00:00]
+}
+ON ROWS
+FROM Dashboard
+WHERE
+(
+        {
+        [Delivery].[Oficiant]                             .&[Аджибеков Артур Тахирович],
+        [Delivery].[Oficiant]                             .&[Анурова Настя]
+    }
+) 
+2018-07-08T16:31:12 MdxRunner Info WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[Weight]
+    MEMBER [Measures].[fieldAll] AS
+        Sum ([Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1], [Measures].[field])
+SELECT
+    {
+                (
+            [Dates].[Cal Month],
+            [Measures].[fieldAll]
+        ),
+                (
+            [Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    }
+ON COLUMNS,
+NON EMPTY (
+    {
+        [Delivery].[Board Number]                         .children
+    })
+ON ROWS
+FROM Dashboard 
+2018-07-08T16:31:12 MdxRunner Info All = WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[Weight]
+    MEMBER [Measures].[fieldAll] AS
+        Sum ([Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1], [Measures].[field])
+SELECT
+    {
+                (
+            [Dates].[Cal Month],
+            [Measures].[fieldAll]
+        ),
+                (
+            [Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    }
+ON COLUMNS
+FROM Dashboard 
+2018-07-08T16:31:12 MdxRunner Info WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[Weight]
+    MEMBER [Measures].[fieldAll] AS
+        Sum ([Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1], [Measures].[field])
+SELECT
+    {
+                (
+            [Dates].[Cal Month],
+            [Measures].[fieldAll]
+        ),
+                (
+            [Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    }
+ON COLUMNS,
+NON EMPTY (
+    {
+        [Delivery].[Oficiant]                             .children
+    })
+ON ROWS
+FROM Dashboard 
+2018-07-08T16:31:12 MdxRunner Info All = WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[Weight]
+    MEMBER [Measures].[fieldAll] AS
+        Sum ([Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1], [Measures].[field])
+SELECT
+    {
+                (
+            [Dates].[Cal Month],
+            [Measures].[fieldAll]
+        ),
+                (
+            [Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    }
+ON COLUMNS
+FROM Dashboard 
+2018-07-08T16:31:15 Dashboard.OLAP.DAL.FaceData Info FaceData: использование календарного месяца: True 
+2018-07-08T16:31:15 DataController Info Используется MonthAccounting = Dashboard.OLAP.DAL.FaceInRoleData.CalendarMonthAccounting 
+2018-07-08T16:31:15 Dashboard.OLAP.DAL.FaceData Debug GetSaleIndicators IN 
+2018-07-08T16:31:15 StandardQuery Info Запрос reportDaysDataProduction WITH
+    MEMBER [Measures].[delKg] AS
+        Divide ([Measures].[SumPrice], [Measures].[DeliveryCount], 0)
+    MEMBER [Measures].[delRub] AS
+        [Measures].[SumPrice]
+    MEMBER [Measures].[delCount] AS
+        [Measures].[DeliveryCount]
+    MEMBER [Measures].[profitPercent] AS
+        Round ([Measures].[grossProfitCoef], 2)
+    MEMBER [Measures].[profitAverPercent] AS
+        Round ([Measures].[grossProfitCoefAver], 2)
+    MEMBER [Measures].[grossProfitSum] AS
+        [Measures].[grossProfit]
+    MEMBER [Measures].[grossProfitSumAver] AS
+        [Measures].[grossProfitAver]
+    MEMBER [Measures].[grossProfitSumAccum] AS
+        Sum (PeriodsToDate ([Dates].[Календарная].[Cal Month], [Dates].[Календарная].CurrentMember), ([Measures].[SumPrice] - [Measures].[Cost]))
+    MEMBER [Measures].[prognozProfitSum] AS
+        [Measures].[grossProfitSumAver] * [Measures].[MonthDayCount]
+SELECT
+    {
+        [Measures].[delRub],
+        [Measures].[delKg],
+        [Measures].[delCount],
+        [Measures].[prognozProfitSum]
+    }
+ON COLUMNS,
+{
+    [Dates].[Date].&[2018-04-01T00:00:00]:[Dates].[Date].&[2018-09-30T00:00:00],
+    [Dates].[Date].&[2017-04-01T00:00:00]:[Dates].[Date].&[2017-09-30T00:00:00]
+}
+ON ROWS
+FROM Dashboard
+WHERE
+(
+        {
+        [Delivery].[Oficiant]                             .&[Аджибеков Артур Тахирович],
+        [Delivery].[Oficiant]                             .&[Анурова Настя]
+    }
+) 
+2018-07-08T16:31:22 MdxRunner Info WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[Weight]
+    MEMBER [Measures].[fieldAll] AS
+        Sum ([Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1], [Measures].[field])
+SELECT
+    {
+                (
+            [Dates].[Cal Month],
+            [Measures].[fieldAll]
+        ),
+                (
+            [Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    }
+ON COLUMNS,
+NON EMPTY (
+    {
+        [Delivery].[Board Number]                         .children
+    })
+ON ROWS
+FROM Dashboard
+WHERE
+(
+    [Delivery].[Oficiant]                             .&[Сильченко Александр]
+) 
+2018-07-08T16:31:23 Dashboard.OLAP.DAL.FaceData Info FaceData: использование календарного месяца: True 
+2018-07-08T16:31:23 DataController Info Используется MonthAccounting = Dashboard.OLAP.DAL.FaceInRoleData.CalendarMonthAccounting 
+2018-07-08T16:31:23 Dashboard.OLAP.DAL.FaceData Debug GetSaleIndicators IN 
+2018-07-08T16:31:23 StandardQuery Info Запрос reportDaysDataProduction WITH
+    MEMBER [Measures].[delKg] AS
+        Divide ([Measures].[SumPrice], [Measures].[DeliveryCount], 0)
+    MEMBER [Measures].[delRub] AS
+        [Measures].[SumPrice]
+    MEMBER [Measures].[delCount] AS
+        [Measures].[DeliveryCount]
+    MEMBER [Measures].[profitPercent] AS
+        Round ([Measures].[grossProfitCoef], 2)
+    MEMBER [Measures].[profitAverPercent] AS
+        Round ([Measures].[grossProfitCoefAver], 2)
+    MEMBER [Measures].[grossProfitSum] AS
+        [Measures].[grossProfit]
+    MEMBER [Measures].[grossProfitSumAver] AS
+        [Measures].[grossProfitAver]
+    MEMBER [Measures].[grossProfitSumAccum] AS
+        Sum (PeriodsToDate ([Dates].[Календарная].[Cal Month], [Dates].[Календарная].CurrentMember), ([Measures].[SumPrice] - [Measures].[Cost]))
+    MEMBER [Measures].[prognozProfitSum] AS
+        [Measures].[grossProfitSumAver] * [Measures].[MonthDayCount]
+SELECT
+    {
+        [Measures].[delRub],
+        [Measures].[delKg],
+        [Measures].[delCount],
+        [Measures].[prognozProfitSum]
+    }
+ON COLUMNS,
+{
+    [Dates].[Date].&[2018-04-01T00:00:00]:[Dates].[Date].&[2018-09-30T00:00:00],
+    [Dates].[Date].&[2017-04-01T00:00:00]:[Dates].[Date].&[2017-09-30T00:00:00]
+}
+ON ROWS
+FROM Dashboard
+WHERE
+(
+        {
+        [Delivery].[Oficiant]                             .&[Аджибеков Артур Тахирович]
+    }
+) 
+2018-07-08T16:31:26 Dashboard.OLAP.DAL.FaceData Info FaceData: использование календарного месяца: True 
+2018-07-08T16:31:26 DataController Info Используется MonthAccounting = Dashboard.OLAP.DAL.FaceInRoleData.CalendarMonthAccounting 
+2018-07-08T16:31:26 Dashboard.OLAP.DAL.FaceData Debug GetSaleIndicators IN 
+2018-07-08T16:31:26 StandardQuery Info Запрос reportDaysDataProduction WITH
+    MEMBER [Measures].[delKg] AS
+        Divide ([Measures].[SumPrice], [Measures].[DeliveryCount], 0)
+    MEMBER [Measures].[delRub] AS
+        [Measures].[SumPrice]
+    MEMBER [Measures].[delCount] AS
+        [Measures].[DeliveryCount]
+    MEMBER [Measures].[profitPercent] AS
+        Round ([Measures].[grossProfitCoef], 2)
+    MEMBER [Measures].[profitAverPercent] AS
+        Round ([Measures].[grossProfitCoefAver], 2)
+    MEMBER [Measures].[grossProfitSum] AS
+        [Measures].[grossProfit]
+    MEMBER [Measures].[grossProfitSumAver] AS
+        [Measures].[grossProfitAver]
+    MEMBER [Measures].[grossProfitSumAccum] AS
+        Sum (PeriodsToDate ([Dates].[Календарная].[Cal Month], [Dates].[Календарная].CurrentMember), ([Measures].[SumPrice] - [Measures].[Cost]))
+    MEMBER [Measures].[prognozProfitSum] AS
+        [Measures].[grossProfitSumAver] * [Measures].[MonthDayCount]
+SELECT
+    {
+        [Measures].[delRub],
+        [Measures].[delKg],
+        [Measures].[delCount],
+        [Measures].[prognozProfitSum]
+    }
+ON COLUMNS,
+{
+    [Dates].[Date].&[2018-04-01T00:00:00]:[Dates].[Date].&[2018-09-30T00:00:00],
+    [Dates].[Date].&[2017-04-01T00:00:00]:[Dates].[Date].&[2017-09-30T00:00:00]
+}
+ON ROWS
+FROM Dashboard
+WHERE
+(
+        {
+        [Delivery].[Oficiant]                             .&[Аджибеков Артур Тахирович]
+    }
+) 
+2018-07-08T16:31:29 Dashboard.OLAP.DAL.FaceData Info FaceData: использование календарного месяца: True 
+2018-07-08T16:31:29 DataController Info Используется MonthAccounting = Dashboard.OLAP.DAL.FaceInRoleData.CalendarMonthAccounting 
+2018-07-08T16:31:29 Dashboard.OLAP.DAL.FaceData Debug GetSaleIndicators IN 
+2018-07-08T16:31:29 StandardQuery Info Запрос reportDaysDataProduction WITH
+    MEMBER [Measures].[delKg] AS
+        Divide ([Measures].[SumPrice], [Measures].[DeliveryCount], 0)
+    MEMBER [Measures].[delRub] AS
+        [Measures].[SumPrice]
+    MEMBER [Measures].[delCount] AS
+        [Measures].[DeliveryCount]
+    MEMBER [Measures].[profitPercent] AS
+        Round ([Measures].[grossProfitCoef], 2)
+    MEMBER [Measures].[profitAverPercent] AS
+        Round ([Measures].[grossProfitCoefAver], 2)
+    MEMBER [Measures].[grossProfitSum] AS
+        [Measures].[grossProfit]
+    MEMBER [Measures].[grossProfitSumAver] AS
+        [Measures].[grossProfitAver]
+    MEMBER [Measures].[grossProfitSumAccum] AS
+        Sum (PeriodsToDate ([Dates].[Календарная].[Cal Month], [Dates].[Календарная].CurrentMember), ([Measures].[SumPrice] - [Measures].[Cost]))
+    MEMBER [Measures].[prognozProfitSum] AS
+        [Measures].[grossProfitSumAver] * [Measures].[MonthDayCount]
+SELECT
+    {
+        [Measures].[delRub],
+        [Measures].[delKg],
+        [Measures].[delCount],
+        [Measures].[prognozProfitSum]
+    }
+ON COLUMNS,
+{
+    [Dates].[Date].&[2018-04-01T00:00:00]:[Dates].[Date].&[2018-09-30T00:00:00],
+    [Dates].[Date].&[2017-04-01T00:00:00]:[Dates].[Date].&[2017-09-30T00:00:00]
+}
+ON ROWS
+FROM Dashboard
+WHERE
+(
+        {
+        [Delivery].[Oficiant]                             .&[Аджибеков Артур Тахирович]
+    }
+) 
+2018-07-08T16:31:30 MdxRunner Info WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[Weight]
+    MEMBER [Measures].[fieldAll] AS
+        Sum ([Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1], [Measures].[field])
+SELECT
+    {
+                (
+            [Dates].[Cal Month],
+            [Measures].[fieldAll]
+        ),
+                (
+            [Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    }
+ON COLUMNS,
+NON EMPTY (
+    {
+        [Ent Contacts].[Full Name]                        .children
+    })
+ON ROWS
+FROM Dashboard
+WHERE
+(
+    [Delivery].[Oficiant]                             .&[Сильченко Александр],
+    [Delivery].[Board Number]                         .&[43]
+) 
+2018-07-08T16:31:50 MdxRunner Info WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[DeliveryCount]
+    MEMBER [Measures].[fieldAll] AS
+        Sum ([Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1], [Measures].[field])
+SELECT
+    {
+                (
+            [Dates].[Cal Month],
+            [Measures].[fieldAll]
+        ),
+                (
+            [Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    }
+ON COLUMNS,
+NON EMPTY (
+    {
+        [Delivery].[Board Number]                         .children
+    })
+ON ROWS
+FROM Dashboard 
+2018-07-08T16:31:50 MdxRunner Info All = WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[DeliveryCount]
+    MEMBER [Measures].[fieldAll] AS
+        Sum ([Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1], [Measures].[field])
+SELECT
+    {
+                (
+            [Dates].[Cal Month],
+            [Measures].[fieldAll]
+        ),
+                (
+            [Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    }
+ON COLUMNS
+FROM Dashboard 
+2018-07-08T16:31:50 MdxRunner Info WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[DeliveryCount]
+    MEMBER [Measures].[fieldAll] AS
+        Sum ([Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1], [Measures].[field])
+SELECT
+    {
+                (
+            [Dates].[Cal Month],
+            [Measures].[fieldAll]
+        ),
+                (
+            [Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    }
+ON COLUMNS,
+NON EMPTY (
+    {
+        [Delivery].[Oficiant]                             .children
+    })
+ON ROWS
+FROM Dashboard 
+2018-07-08T16:31:50 MdxRunner Info All = WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[DeliveryCount]
+    MEMBER [Measures].[fieldAll] AS
+        Sum ([Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1], [Measures].[field])
+SELECT
+    {
+                (
+            [Dates].[Cal Month],
+            [Measures].[fieldAll]
+        ),
+                (
+            [Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    }
+ON COLUMNS
+FROM Dashboard 
+2018-07-08T16:31:54 MdxRunner Info WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[SumPrice]
+    MEMBER [Measures].[fieldAll] AS
+        Sum ([Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1], [Measures].[field])
+SELECT
+    {
+                (
+            [Dates].[Cal Month],
+            [Measures].[fieldAll]
+        ),
+                (
+            [Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    }
+ON COLUMNS,
+NON EMPTY (
+    {
+        [Delivery].[Board Number]                         .children
+    })
+ON ROWS
+FROM Dashboard 
+2018-07-08T16:31:54 MdxRunner Info All = WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[SumPrice]
+    MEMBER [Measures].[fieldAll] AS
+        Sum ([Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1], [Measures].[field])
+SELECT
+    {
+                (
+            [Dates].[Cal Month],
+            [Measures].[fieldAll]
+        ),
+                (
+            [Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    }
+ON COLUMNS
+FROM Dashboard 
+2018-07-08T16:31:54 MdxRunner Info WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[SumPrice]
+    MEMBER [Measures].[fieldAll] AS
+        Sum ([Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1], [Measures].[field])
+SELECT
+    {
+                (
+            [Dates].[Cal Month],
+            [Measures].[fieldAll]
+        ),
+                (
+            [Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    }
+ON COLUMNS,
+NON EMPTY (
+    {
+        [Delivery].[Oficiant]                             .children
+    })
+ON ROWS
+FROM Dashboard 
+2018-07-08T16:31:54 MdxRunner Info All = WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[SumPrice]
+    MEMBER [Measures].[fieldAll] AS
+        Sum ([Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1], [Measures].[field])
+SELECT
+    {
+                (
+            [Dates].[Cal Month],
+            [Measures].[fieldAll]
+        ),
+                (
+            [Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    }
+ON COLUMNS
+FROM Dashboard 
+2018-07-08T16:31:59 MdxRunner Info WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[Weight]
+    MEMBER [Measures].[Декабрь 2016] AS
+                (
+            [Dates].[Cal Month].&[2016]&[12],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Январь 2017] AS
+                (
+            [Dates].[Cal Month].&[2017]&[1],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Декабрь 2017] AS
+                (
+            [Dates].[Cal Month].&[2017]&[12],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Январь 2018] AS
+                (
+            [Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Прогноз] AS
+        Divide (Sum ([Dates].[Date].&[2017-12-31T00:00:00]:[Dates].[Date].&[2017-12-02T00:00:00], [Measures].[field]), 30, 0) * 30
+    MEMBER [Measures].[Динамика к Январь 2017 проценты] AS
+        IIF (IsEmpty([Measures].[Прогноз]), Null, (Divide ([Measures].[Прогноз], [Measures].[Январь 2017], 2) - 1) * 100)
+    MEMBER [Measures].[Динамика к Декабрь 2017 проценты] AS
+        IIF (IsEmpty([Measures].[Прогноз]), Null, (Divide ([Measures].[Прогноз], [Measures].[Декабрь 2017], 2) - 1) * 100)
+SELECT
+    {
+        [Measures].[Декабрь 2016],
+        [Measures].[Январь 2017],
+        [Measures].[Декабрь 2017],
+        [Measures].[Январь 2018],
+        [Measures].[Прогноз],
+        [Measures].[Динамика к Январь 2017 проценты],
+        [Measures].[Динамика к Декабрь 2017 проценты]
+    }
+ON COLUMNS,
+NON EMPTY (
+    {
+        [Delivery].[Board Number]                         .children
+    })
+ON ROWS
+FROM Dashboard 
+2018-07-08T16:31:59 MdxRunner Info All = WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[Weight]
+    MEMBER [Measures].[Декабрь 2016] AS
+                (
+            [Dates].[Cal Month].&[2016]&[12],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Январь 2017] AS
+                (
+            [Dates].[Cal Month].&[2017]&[1],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Декабрь 2017] AS
+                (
+            [Dates].[Cal Month].&[2017]&[12],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Январь 2018] AS
+                (
+            [Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Прогноз] AS
+        Divide (Sum ([Dates].[Date].&[2017-12-31T00:00:00]:[Dates].[Date].&[2017-12-02T00:00:00], [Measures].[field]), 30, 0) * 30
+    MEMBER [Measures].[Динамика к Январь 2017 проценты] AS
+        IIF (IsEmpty([Measures].[Прогноз]), Null, (Divide ([Measures].[Прогноз], [Measures].[Январь 2017], 2) - 1) * 100)
+    MEMBER [Measures].[Динамика к Декабрь 2017 проценты] AS
+        IIF (IsEmpty([Measures].[Прогноз]), Null, (Divide ([Measures].[Прогноз], [Measures].[Декабрь 2017], 2) - 1) * 100)
+SELECT
+    {
+        [Measures].[Декабрь 2016],
+        [Measures].[Январь 2017],
+        [Measures].[Декабрь 2017],
+        [Measures].[Январь 2018],
+        [Measures].[Прогноз],
+        [Measures].[Динамика к Январь 2017 проценты],
+        [Measures].[Динамика к Декабрь 2017 проценты]
+    }
+ON COLUMNS
+FROM Dashboard 
+2018-07-08T16:31:59 MdxRunner Info WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[Weight]
+    MEMBER [Measures].[Декабрь 2016] AS
+                (
+            [Dates].[Cal Month].&[2016]&[12],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Январь 2017] AS
+                (
+            [Dates].[Cal Month].&[2017]&[1],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Декабрь 2017] AS
+                (
+            [Dates].[Cal Month].&[2017]&[12],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Январь 2018] AS
+                (
+            [Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Прогноз] AS
+        Divide (Sum ([Dates].[Date].&[2017-12-31T00:00:00]:[Dates].[Date].&[2017-12-02T00:00:00], [Measures].[field]), 30, 0) * 30
+    MEMBER [Measures].[Динамика к Январь 2017 проценты] AS
+        IIF (IsEmpty([Measures].[Прогноз]), Null, (Divide ([Measures].[Прогноз], [Measures].[Январь 2017], 2) - 1) * 100)
+    MEMBER [Measures].[Динамика к Декабрь 2017 проценты] AS
+        IIF (IsEmpty([Measures].[Прогноз]), Null, (Divide ([Measures].[Прогноз], [Measures].[Декабрь 2017], 2) - 1) * 100)
+SELECT
+    {
+        [Measures].[Декабрь 2016],
+        [Measures].[Январь 2017],
+        [Measures].[Декабрь 2017],
+        [Measures].[Январь 2018],
+        [Measures].[Прогноз],
+        [Measures].[Динамика к Январь 2017 проценты],
+        [Measures].[Динамика к Декабрь 2017 проценты]
+    }
+ON COLUMNS,
+NON EMPTY (
+    {
+        [Good].[Good - Name]                              .children
+    })
+ON ROWS
+FROM Dashboard 
+2018-07-08T16:32:00 MdxRunner Info All = WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[Weight]
+    MEMBER [Measures].[Декабрь 2016] AS
+                (
+            [Dates].[Cal Month].&[2016]&[12],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Январь 2017] AS
+                (
+            [Dates].[Cal Month].&[2017]&[1],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Декабрь 2017] AS
+                (
+            [Dates].[Cal Month].&[2017]&[12],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Январь 2018] AS
+                (
+            [Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Прогноз] AS
+        Divide (Sum ([Dates].[Date].&[2017-12-31T00:00:00]:[Dates].[Date].&[2017-12-02T00:00:00], [Measures].[field]), 30, 0) * 30
+    MEMBER [Measures].[Динамика к Январь 2017 проценты] AS
+        IIF (IsEmpty([Measures].[Прогноз]), Null, (Divide ([Measures].[Прогноз], [Measures].[Январь 2017], 2) - 1) * 100)
+    MEMBER [Measures].[Динамика к Декабрь 2017 проценты] AS
+        IIF (IsEmpty([Measures].[Прогноз]), Null, (Divide ([Measures].[Прогноз], [Measures].[Декабрь 2017], 2) - 1) * 100)
+SELECT
+    {
+        [Measures].[Декабрь 2016],
+        [Measures].[Январь 2017],
+        [Measures].[Декабрь 2017],
+        [Measures].[Январь 2018],
+        [Measures].[Прогноз],
+        [Measures].[Динамика к Январь 2017 проценты],
+        [Measures].[Динамика к Декабрь 2017 проценты]
+    }
+ON COLUMNS
+FROM Dashboard 
+2018-07-08T16:32:19 MdxRunner Info WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[Weight]
+    MEMBER [Measures].[Декабрь 2016] AS
+                (
+            [Dates].[Cal Month].&[2016]&[12],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Январь 2017] AS
+                (
+            [Dates].[Cal Month].&[2017]&[1],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Декабрь 2017] AS
+                (
+            [Dates].[Cal Month].&[2017]&[12],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Январь 2018] AS
+                (
+            [Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Прогноз] AS
+        Divide (Sum ([Dates].[Date].&[2017-12-31T00:00:00]:[Dates].[Date].&[2017-12-02T00:00:00], [Measures].[field]), 30, 0) * 30
+    MEMBER [Measures].[Динамика к Январь 2017 проценты] AS
+        IIF (IsEmpty([Measures].[Прогноз]), Null, (Divide ([Measures].[Прогноз], [Measures].[Январь 2017], 2) - 1) * 100)
+    MEMBER [Measures].[Динамика к Декабрь 2017 проценты] AS
+        IIF (IsEmpty([Measures].[Прогноз]), Null, (Divide ([Measures].[Прогноз], [Measures].[Декабрь 2017], 2) - 1) * 100)
+SELECT
+    {
+        [Measures].[Декабрь 2016],
+        [Measures].[Январь 2017],
+        [Measures].[Декабрь 2017],
+        [Measures].[Январь 2018],
+        [Measures].[Прогноз],
+        [Measures].[Динамика к Январь 2017 проценты],
+        [Measures].[Динамика к Декабрь 2017 проценты]
+    }
+ON COLUMNS,
+NON EMPTY (
+    {
+        [Good].[Good - Name]                              .children
+    })
+ON ROWS
+FROM Dashboard 
+2018-07-08T16:32:19 MdxRunner Info All = WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[Weight]
+    MEMBER [Measures].[Декабрь 2016] AS
+                (
+            [Dates].[Cal Month].&[2016]&[12],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Январь 2017] AS
+                (
+            [Dates].[Cal Month].&[2017]&[1],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Декабрь 2017] AS
+                (
+            [Dates].[Cal Month].&[2017]&[12],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Январь 2018] AS
+                (
+            [Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    MEMBER [Measures].[Прогноз] AS
+        Divide (Sum ([Dates].[Date].&[2017-12-31T00:00:00]:[Dates].[Date].&[2017-12-02T00:00:00], [Measures].[field]), 30, 0) * 30
+    MEMBER [Measures].[Динамика к Январь 2017 проценты] AS
+        IIF (IsEmpty([Measures].[Прогноз]), Null, (Divide ([Measures].[Прогноз], [Measures].[Январь 2017], 2) - 1) * 100)
+    MEMBER [Measures].[Динамика к Декабрь 2017 проценты] AS
+        IIF (IsEmpty([Measures].[Прогноз]), Null, (Divide ([Measures].[Прогноз], [Measures].[Декабрь 2017], 2) - 1) * 100)
+SELECT
+    {
+        [Measures].[Декабрь 2016],
+        [Measures].[Январь 2017],
+        [Measures].[Декабрь 2017],
+        [Measures].[Январь 2018],
+        [Measures].[Прогноз],
+        [Measures].[Динамика к Январь 2017 проценты],
+        [Measures].[Динамика к Декабрь 2017 проценты]
+    }
+ON COLUMNS
+FROM Dashboard 
+2018-07-08T16:33:01 MdxRunner Info WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[SumPrice]
+    MEMBER [Measures].[fieldAll] AS
+        Sum ([Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1], [Measures].[field])
+SELECT
+    {
+                (
+            [Dates].[Cal Month],
+            [Measures].[fieldAll]
+        ),
+                (
+            [Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    }
+ON COLUMNS,
+NON EMPTY (
+    {
+        [Delivery].[Board Number]                         .children
+    })
+ON ROWS
+FROM Dashboard 
+2018-07-08T16:33:01 MdxRunner Info All = WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[SumPrice]
+    MEMBER [Measures].[fieldAll] AS
+        Sum ([Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1], [Measures].[field])
+SELECT
+    {
+                (
+            [Dates].[Cal Month],
+            [Measures].[fieldAll]
+        ),
+                (
+            [Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    }
+ON COLUMNS
+FROM Dashboard 
+2018-07-08T16:33:01 MdxRunner Info WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[SumPrice]
+    MEMBER [Measures].[fieldAll] AS
+        Sum ([Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1], [Measures].[field])
+SELECT
+    {
+                (
+            [Dates].[Cal Month],
+            [Measures].[fieldAll]
+        ),
+                (
+            [Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    }
+ON COLUMNS,
+NON EMPTY (
+    {
+        [Delivery].[Oficiant]                             .children
+    })
+ON ROWS
+FROM Dashboard 
+2018-07-08T16:33:01 MdxRunner Info All = WITH
+    MEMBER [Measures].[field] AS
+        [Measures].[SumPrice]
+    MEMBER [Measures].[fieldAll] AS
+        Sum ([Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1], [Measures].[field])
+SELECT
+    {
+                (
+            [Dates].[Cal Month],
+            [Measures].[fieldAll]
+        ),
+                (
+            [Dates].[Cal Month].&[2017]&[8]:[Dates].[Cal Month].&[2018]&[1],
+            [Measures].[field]
+        )
+    }
+ON COLUMNS
+FROM Dashboard 

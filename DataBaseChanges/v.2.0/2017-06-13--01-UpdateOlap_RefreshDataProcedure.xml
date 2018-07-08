@@ -1,0 +1,264 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="UpdateOlap_RefreshDataProcedure" author="ura">
+    <createProcedure>
+
+      ALTER PROCEDURE [dbo].[olap_RefreshData]
+      -- Add the parameters for the stored procedure here
+      AS
+      BEGIN
+      -- SET NOCOUNT ON added to prevent extra result sets from
+      -- interfering with SELECT statements.
+      SET NOCOUNT ON;
+
+      --  drop table #goods
+      --drop table #priceDates
+      --drop table #prices
+
+
+
+
+      create table #goods
+      (
+      id_good int
+      )
+
+      CREATE CLUSTERED INDEX IDX_C_Goods_good_id ON #goods(id_good)
+
+      insert into #goods
+      select id_good
+      from ent_Goods AS g
+      WHERE g.goodsType_id in (2, 3)
+
+
+      truncate table olap_Details;
+      truncate table olap_delivery;
+
+      insert into olap_delivery(deliveryId, deliveryKey, date, contact_id, ent_type, isPlan, isEffective)
+
+      SELECT        d.id AS deliveryId,
+      'Реализация ' + [key] + ' от ' + CAST([date] AS nvarchar(20)) AS deliveryKey,
+      [date], contact_id,
+      1 AS ent_type,
+      case when DATEPART(dw, date) in (SELECT [DeliveryDay] FROM [ent_ContactsDeliveryDays] where contact_id = d.contact_id)
+      then 1 else 0 end as isPlan,
+      0 as isEffective
+      FROM            ent_Delivery AS d
+      join ent_Contacts c on c.id_contact=d.contact_id and c.isReport=1
+      WHERE        (d.isDeleted = 0) AND id in
+      (SELECT        dd.delivery_id
+      FROM            ent_DeliveryDetails AS dd INNER JOIN
+      #goods AS g ON dd.good_id = g.id_good
+      )
+      UNION
+      SELECT        d.id AS deliveryId, 'Возврат ' + [key] + ' от ' + CAST([date] AS nvarchar(20)) AS deliveryKey, [date], contact_id, 2 AS type, 0 as isPlan, 0 as isEffective
+      FROM            ent_ReturnGoods AS d
+      join ent_Contacts c on c.id_contact=d.contact_id and c.isReport=1
+      WHERE        (d.isDeleted = 0) AND id in
+      (SELECT        dd.return_id
+      FROM            ent_ReturnGoodsDetails AS dd INNER JOIN
+      #goods AS g ON dd.good_id = g.id_good
+      )
+
+
+
+      CREATE TABLE #priceDates
+      (
+      id_good int, date date, priceDate date, priceType_id int
+      )
+      CREATE TABLE #prices
+      (
+      id_good int, date date, price decimal(18, 2), pricePlan decimal(18, 2)
+      )
+
+      insert into #priceDates
+      Select p.id_good, p.date, max(pg.date) as priceDate, pg.priceType_id
+      from
+      (
+      select date, good_id as id_good
+      from olap_delivery d
+      join ent_DeliveryDetails dd on d.deliveryId=dd.delivery_id
+      --where good_id=436
+      union all
+      select date, good_id as id_good
+      from olap_delivery d
+      join ent_ReturnGoodsDetails dd on d.deliveryId=dd.return_id
+
+      --where good_id=436
+      ) p
+      inner join ent_PriceGoodsDetails pgd on p.id_good = pgd.good_id
+      inner join ent_PriceGoods pg on pg.id = pgd.priceGoods_id and p.date >= pg.date
+
+      group by p.id_good, p.date, pg.priceType_id;
+
+      --select *
+      --from #priceDates
+      --where   date>='2016-11-29'
+      --and id_good=436
+      --order by date
+
+
+      --	  Select distinct ap.id_good, ap.date, pgd.price as price, null
+      --      from #priceDates ap
+      --		inner join ent_PriceGoodsDetails pgd
+      --      on ap.id_good = pgd.good_id
+      --		 left join ent_PriceGoods pg
+      --      on pg.id = pgd.priceGoods_id and ap.priceDate = pg.date and (ap.priceType_id is null or ap.priceType_id = 1)
+      --      where  good_id=436
+      --and ap.date>='2016-11-29'
+      --order by ap.date
+
+
+      insert into #prices
+      Select distinct ap.id_good, ap.date, pgd.price as price, null
+      from #priceDates ap
+      inner join ent_PriceGoodsDetails pgd
+      on ap.id_good = pgd.good_id
+      inner join ent_PriceGoods pg
+      on pg.id = pgd.priceGoods_id
+      and ap.priceDate = pg.date
+      where ap.priceType_id is null or ap.priceType_id = 1
+      --and good_id=436
+
+
+
+      --order by date
+      MERGE #prices AS T
+      USING (
+      Select distinct ap.id_good, ap.date, pgd.price as pricePlan
+
+      from #priceDates ap
+      inner join ent_PriceGoodsDetails pgd
+      on ap.id_good = pgd.good_id
+      inner join ent_PriceGoods pg
+      on pg.id = pgd.priceGoods_id
+      and ap.priceDate = pg.date
+      where ap.priceType_id = 2
+      --and good_id=436
+      )
+      AS S
+      ON T.[date] = S.[date]
+      and T.id_good=S.id_good
+      WHEN MATCHED
+      and T.pricePlan != S.pricePlan or T.pricePlan is null
+      THEN
+      UPDATE
+      SET
+      T.pricePlan = S.pricePlan
+
+      WHEN NOT MATCHED BY TARGET
+      THEN
+      INSERT (
+      id_good , date , price, pricePlan)
+      values(
+      id_good, date, null, pricePlan
+      );
+
+      --  select * from #prices
+      --    where date>='2016-11-29'
+      ----  where pricePlan is not null
+      --  order by date
+
+      insert into
+      olap_Details (good_id, olapdelivery_id, amount, weight, sumPrice, cost, cause_id, recNum, costPlan)
+
+      SELECT        dd.good_id, od.id AS delivery_id, dd.amount,dd.weight, dd.sumPrice, isnull(pr.price,0) * dd.amount as cost , null as cause_, dd.recNum, isnull(pr.pricePlan,0) * dd.amount
+      FROM            ent_DeliveryDetails AS dd
+      INNER JOIN #goods AS g ON dd.good_id = g.id_good
+      INNER JOIN ent_Delivery AS d ON dd.delivery_id = d.id AND d.isDeleted = 0
+      join ent_Contacts c on c.id_contact=d.contact_id and c.isReport=1
+      join olap_delivery od on dd.delivery_id=od.deliveryId and od.ent_type=1
+      left join #prices pr on pr.date=d.date and pr.id_good=dd.good_id
+      --  where d.date>='2016-11-29' and dd.good_id=436
+      UNION ALL
+      SELECT       dd.good_id, od.id AS delivery_id, -dd.amount, -dd.weight, -dd.sumPrice, isnull(pr.price,0) * -dd.amount, cause_id, dd.recNum, isnull(pr.pricePlan,0) * -dd.amount
+      FROM            ent_ReturnGoodsDetails AS dd
+      INNER JOIN #goods AS g ON dd.good_id = g.id_good
+      INNER JOIN ent_ReturnGoods AS d ON dd.return_id = d.id AND d.isDeleted = 0
+      join ent_Contacts c on c.id_contact=d.contact_id and c.isReport=1
+      join olap_delivery od on dd.return_id=od.deliveryId and od.ent_type=2
+      left join #prices pr on pr.date=d.date and pr.id_good=dd.good_id
+
+
+
+      update olap_delivery
+      set isEffective = case when (select sum(weight) from olap_Details d
+      where d.olapdelivery_id=olap_delivery.id) > (select planWeight from ent_Contacts where ent_Contacts.id_contact=olap_delivery.contact_id)
+      then 1 else 0
+      end
+      where ent_type=1
+
+
+      update olap_Delivery
+      set isMmlRazvitiePercent = 0;
+
+      update olap_Delivery
+      set isMmlRazvitiePercent = 1
+      from
+      (
+      select * from olap_Delivery as od
+      LEFT OUTER JOIN
+      (
+      select sum(dd.weight) as AllWeight, dd.delivery_id as Alldelivery_id
+      from ent_Goods as g
+      join ent_BKG as bkg
+      on g.BKG_id = bkg.id
+
+      join ent_DeliveryDetails as dd
+      on g.id_good = dd.good_id
+
+      group by (dd.delivery_id)
+      ) as res
+
+      on od.deliveryId = res.Alldelivery_id
+
+      LEFT OUTER JOIN
+
+      (select sum(dd.weight) as MmlRazvWeight, dd.delivery_id as Mmldelivery_id
+      from ent_Goods as g
+      join ent_BKG as bkg
+      on g.BKG_id = bkg.id
+
+      join ent_DeliveryDetails as dd
+      on g.id_good = dd.good_id
+
+      where bkg.id = 3 or bkg.id = 4
+      group by (dd.delivery_id)) as res2
+
+      on od.deliveryId = res2.Mmldelivery_id
+      ) as odResult
+
+      where  olap_Delivery.deliveryId = Alldelivery_id and odResult.MmlRazvWeight >= 0.5 * odResult.AllWeight and olap_Delivery.isEffective = 1
+
+
+      --.
+      if(not exists(select 1 from olap_Dates))
+      begin
+
+
+      WITH T(date)
+      AS
+      (
+      SELECT CAST('20140101' AS smalldatetime)
+      UNION ALL
+      SELECT DateAdd(day,1,T.date) FROM T WHERE T.date &lt; '20180101'
+	        )
+
+	        insert into olap_Dates
+	        SELECT     date
+		         FROM         T OPTION(MAXRECURSION 0)
+	         end
+
+
+        END
+
+
+    </createProcedure>
+
+  </changeSet>
+</databaseChangeLog>

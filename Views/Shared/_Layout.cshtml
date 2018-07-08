@@ -1,0 +1,239 @@
+﻿@using System.Collections.Generic
+@using Dashboard.Menu
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    @RenderSection("meta", required: false)
+
+    <title>@ViewBag.Title</title>
+
+    @Styles.Render(
+        Dashboard.Bundles.MainCss.Css.Key,
+        Dashboard.Bundles.LoadAnimate.Css.Key,
+        Dashboard.Bundles.SectionMain.Css.Key
+    )
+    
+    @*sectionMain.css используется для карточке и виджетов на dashBoard*@
+   
+    <script type="text/javascript">
+        var basePath = '@Url.Content("~/")';
+
+
+        var controllerName = '@ViewContext.Controller.ValueProvider.GetValue("controller").RawValue';
+        var actionName = '@ViewContext.Controller.ValueProvider.GetValue("action").RawValue';
+
+
+    </script>
+
+    @Scripts.Render(
+        Dashboard.Bundles.modernizr.Scripts.Key,
+        Dashboard.Bundles.jquery.jquery.Scripts.Key
+    )
+    
+    @if (Configuration.TaskNotificationEnabled)
+    {
+        @Scripts.Render(Dashboard.Bundles.SignalR.Scripts.Key)
+
+        <script src="~/signalr/hubs"></script>
+    }
+   
+    @RenderSection("styles", required: false)
+
+</head>
+<body>
+    @Html.Partial("DoubleAjaxRequestBlocking")
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+
+            <div class="navbar-collapse collapse">
+                <div class="navbar-header">
+                    @Html.ActionLink(Configuration.NameCrm, "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+                </div>
+                <div class="navbar-collapse collapse">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <ul class="nav navbar-nav">
+                            @{
+                                    var mainMenu = new ISecurityMenuItem[]
+                                    {
+                                    //new SecurityActionMenuItem(
+                                    //    "Plan",
+                                    //    "Планы",
+                                    //    new SecurityActionMenuItem("Коммерческая служба", "Index", "Plan"),
+                                    //    new SecurityActionMenuItem("Планы продаж КС", "Index", "KSPlans"),
+                                    //    new SecurityActionMenuItem("SalesPlans", "Отдел продаж",
+                                    //        new SecurityActionMenuItem("matrix", "Матрица KPI", "Index", "MatrixOfKeyPerformanceIndicators"),
+                                    //        new SecurityActionMenuItem("Планы продаж", "Index", "SalesPlansKpi"))
+                                    //    ),
+                                    //new SecurityActionMenuItem(
+                                    //    "SalaryMenu",
+                                    //    "Мотивация",
+                                    //    new SecurityActionMenuItem("Общая ведомость", "Index", "GeneralStatement"),
+                                    //    new SecurityActionMenuItem("Расчет", "Index", "SalesSalary")),
+                                    new SecurityActionMenuItem(
+                                        "ReportMenu",
+                                        "Отчёты",
+                                        new SecurityActionMenuItem("Показатели продаж", "Contact", "SalesIndicatorReportOLAP"),
+                                        new SecurityActionMenuItem("Анализ по периодам", "Index", "AnalizeByPeriodsOLAP"),
+                                        new SecurityActionMenuItem("Отчет по периодам", "Index", "ReportByPeriodsOLAP"),
+                                        new SecurityActionMenuItem("Совместные покупки", "Rules", "Contact"),
+                                        new SecurityActionMenuItem("Наборы товаров", "Sets", "Contact")
+                                        //new SecurityActionMenuItem("Проверка данных", "Index", "TestDataReport"),
+                                        //new SecurityActionMenuItem("График отклонений данных", "Index", "TestDataChart"),
+                                        //new SecurityActionMenuItem("Пузырьковая диаграмма", "Index", "Bubble"),
+                                        //new SecurityActionMenuItem("БКГ", "Index", "BCG"),
+                                        //new SecurityActionMenuItem("План-фактный анализ ОП", "Index", "PlanFactReport"),
+                                        //new SecurityActionMenuItem("План-фактный анализ КС", "Index", "PlanFactKS"),
+                                        //new SecurityActionMenuItem("Некорректные данные", "Index", "CorrectData"),
+                                        //new SecurityActionMenuItem("Отчеты в Excel", "Index", "ExcelDocuments")
+                                        ),
+                                      
+                                    new SecurityActionMenuItem(
+                                        "DictionaryMenu",
+                                        "Справочники",
+                                        new SecurityActionMenuItem(
+                                            "GoodMenu",
+                                            "Номенклатура",
+                                            new SecurityActionMenuItem("Товары", "Index", "Good"),
+                                            new SecurityActionMenuItem("Группы товаров", "Index", "GoodGroup")
+                                           
+                                            ),
+                                        new SecurityActionMenuItem("Показатели", "Index", "IndicatorsByPeriodRpts"),
+                                        new SecurityActionMenuItem("Клиенты", "Index", "Contact"),
+                                        new SecurityActionMenuItem("Сотрудники", "Index", "Employees")
+                                        //new SecurityActionMenuItem("Должности", "Index", "Positions"),
+                                        //new SecurityActionMenuItem("Варианты KPI", "Index", "KpiVariants"),
+                                        //new SecurityActionMenuItem("Цены на основное сырьё", "Index", "BasicMaterial")
+                                        ),
+                                    new SecurityActionMenuItem(
+                                        "AdministrationMenu",
+                                        "Администрирование",
+                                        new SecurityActionMenuItem("Список пользователей", "Index", "AccessRights"),
+                                        new SecurityActionMenuItem("Пользователи", "UsersList", "Account"))
+                                };
+
+                                mainMenu.SetAccessFromConfig(User);
+
+                                //mainMenu.SetAccess(
+                                //    new Dictionary<string, bool>()
+                                //            {
+                                //                {"Plan", true},
+                                //                {"SalesPlans", true},
+                                //                {"matrix", true},
+                                //                {"ReportMenu", true},
+                                //                {"DictionaryMenu", true},
+                                //                {"AdministrationMenu", true},
+                                //                {"KpiMenu", true}
+                                //            });
+
+                                    @ShowMenuTree(mainMenu)
+                            }
+                        </ul>
+                    }
+                    
+                    @Html.Partial("_LoginPartial")
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container body-content">
+        @RenderBody()
+    </div>
+
+    <footer class="footer">
+        @*<div class="container" style="float: left; min-width: 0!important">
+            <p>Поддержка: tmu@btr-it.ru</p>
+            <p>8 (8652) 41-36-81 </p>
+        </div>
+
+        <div>
+            <p>ООО Бизнес трансформация 2017 год</p>
+        </div>*@
+    </footer>
+    @Scripts.Render(
+        Dashboard.Bundles.Bootstrap.Scripts.Key,
+        Dashboard.Bundles.Constants.Scripts.Key,
+        Dashboard.Bundles.scriptLoader.Scripts.Key,
+        Dashboard.Bundles.LoadAnimate.Scripts.Key
+    )
+
+   @RenderSection("scripts", required: false)
+    <script>
+
+    $(function () {
+        includeOnce("bundles/layout", function () {});
+
+        includeOnce("bundles/LayoutAsync", function() {
+
+            if (typeof PNotify != 'undefined') {
+                PNotify.prototype.options.styling = "bootstrap3";
+            }
+
+           
+        });
+
+    });
+
+    </script>
+
+</body>
+</html>
+@helper ShowMenuTree(IEnumerable<ISecurityMenuItem> items, int level = 0)
+{
+    foreach (var item in items)
+    {
+        if (!item.Enabled)
+        {
+            continue;
+        }
+
+        switch (item.Type)
+        {
+            case MenuItemType.Action:
+                var actionInfo = (SecurityActionMenuItem)item;
+
+                <li>
+                    @if (string.IsNullOrEmpty(actionInfo.Action))
+                    {
+                        if (level == 0)
+                        {
+                            <a href="#" data-toggle="dropdown" class="dropdown-toggle" aria-expanded="true">
+                                @actionInfo.Name<span class="caret"></span>
+                            </a>
+                        }
+                        else
+                        {
+                            <a class="trigger right-caret">@actionInfo.Name</a>
+                        }
+                    }
+                    else
+                    {
+                        @Html.ActionLink(actionInfo.Name, actionInfo.Action, actionInfo.Controller)
+                    }
+
+                    @if (actionInfo.Items != null)
+                    {
+                        <ul class="dropdown-menu @(level == 0 ? "" : "sub-menu")">
+                            @ShowMenuTree(actionInfo.Items, level + 1)
+                        </ul>
+                    }
+                </li>
+                    break;
+
+            case MenuItemType.Link:
+                    var linkInfo = (SecurityUrlMenuItem)item;
+
+                <li><a href="@linkInfo.Url">@linkInfo.Name</a></li>
+                    break;
+
+            default:
+                    throw new ArgumentOutOfRangeException("Не предусмотренный вариант элемента меню " + item.Type);
+        }
+
+
+    }
+}

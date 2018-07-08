@@ -1,0 +1,292 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="deb_InsertDataToAgregateRegistres_StoredProcedure" author="Ura">
+    <createProcedure>
+-- =============================================
+-- Author:		Andrey
+-- Create date: 06/01/2018
+-- Description:	Перезаписывание данных в регистры накопления БД Dashboard из БД 1С
+-- =============================================
+CREATE PROCEDURE deb_InsertDataToAgregateRegistres
+	
+AS
+BEGIN
+	delete from dbo.ent_DocumentsOfSettlementsByContragents;
+
+DBCC CHECKIDENT(ent_DocumentsOfSettlementsByContragents, RESEED, 0) WITH NO_INFOMSGS;
+
+insert into ent_DocumentsOfSettlementsByContragents
+	([DocumentBinID]
+    ,[Period]
+	,[DocNumber]
+    ,[DocumentNameId]
+	,[agreement_Id]
+    ,[contragent_id]
+    ,[Money])
+select *
+from(
+select
+	T1._RecorderRRef as [DocumentBinId],
+	DATEADD(year, -2000, T1._Period) as [Period],
+	CASE 
+		WHEN T1._RecorderTRef = 0x000001AD THEN T5._Number 
+		WHEN T1._RecorderTRef = 0x000001A9 THEN T6._Number 
+		WHEN T1._RecorderTRef = 0x00000115 THEN T7._Number
+		WHEN T1._RecorderTRef = 0x000001AA THEN T8._Number
+		WHEN T1._RecorderTRef = 0x0000019B THEN T9._Number 
+		WHEN T1._RecorderTRef = 0x00000136 THEN T10._Number
+		WHEN T1._RecorderTRef = 0x000001AF THEN T11._Number
+		WHEN T1._RecorderTRef = 0x00000114 THEN T12._Number 
+		WHEN T1._RecorderTRef = 0x000001F8 THEN T13._Number 
+		WHEN T1._RecorderTRef = 0x000001CB THEN T14._Number 
+		WHEN T1._RecorderTRef = 0x00000148 THEN T15._Number 
+		WHEN T1._RecorderTRef = 0x00000135 THEN T16._Number 
+		WHEN T1._RecorderTRef = 0x0000017B THEN T17._Number 
+		WHEN T1._RecorderTRef = 0x000001CE THEN T18._Number 
+		WHEN T1._RecorderTRef = 0x000001D8 THEN T19._Number 
+		WHEN T1._RecorderTRef = 0x000001EC THEN T20._Number 
+		WHEN T1._RecorderTRef = 0x00000113 THEN T21._Number 
+		WHEN T1._RecorderTRef = 0x000001F7 THEN T22._Number 
+		WHEN T1._RecorderTRef = 0x000001DC THEN T23._Number 
+		WHEN T1._RecorderTRef = 0x0000017C THEN T24._Number 
+		WHEN T1._RecorderTRef = 0x000001DB THEN T25._Number 
+		WHEN T1._RecorderTRef = 0x000001D9 THEN T26._Number 
+		WHEN T1._RecorderTRef = 0x000001B7 THEN T27._Number 
+		WHEN T1._RecorderTRef = 0x000001E4 THEN T28._Number 
+		WHEN T1._RecorderTRef = 0x000001D0 THEN T29._Number 
+		WHEN T1._RecorderTRef = 0x00000172 THEN T30._Number 
+		WHEN T1._RecorderTRef = 0x00000134 THEN T31._Number 
+		WHEN T1._RecorderTRef = 0x000001AC THEN T32._Number 
+		WHEN T1._RecorderTRef = 0x000001CD THEN T33._Number 
+		WHEN T1._RecorderTRef = 0x000001CF THEN T34._Number 
+		WHEN T1._RecorderTRef = 0x000001CC THEN T35._Number 
+		WHEN T1._RecorderTRef = 0x000001B5 THEN T36._Number 
+		WHEN T1._RecorderTRef = 0x00000112 THEN T37._Number 
+		WHEN T1._RecorderTRef = 0x000001D6 THEN T38._Number 
+		WHEN T1._RecorderTRef = 0x00000171 THEN T39._Number 
+		ELSE CAST(NULL AS nchar) 
+	END as [DocNumber],
+	cast(T1._RecorderTRef as int) as [DocNameId],
+	agr.id as [AgreementId],
+	c.id_contact as [ContragentId],
+	CAST((CASE WHEN _RECORDKIND = 0.0 THEN _Fld21386 ELSE - _Fld21386 END) AS money) AS [Money]
+from ka_satCopy2017_05.DBO._AccumRg21381 T1 WITH(NOLOCK)
+join ka_satCopy2017_05.dbo._Reference73 T2 on T1._Fld21382RRef = T2._IDRRef and T1._Fld21385RRef = T2._OwnerIDRRef and T2._Fld1964 = 0x01 and T2._Fld1953 = 0x00
+join [dbo].[ent_Contacts] c WITH (NOLOCK) ON T1._Fld21385RRef = c.binaryGuid
+join [dbo].[ent_Agreement] agr WITH (NOLOCK) ON T1._Fld21382RRef = agr.[binaryGuid]
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document429 T5 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x000001AD AND T1._RecorderRRef = T5._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document425 T6 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x000001A9 AND T1._RecorderRRef = T6._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document277 T7 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x00000115 AND T1._RecorderRRef = T7._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document426 T8 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x000001AA AND T1._RecorderRRef = T8._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document411 T9 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x0000019B AND T1._RecorderRRef = T9._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document310 T10 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x00000136 AND T1._RecorderRRef = T10._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document431 T11 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x000001AF AND T1._RecorderRRef = T11._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document276 T12 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x00000114 AND T1._RecorderRRef = T12._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document504 T13 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x000001F8 AND T1._RecorderRRef = T13._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document459 T14 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x000001CB AND T1._RecorderRRef = T14._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document328 T15 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x00000148 AND T1._RecorderRRef = T15._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document309 T16 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x00000135 AND T1._RecorderRRef = T16._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document379 T17 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x0000017B AND T1._RecorderRRef = T17._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document462 T18 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x000001CE AND T1._RecorderRRef = T18._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document472 T19 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x000001D8 AND T1._RecorderRRef = T19._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document492 T20 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x000001EC AND T1._RecorderRRef = T20._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document275 T21 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x00000113 AND T1._RecorderRRef = T21._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document503 T22 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x000001F7 AND T1._RecorderRRef = T22._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document476 T23 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x000001DC AND T1._RecorderRRef = T23._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document380 T24 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x0000017C AND T1._RecorderRRef = T24._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document475 T25 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x000001DB AND T1._RecorderRRef = T25._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document473 T26 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x000001D9 AND T1._RecorderRRef = T26._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document439 T27 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x000001B7 AND T1._RecorderRRef = T27._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document484 T28 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x000001E4 AND T1._RecorderRRef = T28._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document464 T29 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x000001D0 AND T1._RecorderRRef = T29._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document370 T30 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x00000172 AND T1._RecorderRRef = T30._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document308 T31 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x00000134 AND T1._RecorderRRef = T31._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document428 T32 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x000001AC AND T1._RecorderRRef = T32._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document461 T33 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x000001CD AND T1._RecorderRRef = T33._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document463 T34 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x000001CF AND T1._RecorderRRef = T34._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document460 T35 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x000001CC AND T1._RecorderRRef = T35._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document437 T36 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x000001B5 AND T1._RecorderRRef = T36._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document274 T37 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x00000112 AND T1._RecorderRRef = T37._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document470 T38 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x000001D6 AND T1._RecorderRRef = T38._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document369 T39 WITH(NOLOCK)
+	ON T1._RecorderTRef = 0x00000171 AND T1._RecorderRRef = T39._IDRRef
+where _Active = 0x01
+) Temp;
+
+delete from dbo.ent_DocumentsOfSettlementsByDocuments;
+
+DBCC CHECKIDENT(ent_DocumentsOfSettlementsByDocuments, RESEED, 0) WITH NO_INFOMSGS;
+
+insert into ent_DocumentsOfSettlementsByDocuments
+	([DocumentBinID]
+    ,[Period]
+	,[DocNumber]
+    ,[DocumentNameId]
+	,[agreement_Id]
+    ,[contragent_id]
+    ,[Money])
+
+select 
+	T1._Fld21393_RRRef as [DocumentBinId],
+	DATEADD(year, -2000, T1._Period) as [Period],
+	CASE 
+		WHEN T1._Fld21393_RTRef = 0x000001AD THEN T5._Number 
+		WHEN T1._Fld21393_RTRef = 0x000001A9 THEN T6._Number 
+		WHEN T1._Fld21393_RTRef = 0x00000115 THEN T7._Number
+		WHEN T1._Fld21393_RTRef = 0x000001AA THEN T8._Number
+		WHEN T1._Fld21393_RTRef = 0x0000019B THEN T9._Number 
+		WHEN T1._Fld21393_RTRef = 0x00000136 THEN T10._Number
+		WHEN T1._Fld21393_RTRef = 0x000001AF THEN T11._Number
+		WHEN T1._Fld21393_RTRef = 0x00000114 THEN T12._Number 
+		WHEN T1._Fld21393_RTRef = 0x000001F8 THEN T13._Number 
+		WHEN T1._Fld21393_RTRef = 0x000001CB THEN T14._Number 
+		WHEN T1._Fld21393_RTRef = 0x00000148 THEN T15._Number 
+		WHEN T1._Fld21393_RTRef = 0x00000135 THEN T16._Number 
+		WHEN T1._Fld21393_RTRef = 0x0000017B THEN T17._Number 
+		WHEN T1._Fld21393_RTRef = 0x000001CE THEN T18._Number 
+		WHEN T1._Fld21393_RTRef = 0x000001D8 THEN T19._Number 
+		WHEN T1._Fld21393_RTRef = 0x000001EC THEN T20._Number 
+		WHEN T1._Fld21393_RTRef = 0x00000113 THEN T21._Number 
+		WHEN T1._Fld21393_RTRef = 0x000001F7 THEN T22._Number 
+		WHEN T1._Fld21393_RTRef = 0x000001DC THEN T23._Number 
+		WHEN T1._Fld21393_RTRef = 0x0000017C THEN T24._Number 
+		WHEN T1._Fld21393_RTRef = 0x000001DB THEN T25._Number 
+		WHEN T1._Fld21393_RTRef = 0x000001D9 THEN T26._Number 
+		WHEN T1._Fld21393_RTRef = 0x000001B7 THEN T27._Number 
+		WHEN T1._Fld21393_RTRef = 0x000001E4 THEN T28._Number 
+		WHEN T1._Fld21393_RTRef = 0x000001D0 THEN T29._Number 
+		WHEN T1._Fld21393_RTRef = 0x00000172 THEN T30._Number 
+		WHEN T1._Fld21393_RTRef = 0x00000134 THEN T31._Number 
+		WHEN T1._Fld21393_RTRef = 0x000001AC THEN T32._Number 
+		WHEN T1._Fld21393_RTRef = 0x000001CD THEN T33._Number 
+		WHEN T1._Fld21393_RTRef = 0x000001CF THEN T34._Number 
+		WHEN T1._Fld21393_RTRef = 0x000001CC THEN T35._Number 
+		WHEN T1._Fld21393_RTRef = 0x000001B5 THEN T36._Number 
+		WHEN T1._Fld21393_RTRef = 0x00000112 THEN T37._Number 
+		WHEN T1._Fld21393_RTRef = 0x000001D6 THEN T38._Number 
+		WHEN T1._Fld21393_RTRef = 0x00000171 THEN T39._Number 
+		ELSE CAST(NULL AS nchar) 
+	END as [DocNumber],
+	cast(T1._Fld21393_RTRef as int) as [DocNameId],
+	agr.id as [AgreementId],
+	c.id_contact as [ContragentId],
+	CAST((CASE WHEN _RECORDKIND = 0.0 THEN _FLD21398 ELSE - _FLD21398 END) AS money) AS [Money]
+from ka_satCopy2017_05.DBO._ACCUMRG21390 T1 WITH(NOLOCK)
+join ka_satCopy2017_05.dbo._Reference73 T2 on T1._Fld21391RRef = T2._IDRRef and T1._FLD21397RREF = T2._OwnerIDRRef and T2._Fld1964 = 0x01 and T2._Fld1953 = 0x01
+join [dbo].[ent_Contacts] c WITH (NOLOCK) ON T1.[_FLD21397RREF] = c.binaryGuid
+join [dbo].[ent_Agreement] agr WITH (NOLOCK) ON T1.[_Fld21391RRef] = agr.[binaryGuid]
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document429 T5 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x000001AD AND T1._Fld21393_RRRef = T5._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document425 T6 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x000001A9 AND T1._Fld21393_RRRef = T6._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document277 T7 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x00000115 AND T1._Fld21393_RRRef = T7._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document426 T8 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x000001AA AND T1._Fld21393_RRRef = T8._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document411 T9 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x0000019B AND T1._Fld21393_RRRef = T9._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document310 T10 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x00000136 AND T1._Fld21393_RRRef = T10._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document431 T11 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x000001AF AND T1._Fld21393_RRRef = T11._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document276 T12 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x00000114 AND T1._Fld21393_RRRef = T12._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document504 T13 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x000001F8 AND T1._Fld21393_RRRef = T13._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document459 T14 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x000001CB AND T1._Fld21393_RRRef = T14._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document328 T15 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x00000148 AND T1._Fld21393_RRRef = T15._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document309 T16 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x00000135 AND T1._Fld21393_RRRef = T16._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document379 T17 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x0000017B AND T1._Fld21393_RRRef = T17._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document462 T18 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x000001CE AND T1._Fld21393_RRRef = T18._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document472 T19 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x000001D8 AND T1._Fld21393_RRRef = T19._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document492 T20 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x000001EC AND T1._Fld21393_RRRef = T20._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document275 T21 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x00000113 AND T1._Fld21393_RRRef = T21._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document503 T22 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x000001F7 AND T1._Fld21393_RRRef = T22._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document476 T23 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x000001DC AND T1._Fld21393_RRRef = T23._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document380 T24 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x0000017C AND T1._Fld21393_RRRef = T24._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document475 T25 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x000001DB AND T1._Fld21393_RRRef = T25._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document473 T26 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x000001D9 AND T1._Fld21393_RRRef = T26._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document439 T27 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x000001B7 AND T1._Fld21393_RRRef = T27._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document484 T28 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x000001E4 AND T1._Fld21393_RRRef = T28._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document464 T29 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x000001D0 AND T1._Fld21393_RRRef = T29._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document370 T30 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x00000172 AND T1._Fld21393_RRRef = T30._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document308 T31 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x00000134 AND T1._Fld21393_RRRef = T31._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document428 T32 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x000001AC AND T1._Fld21393_RRRef = T32._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document461 T33 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x000001CD AND T1._Fld21393_RRRef = T33._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document463 T34 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x000001CF AND T1._Fld21393_RRRef = T34._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document460 T35 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x000001CC AND T1._Fld21393_RRRef = T35._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document437 T36 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x000001B5 AND T1._Fld21393_RRRef = T36._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document274 T37 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x00000112 AND T1._Fld21393_RRRef = T37._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document470 T38 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x000001D6 AND T1._Fld21393_RRRef = T38._IDRRef
+	LEFT OUTER JOIN ka_satCopy2017_05.dbo._Document369 T39 WITH(NOLOCK)
+	ON T1._Fld21393_RTRef = 0x00000171 AND T1._Fld21393_RRRef = T39._IDRRef
+where _Fld21393_Type = 0x08 and _Active = 0x01
+
+END
+	</createProcedure>
+  </changeSet>
+</databaseChangeLog>

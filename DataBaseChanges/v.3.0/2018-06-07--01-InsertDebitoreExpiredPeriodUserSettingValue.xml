@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="InsertDebitoreExpiredPeriodUserSettingValue" author="Andrey">
+
+
+    <insert tableName="dsh_UserSetting">
+      <column name="id" value="20"/>
+      <column name="SettingName" value="Период просроченной задолженности" />
+    </insert>
+
+
+  </changeSet>
+
+</databaseChangeLog>

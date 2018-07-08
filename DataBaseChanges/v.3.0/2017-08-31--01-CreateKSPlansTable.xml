@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="2017-08-31--01-CreateKSPlansTable" author="Mikhail">
+
+    <createTable tableName="pln_KSPlans">
+
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+
+      <column name="month" type="date">
+        <constraints nullable="false" />
+      </column>
+      
+        
+       <column name="hst_datetime" type="datetime">
+        <constraints nullable="false" />
+      </column>
+      
+      <column name="indicator_id" type="INT">
+        <constraints nullable="false" />
+      </column>
+
+      <column name="region_id" type="INT">
+        <constraints nullable="false" />
+      </column>
+      
+      <column name="good_id" type="INT">
+        <constraints nullable="false" />
+      </column>
+
+      <column name="plan" type="DECIMAL">
+        <constraints nullable="false" />
+      </column>
+
+    </createTable>
+
+    <addForeignKeyConstraint referencedColumnNames="id" referencedTableName="rpt_ByPeriods_Indicators"
+                                 baseColumnNames="indicator_id" baseTableName="pln_KSPlans"
+                           constraintName="FK_KSPlans_Indicators" onDelete="NO ACTION"/>
+
+    <addForeignKeyConstraint referencedColumnNames="id_good" referencedTableName="ent_Goods"
+                                 baseColumnNames="good_id" baseTableName="pln_KSPlans"
+                           constraintName="FK_KSPlans_Good" onDelete="NO ACTION"/>
+
+    <addForeignKeyConstraint referencedColumnNames="id" referencedTableName="ent_Regions"
+                                baseColumnNames="region_id" baseTableName="pln_KSPlans"
+                          constraintName="FK_KSPlans_Region" onDelete="NO ACTION"/>
+
+  </changeSet>
+</databaseChangeLog>
+

@@ -1,0 +1,286 @@
+﻿
+
+html {
+    min-height: 96%;
+    position: relative;
+    max-width: 98%;
+}
+body {
+    padding-top: 50px;
+    padding-bottom: 20px;
+}
+
+/* Set padding to keep content from hitting the edges */
+.body-content {
+    padding-left: 15px;
+    padding-right: 15px;
+    padding-bottom: 40px;
+    max-width: 100%; 
+}
+
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+    max-width: 280px;
+}
+
+/*Рейтинги*/
+
+.progress {
+    margin: 5px;
+    position: relative;
+    text-align: center;
+    background-color: #191970;
+}
+.progress-value {
+    position:absolute;
+    right:0;
+    left:0;
+	top: 0;
+	font-weight: normal;
+    color: #ffffff;
+}
+
+.progress-bar{
+    background-color: #3f51b5;
+}
+
+.footer {
+    bottom: 0;
+    height: 40px;
+    position: absolute;
+    width: 100%;
+    text-align: right;
+}
+.legend-rotate {
+    transform: rotate(-90deg);
+}
+
+/*стиль для каскадного меню http://jsfiddle.net/chirayu45/e02t2jcc/1/*/
+.dropdown-menu .sub-menu {
+    left: 100%;
+    position: absolute;
+    top: 0;
+    display:none;
+    margin-top: -1px;
+	border-top-left-radius:0;
+	border-bottom-left-radius:0;
+	border-left-color:#fff;
+	box-shadow:none;
+}
+
+.right-caret:after
+ {	content:"";
+    border-bottom: 4px solid transparent;
+    border-top: 4px solid transparent;
+    border-left: 4px solid orange;
+    display: inline-block;
+    height: 0;
+    opacity: 0.8;
+    vertical-align: middle;
+    width: 0;
+	margin-left:5px;
+}
+.left-caret:after
+{	content:"";
+    border-bottom: 4px solid transparent;
+    border-top: 4px solid transparent;
+    border-right: 4px solid orange;
+    display: inline-block;
+    height: 0;
+    opacity: 0.8;
+    vertical-align: middle;
+    width: 0;
+	margin-left:5px;
+}
+
+
+input[type="submit"], input[type="button"], button {
+    border: 1px solid #787878;
+    cursor: pointer;
+    /*float: right;*/
+    font-size: 1.2em;
+    font-weight: 600;
+    width: auto;
+}
+
+
+
+    #login a {
+        background-color: #d3dce0;
+        margin-left: 10px;
+        margin-right: 3px;
+        padding: 2px 3px;
+        text-decoration: none;
+    }
+
+    #login a.username {
+        background: none;
+        margin: 0;
+        padding: 0;
+        text-decoration: underline;
+    }
+
+    #login ul {
+        margin: 0;
+    }
+
+   #login li {
+        display: inline;
+        list-style: none;
+    }
+
+   hgroup.title {
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+header, footer, hgroup, nav, section {
+    display: block;
+}
+   
+	.login-title {
+		background-color: #8f9297;
+		text-align: center;
+		vertical-align: central;
+	}
+
+	.login-form {
+		border: 1px solid #e2e2e2;
+		padding: 5px 20px;
+		min-width: 380px;
+	}
+
+
+    #loginForm {
+    float: left;
+     margin: 25% 0 0 0%;
+     width: 350px;
+     font-size: 0.8em
+}
+
+    #loginForm .validation-error {
+        display: block;
+        margin-left: 15px;
+    }
+
+    #loginForm .validation-summary-errors ul {
+        margin: 0;
+        padding: 0;
+    }
+
+    #loginForm .validation-summary-errors li {
+        display: inline;
+        list-style: none;
+        margin: 0;
+    }
+
+
+    #loginForm input[type="checkbox"],
+    #loginForm input[type="submit"],
+    #loginForm input[type="button"],
+    #loginForm button {
+        width: auto;
+    }
+
+    .icon-right {
+        float: right;
+        padding-left: 3px;
+    }
+    
+    
+    /*#Grid {
+        min-width: 98vw;   
+    }*/
+
+@media screen and (device-width: 1280px) {
+    .custom_col_lg_8 {
+        width: 58%;
+    }
+
+       .period {
+    padding-left: 0;
+    padding-right: 0;
+    width: 5%;
+   }
+
+   .select_period {
+       width: 20%;
+   }
+
+   .container {
+       margin-left: 0%;
+   }
+}
+
+@media screen and (device-width: 1024px) {
+    .container {
+        max-width: 100%;
+    }
+
+    .custom_col_md_1 {
+        width: 5%;
+        padding-right: 0;
+    }
+
+    .custom_col_md_7 {
+        width: 52%;
+        padding-right: 0;
+    }
+
+    .custom_col_xs_2 {
+        width: 13%;
+    }
+
+    .padding_zero {
+        padding: 0;
+    }
+
+    #logoutForm {
+        float: left !important;
+    }
+
+    .modal-dialog {
+        width: 100vw !important;
+        padding-top: 0;
+        padding-left: 0;
+        margin-left: 0;
+    }
+
+    #currDate {
+        padding-top: 5px !important;
+        ;
+        font-size: 16px !important;
+        ;
+        margin-left: -15px;
+        padding-left: 14px;
+    }
+
+    .date-picker {
+        padding: 0;
+        margin-top: 0 !important;
+    }
+
+    .comment {
+        width: 50%;
+        padding-left: 9%;
+    }
+
+    .checkbox_report_by_per {
+        width: 20%;
+    }
+
+    .data-range {
+        width: 46%;
+    }
+
+    .period {
+        padding-left: 0;
+        padding-right: 0;
+        width: 5%;
+    }
+
+    .select_period {
+        width: 24%;
+    }
+}

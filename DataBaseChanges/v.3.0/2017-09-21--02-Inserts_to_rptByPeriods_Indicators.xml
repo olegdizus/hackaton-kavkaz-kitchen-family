@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Inserts_to_rptByPeriods_Indicators" author="Ura">
+
+    <insert tableName="rpt_ByPeriods_Indicators">
+      <column name="name" value="Стоимость доставки (на точку), руб" />
+      <column name="aggregateType" value="simple" />
+      <column name="measureName" value="ContactCruiseCost" />
+      <column name="kategory_id" value="1" />
+      <column name="isOnlyReport" value="0" />
+      <column name="goodsType_id" value="2" />
+      <column name="description" value="Стоимость доставки товара к клиенту" />
+    </insert>
+
+    
+    <insert tableName="rpt_ByPeriods_Indicators">
+      <column name="name" value="Расходы (на точку), руб" />
+      <column name="aggregateType" value="simple" />
+      <column name="measureName" value="ContactExpenses" />
+      <column name="kategory_id" value="1" />
+      <column name="isOnlyReport" value="0" />
+      <column name="goodsType_id" value="2" />
+      <column name="description" value="Стоимость доставки + зарплата отдела продаж" />
+    </insert>
+
+    
+    <insert tableName="rpt_ByPeriods_Indicators">
+      <column name="name" value="Доходы (на точку), руб" />
+      <column name="aggregateType" value="simple" />
+      <column name="measureName" value="Earnings" />
+      <column name="kategory_id" value="1" />
+      <column name="isOnlyReport" value="0" />
+      <column name="goodsType_id" value="2" />
+      <column name="description" value="Валовая прибыль - Расходы (на точку)" />
+    </insert>
+    
+  </changeSet>
+</databaseChangeLog>

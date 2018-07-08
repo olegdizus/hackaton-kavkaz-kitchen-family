@@ -1,0 +1,152 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Create_ProductsDeliveryRefresh_Procedure" author="Ura">
+    <createProcedure>
+
+-- =============================================
+-- Author:		Дудченко Юрий
+-- Create date: 25.09.2017
+-- Description:
+-- =============================================
+
+      CREATE PROCEDURE imp_ProductsDeliveryRefresh
+      AS
+      BEGIN
+      SET NOCOUNT ON;
+
+      DECLARE @importId UNIQUEIDENTIFIER
+
+      CREATE TABLE #importIdTable (
+      importId UNIQUEIDENTIFIER
+      )
+
+      WHILE 0 &lt; (SELECT
+      COUNT(*)
+      FROM imp_ProductsDelivery
+      WHERE importId NOT IN (SELECT importId FROM #importIdTable))
+      BEGIN
+
+      SET @importId = (SELECT TOP 1
+      importId
+      FROM imp_ProductsDelivery
+      WHERE importId NOT IN (SELECT importId FROM #importIdTable)
+      ORDER BY id)
+
+      INSERT INTO #importIdTable (importId)
+      VALUES (@importId);
+
+
+      MERGE ent_ProductsDelivery AS T
+      USING (SELECT
+
+      ipd.[guid],
+      ipd.isDeleted,
+      ipd.number,
+      ipd.[date],
+      ipd.IsCarriedOut,
+      ipd.cruise,
+      ipd.isDirectDelivery,
+      ipd.user1C,
+      ipd.typeObject,
+      ipd.hst_datetime,
+
+      ef.id AS forwarder_id,
+      rf.id AS routeForwarder_id,
+      factrf.id AS factForwarder_id
+
+      FROM imp_ProductsDelivery ipd
+
+      LEFT JOIN ent_Forwarders ef ON ef.[guid] = ipd.forwarderGuid
+
+      LEFT JOIN ent_RoutesForwarders rf ON rf.[guid] = ipd.RouteForwarderGuid
+
+      LEFT JOIN ent_Forwarders factrf ON factrf.[guid] = ipd.factForwarderGuid
+
+      WHERE ipd.importId = @importId
+      ) AS S
+
+      ON T.[guid] = S.[guid]
+      WHEN MATCHED
+      AND (T.isDeleted != S.isDeleted OR T.isDeleted IS NOT NULL AND S.isDeleted IS NULL OR T.isDeleted IS NULL AND S.isDeleted IS NOT NULL
+      OR T.number != S.number OR T.number IS NOT NULL AND S.number IS NULL OR T.number IS NULL AND S.number IS NOT NULL
+      OR T.[date] != S.[date] OR T.[date] IS NOT NULL AND S.[date] IS NULL OR T.[date] IS NULL AND S.[date] IS NOT NULL
+      OR T.IsCarriedOut != S.IsCarriedOut OR T.IsCarriedOut IS NOT NULL AND S.IsCarriedOut IS NULL OR T.IsCarriedOut IS NULL AND S.IsCarriedOut IS NOT NULL
+      OR T.forwarder_id != S.forwarder_id OR T.forwarder_id IS NOT NULL AND S.forwarder_id IS NULL OR T.forwarder_id IS NULL AND S.forwarder_id IS NOT NULL
+      OR T.cruise != S.cruise OR T.cruise IS NOT NULL AND S.cruise IS NULL OR T.cruise IS NULL AND S.cruise IS NOT NULL
+      OR T.routeForwarder_id != S.routeForwarder_id OR T.routeForwarder_id IS NOT NULL AND S.routeForwarder_id IS NULL OR T.routeForwarder_id IS NULL AND S.routeForwarder_id IS NOT NULL
+      OR T.isDirectDelivery != S.isDirectDelivery OR T.isDirectDelivery IS NOT NULL AND S.isDirectDelivery IS NULL OR T.isDirectDelivery IS NULL AND S.isDirectDelivery IS NOT NULL
+      OR T.factForwarder_id != S.factForwarder_id OR T.factForwarder_id IS NOT NULL AND S.factForwarder_id IS NULL OR T.factForwarder_id IS NULL AND S.factForwarder_id IS NOT NULL
+      OR T.user1C != S.user1C OR T.user1C IS NOT NULL AND S.user1C IS NULL OR T.user1C IS NULL AND S.user1C IS NOT NULL
+      OR T.typeObject != S.typeObject OR T.typeObject IS NOT NULL AND S.typeObject IS NULL OR T.typeObject IS NULL AND S.typeObject IS NOT NULL
+      )
+
+      THEN UPDATE
+      SET T.[guid] = S.[guid]
+      ,T.[isDeleted] = S.[isDeleted]
+      ,T.[number] = S.[number]
+      ,T.[date] = S.[date]
+      ,T.[IsCarriedOut] = S.[IsCarriedOut]
+      ,T.[forwarder_id] = S.[forwarder_id]
+      ,T.[cruise] = S.[cruise]
+      ,T.[routeForwarder_id] = S.[routeForwarder_id]
+      ,T.[isDirectDelivery] = S.[isDirectDelivery]
+      ,T.[factForwarder_id] = S.[factForwarder_id]
+      ,T.[user1C] = S.[user1C]
+      ,T.[typeObject] = S.[typeObject]
+      ,T.[hst_datetime] = S.[hst_datetime]
+
+      WHEN NOT MATCHED BY TARGET
+      THEN INSERT (
+      [guid],
+      [isDeleted],
+      [number],
+      [date],
+      [IsCarriedOut],
+      [forwarder_id],
+      [cruise],
+      [routeForwarder_id],
+      [isDirectDelivery],
+      [factForwarder_id],
+      [user1C],
+      [typeObject],
+      [hst_datetime]
+      )
+      VALUES (
+      [guid],
+      [isDeleted],
+      [number],
+      [date],
+      [IsCarriedOut],
+      [forwarder_id],
+      [cruise],
+      [routeForwarder_id],
+      [isDirectDelivery],
+      [factForwarder_id],
+      [user1C],
+      [typeObject],
+      [hst_datetime]);
+
+
+      print 'Удаление из импортной таблицы';
+
+      DELETE FROM imp_ProductsDelivery
+      WHERE importId IN (SELECT
+      importId
+      FROM #importIdTable);
+
+      END;
+
+      DROP TABLE #importIdTable
+
+
+      END
+
+    </createProcedure>
+
+  </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <include file="2018-06-13--01-AddColumnSystemHandleAndSystemNalogToContact.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-06-13--02-AddSystemHandleTable.xml" relativeToChangelogFile="true"/>
+  <include file="2018-06-13--03-AddSystemNalogTable.xml" relativeToChangelogFile="true"/>
+
+  <include file="2018-06-13--04-AddColumnSystemHandleAndSystemNalogToEntContact.xml" relativeToChangelogFile="true"/>
+  <include file="2018-06-13--05-Alter_imp_ContactsRefresh.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-06-13--06-Update_dsh_GetGroupsByPeriod_Procedure.xml" relativeToChangelogFile="true"/>
+  <include file="2018-06-13--07-Inserts_to_rpt_Dimension.xml" relativeToChangelogFile="true"/>
+  <include file="2018-06-14--01-Update_rpt_Dimension_System_Values.xml" relativeToChangelogFile="true"/>
+  
+</databaseChangeLog>

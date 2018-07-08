@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Add_ent_Contacts_ent_Contact_ForeignConstraint.xml" author="Andrey">
+      
+	<addForeignKeyConstraint referencedColumnNames="id_contact" referencedTableName="ent_Contacts"
+		 baseColumnNames="id_contact" baseTableName="ent_Contacts"
+		 constraintName="FK_ent_Contacts_ent_Contacts" onDelete="NO ACTION"/>
+
+  </changeSet>
+</databaseChangeLog>

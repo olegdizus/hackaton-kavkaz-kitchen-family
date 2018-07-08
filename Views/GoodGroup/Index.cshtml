@@ -1,0 +1,57 @@
+﻿@using Kendo.Mvc.UI;
+@using Dashboard.DB.Models;
+@using System.Web.Mvc;
+@using Dashboard.Controllers
+@using Dashboard.DB.Hack
+
+@section styles
+{
+    @Styles.Render(Dashboard.Bundles.Kendo.KendoStandart.Css.Key,
+        Dashboard.Bundles.Fontawesome.Css.Key)
+}
+
+@section Scripts
+{
+    @Scripts.Render(
+        Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+        Dashboard.Bundles.Kendo.kendoHelp.Scripts.Key)
+}
+
+@Html.Partial("DeleteModalWindow")
+@{
+}
+@{
+    ViewBag.Title = "Группы товаров";
+}
+<h2>@ViewBag.Title</h2>
+
+<div class="form-horizontal">
+    <p>
+        @*<div id="createGroupButton" class="btn btn-primary">Создать группу</div>*@
+    </p>
+
+    <div>
+        @(Html.Kendo().Grid<GoodGroupList>()
+              .Name("Grid")
+              .Columns(columns =>
+              {
+                  columns.Bound(p => p.Name);
+                  columns.Bound(p => p.Goods);
+
+                 
+              })
+              .DataSource(dataSource => dataSource
+                  .Ajax()
+                  .Events(events => events.Error("error_handler"))
+                  .Read(read => read.Action("AllHackGoodGroups", "GoodGroup"))
+                  .PageSize(30)
+                  .Total(0))
+              .Pageable()
+              .Sortable()
+              .Filterable()
+              )
+    </div>
+</div>
+
+
+

@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="CreateSalaryIndicatorParametrsTable" author="aPetrosyan">
+
+    <createTable tableName="dsh_SalaryIndicatorParametrs">
+
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+
+      <column name="salary_id" type="INT">
+        <constraints nullable="false" />
+      </column>
+
+      <column name="indicator_id" type="INT">
+        <constraints nullable="false" />
+      </column>
+
+      <column name="payedMax" type="DECIMAL">
+        <constraints nullable="false" />
+      </column>
+
+    </createTable>
+
+    <addForeignKeyConstraint referencedColumnNames="id" referencedTableName="dsh_Salary"
+                                 baseColumnNames="salary_id" baseTableName="dsh_SalaryIndicatorParametrs"
+                           constraintName="FK_Salary_SalaryBonus" onDelete="CASCADE"/>
+
+    <addForeignKeyConstraint referencedColumnNames="id" referencedTableName="rpt_ByPeriods_Indicators"
+                                 baseColumnNames="indicator_id" baseTableName="dsh_SalaryIndicatorParametrs"
+                           constraintName="FK_SalaryBonus_Indicators" onDelete="NO ACTION"/>
+
+  </changeSet>
+</databaseChangeLog>
+

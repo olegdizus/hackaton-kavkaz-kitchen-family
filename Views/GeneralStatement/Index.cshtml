@@ -1,0 +1,38 @@
+﻿@{
+    ViewBag.Title = "Общая ведомость";
+}
+
+<h2>@ViewBag.Title</h2>
+
+@section styles
+{
+    @Styles.Render(
+        Dashboard.Bundles.Kendo.kendo.Css.Key,
+        Dashboard.Bundles.Fontawesome.Css.Key,
+        Dashboard.Bundles.GeneralStatementCss.Css.Key
+    )
+}
+
+<div class="row">  
+    @Html.Partial("~/Views/Shared/ProductionMonthControl.cshtml")
+</div>
+
+<div id="imgContainer" >
+    <i id="export" class="fa fa-file-excel-o" title="Экспорт в Excel"></i>
+</div>
+
+<div id="Grid"></div>
+
+
+@section Scripts
+{
+    @Scripts.Render(
+        Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+        Dashboard.Bundles.Knockout.Scripts.Key,
+        Dashboard.Bundles.Kendo.kendoHelp.Scripts.Key,
+       
+        Dashboard.Bundles.Reports.ReportHelper.Scripts.Key,
+        Dashboard.Bundles.Reports.GeneralStatementScript.Scripts.Key
+        )
+
+}

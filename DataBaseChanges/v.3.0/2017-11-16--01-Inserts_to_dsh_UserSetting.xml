@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Inserts_to_dsh_UserSetting" author="Ura">
+
+    <insert tableName="dsh_UserSetting">
+      <column name="id" value="18" />
+      <column name="SettingName" value="Раскрытие иерархии отчета" />
+    </insert>
+
+  </changeSet>
+</databaseChangeLog>

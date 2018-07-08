@@ -1,0 +1,72 @@
+﻿@{
+    ViewBag.Title = "График отклонений данных по показателям";
+}
+
+<style>
+    .container {
+        min-width: 1480px !important;
+    }
+</style>
+
+<h2>@ViewBag.Title</h2>
+
+<div class="row">
+    <div class="form-group">
+        <div class="col-xs-3 date-picker">
+            <ul class="pager" style="margin-top: 5px; margin-bottom: 5px; max-width: 260px;">
+                <li class="previous"><a id="perviosDay" href="#"><<</a></li>
+                <li>
+                    &nbsp;
+                    <label id="currDate" data-date="" style="padding-top: 5px; font-size: 18px;"></label>
+                    <input id="datepicker" data-date-format="dd.mm.yyyy" style="display: none" type="text">
+                </li>&nbsp;
+                <li class="next"><a id="nextDay" href="#">>></a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-10">
+        <div class="btn-group" data-toggle="buttons" id="indicators">
+        </div>
+    </div>
+</div>
+
+@Html.Partial("GraphicTemplate")
+
+<div id="main-section-content" class="section-content">
+    
+    <div class="row">
+        <div class="col-xs-10">
+            <div class="col-xs-3">
+                <div id="mainDataReportGraphic" class="dashboard" data-bind="template: { name: 'graphicTemplate' }"></div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <p id="choices" style="float:right; width:135px;"></p>
+    </div>
+</div>
+
+@Scripts.Render(
+    Dashboard.Bundles.SectionViewModels.Scripts.Key,
+    Dashboard.Bundles.koViewModels.Scripts.Key,
+    Dashboard.Bundles.Bootstrap.Scripts.Key,
+    Dashboard.Bundles.Flot.Scripts.Key,
+    Dashboard.Bundles.dataProvider.Scripts.Key,
+    Dashboard.Bundles.Knockout.Scripts.Key,
+    Dashboard.Bundles.dataUrlProvider.Scripts.Key,
+    Dashboard.Bundles.Extentions.Scripts.Key
+)
+
+<script type="text/javascript">
+    var date = new Date('@DateTime.Now.Date.ToString("yyyy-MM-ddTHH:mm:ss")');
+    var dateForDatePicker = '@DateTime.Now.Date.ToShortDateString()';
+    var dateForDatePickerStr = '@DateTime.Now.Date.ToString("MMMM yyyy")';
+</script>
+
+@Scripts.Render(
+    Dashboard.Bundles.Extentions.Scripts.Key,
+    Dashboard.Bundles.Reports.TestDataChart.Scripts.Key
+)

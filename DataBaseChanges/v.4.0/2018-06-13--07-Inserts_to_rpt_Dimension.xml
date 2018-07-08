@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Inserts_to_rpt_Dimension" author="Emil">
+
+    <insert tableName="rpt_Dimension">
+      <column name="name" value="Система обслуживания" />
+      <column name="value" value="Contact_SystemHandle" />
+
+      <column name="dimensionCategory_id" value="1" />
+      
+      <column name="isLarge" value="0" />
+      <column name="isTransferNameToServer" value="0" />
+    </insert>
+
+    <insert tableName="rpt_Dimension">
+      <column name="name" value="Система налогообложения" />
+      <column name="value" value="Contact_SystemNalog" />
+
+      <column name="dimensionCategory_id" value="1" />
+      
+      <column name="isLarge" value="0" />
+      <column name="isTransferNameToServer" value="0" />
+    </insert>
+
+  </changeSet>
+</databaseChangeLog>

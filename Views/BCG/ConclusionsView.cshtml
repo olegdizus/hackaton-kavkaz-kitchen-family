@@ -1,0 +1,26 @@
+﻿@section styles
+{
+    @Styles.Render(Dashboard.Bundles.BCG.Css.Key)
+}
+
+<div id="bcgMatrixComments">
+    <table border="1">
+        <tr>
+            <td class="difChildrenLabel">Tрудные дети</td>
+            <td class="starsLabel">Звезды</td>
+        </tr>
+        <tr>
+            <td><textarea id="difficultChildrenComment" class="difChildrenDescr" rows="8"></textarea></td>
+            <td><textarea id="starsComment" rows="8" class="starsDescr"></textarea></td>
+        </tr>
+        <tr>
+            <td class="dogsLabel">Собаки</td>
+            <td class="cowsLabel">Дойные коровы</td>
+        </tr>
+        <tr>
+            <td><textarea id="dogsComment" rows="8" class="dogsDescr"></textarea></td>
+            <td><textarea id="cowsComment" rows="8" class="cowsDescr"></textarea></td>
+        </tr>
+    </table>
+</div>
+

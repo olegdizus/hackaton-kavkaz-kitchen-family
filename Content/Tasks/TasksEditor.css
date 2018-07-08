@@ -1,0 +1,52 @@
+﻿#taskList {
+        width: 50%;
+        vertical-align: top;
+    }
+
+#taskPostsTape {
+    vertical-align: top;
+    width: 50%;
+    padding: 0 0 0 10px;
+}
+
+#filterParamTable {
+    background: inherit;
+}
+
+#filters {
+    padding-bottom: 40px;
+}
+
+.filter-name {
+    vertical-align: middle;
+    width: 200px;
+}
+
+.filter-control {
+    width: 250px;
+}
+
+.filter-table td {
+    padding-bottom: 4px;
+}
+
+.modal-control {
+    max-width: none;
+}
+
+.arcticmodal-container_i {
+    background: inherit;
+}
+
+.body-content {
+    width: 100% !important;
+    margin: 0 !important;
+}
+
+.left {
+    float: left;
+}
+
+.right {
+    float: right;
+}

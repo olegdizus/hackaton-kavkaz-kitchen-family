@@ -1,0 +1,302 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+
+  <changeSet id="Update_imp_DeliveriesRefresh_Procedure" author="Ura">
+    <createProcedure>
+      
+      ALTER PROCEDURE  [dbo].[imp_DeliveriesRefresh]
+
+      AS
+      BEGIN
+      SET NOCOUNT ON;
+
+      -- Добавление новых складов, если таковых нет
+      MERGE ent_Stock
+      USING (select distinct stock from imp_Delivery where stock is not null) AS impDeliveryStocks
+      ON ent_Stock.name = impDeliveryStocks.stock
+      WHEN NOT MATCHED BY TARGET
+      THEN INSERT ([name]) VALUES (stock);
+
+      -- Сливаем данные из таблицы для импорта в основную таблицу
+
+      declare @importId uniqueidentifier
+
+      CREATE TABLE #importIdTable
+      (
+      importId uniqueidentifier
+      )
+
+      while 0 &lt; (select count(*)
+      from imp_Delivery
+      where importId not in (select importId from #importIdTable))
+      begin
+
+      set @importId = (select top 1 importId
+      from imp_Delivery
+      where importId not in (select importId from #importIdTable)
+      order by id)
+
+      insert into #importIdTable (importId) values (@importId);
+
+      --Пишем в договор минимальную дату для пересчета
+      MERGE ent_Agreement AS T
+      USING
+      (select agreement_id, min(date) as date
+      from (select contactAgreement.[id] as agreement_id, d.[date] as date
+      FROM imp_Delivery d
+      join ent_Agreement as contactAgreement on d.[contactAgreement] = contactAgreement.[key]
+      where d.id in (select max(id) from imp_Delivery group by [guid])
+      and importId=@importId
+      union
+      select d.[agreement_id] as agreement_id, d.[date] as date
+      FROM ent_Delivery d
+      where d.guid in (select del.guid
+      FROM imp_Delivery del
+      where del.id in (select max(id) from imp_Delivery group by [guid])
+      and importId=@importId)
+      ) ss
+      group by agreement_id
+      )as S
+      ON T.id = S.agreement_id
+      WHEN MATCHED
+      and (T.recalculateFromDate> S.date OR T.recalculateFromDate is null)
+      THEN
+      UPDATE
+      SET
+      T.recalculateFromDate = S.[date];
+
+      MERGE ent_Delivery AS T
+      USING
+      (select d.[deliveryKey] as [key]
+      ,d.[date]
+      ,d.[isDeleted]
+      ,contact.[id_contact] as contact_id
+      ,contactAgreement.[id] as agreement_id
+      ,payer.[id_contact] as payContact_id
+      ,payerAgreement.[id] as payAgreement_id
+      ,d.[orderDoc]
+      ,stock.id as stock_id
+      ,d.[sum]
+      ,d.[totalWeight] as grossWeight
+      ,d.[user1C]
+      ,d.[guid]
+      ,d.[Time]
+      ,d.sumByAgreement
+      ,d.binaryGuid
+      FROM imp_Delivery d
+      join ent_Contacts as contact on d.contactKey = contact.contactKey
+      join ent_Agreement as contactAgreement on d.[contactAgreement] = contactAgreement.[key]
+      join ent_Contacts as payer on d.[payerKey] = payer.contactKey
+      join ent_Agreement as payerAgreement on d.[payerAgreement] = payerAgreement.[key]
+      join ent_Stock as stock on d.[stock] = stock.name
+      where d.id in (select max(id) from imp_Delivery group by [guid])
+      and importId=@importId
+      --and d.isdeleted = 0
+      ) AS S
+      on T.[guid] = S.[guid]
+      WHEN MATCHED
+      THEN
+      UPDATE
+      SET
+      T.[date] = S.[date]
+      ,T.[isDeleted] = S.[isDeleted]
+      ,T.contact_id = S.contact_id
+      ,T.agreement_id = S.agreement_id
+      ,T.payContact_id = S.payContact_id
+      ,T.payAgreement_id = S.payAgreement_id
+      ,T.[orderDoc] = S.[orderDoc]
+      ,T.stock_id = S.stock_id
+      ,T.[sumAll] = S.[sum]
+      ,T.grossWeight = S.grossWeight
+      ,T.[user1C] = S.[user1C]
+      ,T.[guid] = S.[guid]
+      ,T.[Time] = S.[Time]
+      ,T.sumByAgreement = S.sumByAgreement
+      ,T.binaryGuid = S.binaryGuid
+
+      WHEN NOT MATCHED BY TARGET
+      THEN INSERT (
+      [key]
+      ,[date]
+      ,[isDeleted]
+      ,contact_id
+      ,agreement_id
+      ,payContact_id
+      ,payAgreement_id
+      ,[orderDoc]
+      ,stock_id
+      ,[sumAll]
+      ,grossWeight
+      ,[user1C]
+      ,[guid]
+      ,[Time]
+      ,hst_datetime
+      ,sumByAgreement
+      ,binaryGuid
+      )
+      VALUES (
+      [key]
+      ,[date]
+      ,[isDeleted]
+      ,contact_id
+      ,agreement_id
+      ,payContact_id
+      ,payAgreement_id
+      ,[orderDoc]
+      ,stock_id
+      ,[sum]
+      ,grossWeight
+      ,[user1C]
+      ,[guid]
+      ,[Time]
+      ,Getdate()
+      ,sumByAgreement
+      ,binaryGuid
+
+      );
+
+      MERGE ent_DeliveryDetails AS T
+      USING
+      (SELECT g.id_good as good_id,
+      d.id as delivery_id
+      ,dd.[amount]
+      ,dd.[weight]
+      ,dd.[sumPrice]
+      ,dd.recNum
+      FROM [dbo].[imp_DeliveryDetails] dd
+      join ent_goods g on dd.goodGuid=g.[guid]
+      join ent_delivery d on dd.deliveryGuid=d.[guid]
+      where dd.id in (select max(id) from [imp_DeliveryDetails] group by goodGuid, deliveryGuid, recNum)
+      and importId=@importId
+      --and d.isdeleted = 0
+      ) AS S
+      on T.delivery_id = S.delivery_id and T.recNum = S.recNum --and T.good_id = S.good_id
+      WHEN MATCHED
+      and (T.amount != S.amount
+      or T.good_id != S.good_id
+      or T.[weight] != S.[weight]
+      or T.sumPrice != S.sumPrice)
+      THEN
+      UPDATE
+      SET
+
+      T.amount = S.amount
+      ,T.[weight] = S.[weight]
+      ,T.good_id = S.good_id
+      ,T.sumPrice = S.sumPrice
+
+      WHEN NOT MATCHED BY TARGET
+      THEN INSERT (
+      good_id
+      ,delivery_id
+      ,amount
+      ,[weight]
+      ,sumPrice
+      ,recNum)
+      VALUES (
+      good_id
+      ,delivery_id
+      ,amount
+      ,[weight]
+      ,sumPrice
+      ,recNum
+      )
+      --WHEN NOT MATCHED BY SOURCE
+      -- and (T.delivery_id in (select d.id
+      --					from imp_DeliveryDetails dd
+      --					join ent_delivery d on dd.deliveryGuid=d.[guid]))
+      --	THEN DELETE
+      ;
+
+      delete from ent_DeliveryDetails
+      where id in (select dd.id
+      from ent_DeliveryDetails dd
+      left join (select d.id, dd.recNum, [sumPrice]
+      from imp_DeliveryDetails dd
+      join ent_delivery d on dd.deliveryGuid=d.[guid]
+      where dd.importId=@importId
+      ) t on dd.delivery_id = t.id and dd.recNum =t.recNum and dd.[sumPrice]=t.[sumPrice]
+      where dd.delivery_id in (select distinct d.id
+      from imp_DeliveryDetails dd
+      join ent_delivery d on dd.deliveryGuid=d.[guid]
+      where dd.importId=@importId
+      ) and t.id is null)
+
+
+      --проверяем количество обработанных данных
+
+      insert into imp_importLog ([date]
+      ,[entity]
+      ,[key]
+      ,[entityDate])
+      select getdate(),
+      'Реализации',
+      i.deliveryKey,
+      i.date
+      from imp_Delivery i
+      where importId=@importId
+      and
+      i.guid not in (
+      select guid
+      from ent_Delivery);
+
+      delete from ent_DeliveryDetails
+      where delivery_id in (select id
+      from ent_Delivery d
+      where sumAll = 0
+      and d.id in (select e.id
+      from imp_Delivery i
+      inner join ent_Delivery e on e.guid = i.guid
+      where i.importId in (select importId from #importIdTable)));
+
+
+
+
+      insert into dsh_ImportLog
+      select @importId as [importGuid], importData.deliveryGuid as [guid],
+
+      case when importData.sumDiff = 0
+      then 'Реализация импортирована успешно'
+      else 'Сумма реализации отличается от суммы по деталям. Разница = ' +  cast(sumDiff as varchar)
+      END
+      as [message],
+      GETDATE() as [hst_datetime]
+
+      from
+      (
+      select dd.deliveryGuid,
+      sum(dd.sumPrice) as detailsSum,
+      max(d.sum)  as deliverySum,
+      sum(dd.sumPrice)-max(d.sum) as sumDiff
+
+      FROM imp_DeliveryDetails as dd
+      join imp_Delivery as d
+      on d.guid = dd.deliveryGuid
+
+      where d.importId = @importId
+
+      group by deliveryGuid) as importData
+
+
+
+
+
+
+
+
+
+      delete from imp_Delivery where importId in (select importId from #importIdTable);
+      delete from imp_DeliveryDetails where importId in (select importId from #importIdTable);
+
+      END
+
+      END
+    </createProcedure>
+
+  </changeSet>
+</databaseChangeLog>

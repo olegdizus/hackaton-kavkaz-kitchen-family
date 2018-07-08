@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Update_olap_Dates" author="ura">
+
+    <sql>
+      
+      declare @calendar date = '2018.01.02'
+      declare @endDate date = '2050.01.01'
+
+      begin
+        while (@calendar &lt;= @endDate)
+          begin
+            insert into olap_Dates
+            (date) values (@calendar)
+            set @calendar = DATEADD(day, 1, @calendar)
+          end
+      end
+      
+    </sql>
+
+  </changeSet>
+</databaseChangeLog>
+

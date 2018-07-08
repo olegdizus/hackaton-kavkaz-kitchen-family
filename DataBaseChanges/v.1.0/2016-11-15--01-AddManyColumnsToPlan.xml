@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet id="AddManyColumnsToPlan" author="zelim">
+    
+    <addColumn tableName="ent_Plan">
+      <column name="region_id" type="int">
+        <constraints nullable="true" />
+      </column>
+      <column name="profit" type="DECIMAL">
+        <constraints nullable="true" />
+      </column>
+      <column name="margin" type="DECIMAL">
+        <constraints nullable="true" />
+      </column>
+    </addColumn>
+
+    <addForeignKeyConstraint referencedColumnNames="id" referencedTableName="ent_Regions"
+                                  baseColumnNames="region_id" baseTableName="ent_Plan"
+                            constraintName="FK_Region_Region" onDelete="NO ACTION"/>
+  </changeSet>
+</databaseChangeLog>

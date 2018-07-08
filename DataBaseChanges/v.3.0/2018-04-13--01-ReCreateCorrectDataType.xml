@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="ReCreateCorrecrTypeTable" author="Andrey">
+	
+	<sql>
+	    DELETE FROM dbo.ent_CorrectData;
+		ALTER TABLE dbo.ent_CorrectData
+		DROP CONSTRAINT FK_CorrectDataType_CorrectData_type;
+	</sql>
+	
+	<dropTable tableName="ent_CorrectDataType"/>	
+	
+	<createTable tableName="ent_CorrectDataType">
+
+      <column name="id"  type="INT" autoIncrement="false">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+
+	  <column name="Name"  type="nvarchar(128)">
+        <constraints nullable="false" />
+      </column>
+	  
+	  <column name="System"  type="nvarchar(128)">
+        <constraints nullable="true" />
+      </column>
+	  
+	  <column name="Destination"  type="nvarchar(128)">
+        <constraints nullable="true" />
+      </column>
+	  
+	  <column name="Description"  type="nvarchar(512)">
+        <constraints nullable="true" />
+      </column>
+	  
+		<column name="idName" type="varchar(255)">
+			<constraints nullable="false" />
+		</column>
+	  
+	</createTable>
+	
+	<addUniqueConstraint tableName="ent_CorrectDataType"  columnNames="idName"
+            constraintName="uc_ent_CorrectDataType_idName"
+            deferrable="true"
+            disabled="true"
+            initiallyDeferred="true" />
+	
+	<addForeignKeyConstraint referencedColumnNames="id" referencedTableName="ent_CorrectDataType"
+		 baseColumnNames="type_id" baseTableName="ent_CorrectData"
+		 constraintName="FK_CorrectDataType_CorrectData_type" onDelete="NO ACTION"/>
+  </changeSet>
+  
+
+  
+</databaseChangeLog>

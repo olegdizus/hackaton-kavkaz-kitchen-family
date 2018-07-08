@@ -1,0 +1,6 @@
+﻿
+@model DateTime?
+
+<input class="form-control datepicker text-box single-line valid"
+       data-val="false" data-val-date="Поле @ViewData.ModelMetadata.DisplayName должно содержать дату."
+       data-val-required="Требуется поле @ViewData.ModelMetadata.DisplayName." id="@ViewData.ModelMetadata.PropertyName" name="@ViewData.ModelMetadata.PropertyName" type="datetime" value="@(Model.HasValue ? Model.Value.ToShortDateString() : "")" >

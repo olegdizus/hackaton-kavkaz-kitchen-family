@@ -1,0 +1,1171 @@
+﻿@using Dashboard.Controllers
+@using Dashboard.DB.Models
+@using Kendo.Mvc.UI
+
+
+@section styles
+{
+    @Styles.Render(Dashboard.Bundles.Kendo.KendoStandart.Css.Key,
+        Dashboard.Bundles.Fontawesome.Css.Key)
+
+    <style>
+
+        #Grid table { width: 970px; }
+
+        
+    </style>
+    @*<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">*@
+    <link rel="stylesheet" href="~/Content/info.css">
+}
+
+@section Scripts
+{
+    @Scripts.Render(
+        Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+        Dashboard.Bundles.Kendo.kendoHelp.Scripts.Key)
+}
+
+@{
+    var contact = (ContactInfo)ViewBag.ContactInfo;
+
+    ViewBag.Title = "Карточка клиента " + contact.Contact.name;
+        
+
+}
+
+
+<div class="container layout">
+<div class="row content">
+    <div class="col-md-2 sidebar">
+        <div>
+            <img width="130px" src="~/Images/img/abama.jpg" alt="..." class="img-circle">
+            <div class="hb"></div>
+        </div>
+        <hr>
+        <div>
+            <strong>Иванов Иван</strong>
+        </div>
+        <div><strong>Карта:</strong> 00000434</div>
+        <div><strong>Баланс:</strong> 1500</div>
+        <div><strong>RFM:</strong> 445</div>
+        <div><a href="~/Contact/Waiter" class="btn btn-default">Ожидания клиента</a></div>
+
+        <hr>
+        <div class="row">
+            <div class="col-md-2">
+                <a href="#">
+                    <img class="icon" src="~/Images/img/instagram.png" />
+                </a>
+            </div>
+            <div class="col-md-2">
+                <a href="#">
+                    <img class="icon" src="~/Images/img/facebook.png" />
+                </a>
+            </div>
+            <div class="col-md-2">
+                <a href="#">
+                    <img class="icon" width="24px" src="~/Images/img/vk.png" />
+                </a>
+            </div>
+        </div>
+    </div>
+<div class="col-md-10 main">
+<ul class="nav nav-tabs" id="tabs">
+    <li role="presentation" class="active">
+        <a href="#basic">Основная информация</a>
+    </li>
+    <li role="presentation">
+        <a href="#social">Социальные сети</a>
+    </li>
+    <li role="presentation">
+        <a href="#orders">Заказы <span class="badge">123</span></a>
+    </li>
+    <li role="presentation">
+        <a href="#touches">Касания <span class="badge">56</span></a>
+    </li>
+    <li role="presentation">
+        <a href="#preferences">Предпочтения</a>
+    </li>
+    <li role="presentation">
+        <a href="#rfm">RFM-анализ</a>
+    </li>
+</ul>
+<div class="tab-content">
+<div role="tabpanel" class="tab-pane active" id="basic">
+    <table class="table">
+        <tbody>
+        <tr>
+            <th>Фамилия</th>
+            <td>@contact.Contact.name</td>
+        </tr>
+        <tr>
+            <th>Имя</th>
+            <td>@contact.Contact.name</td>
+        </tr>
+        <tr>
+            <th>Отчество</th>
+            <td>@contact.Contact.name</td>
+        </tr>
+        <tr>
+            <th>Дата рождения</th>
+            <td>@contact.Contact.DateOfBirth</td>
+        </tr>
+        <tr>
+            <th>Дата регистрации карты клиента</th>
+            <td>@contact.Contact.DateIn</td>
+        </tr>
+        <tr>
+            <th>
+                Первое посещение
+            </th>
+            <td>
+                @contact.Contact.FirstVisit
+            </td>
+        </tr>
+        <tr>
+            <th>Город</th>
+            <td>@contact.Contact.City</td>
+        </tr>
+        <tr>
+            <th>Семейный статус</th>
+            <td>@Html.Raw(contact.Contact.MaritalStatus==true ? "Женат" : "Не женат")</td>
+        </tr>
+        <tr>
+            <th>Дети</th>
+            <td>2: 1 мальчик, 5 лет; 1 девочка, 14 лет</td>
+        </tr>
+        <tr>
+            <th>Номер телефона</th>
+            <td><a href="tel:@contact.Contact.PhoneNumber" />@contact.Contact.PhoneNumber</td>
+        </tr>
+        <tr>
+            <th>E-mail</th>
+            <td><a href="mailto:@contact.Contact.email" />@contact.Contact.email</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div role="tabpanel" class="tab-pane" id="social">
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Целевые хештеги</h3>
+        </div>
+        <div class="panel-body">
+            <ul class="list-unstyled">
+                <li>
+                    #стейк
+                    <span class="badge">12</span>
+                </li>
+                <li>
+                    #вискарь
+                    <span class="badge">6</span>
+                </li>
+                <li>
+                    #романтика
+                    <span class="badge">4</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h3 class="panel-title">Упоминания заведений</h3>
+        </div>
+        <div class="panel-body">
+            <table>
+                <thead>
+                <tr>
+                    <th>
+                        Заведение
+                    </th>
+                    <th>
+                        Контекст упоминания
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr class="success">
+                    <td style="min-width: 200px;">
+                        Кухня family
+                        <span class="badge">16</span>
+                    </td>
+                    <td>
+                        <span>
+                            #уютнаяатмосфера
+                            <span class="badge">14</span>
+                        </span>,
+                        <span>
+                            #шефбог
+                            <span class="badge">11</span>
+                        </span>,
+                        <span>
+                            #немогунежратьпослешести
+                            <span class="badge">9</span>
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Рога-копыта
+                        <span class="badge">8</span>
+                    </td>
+                    <td>
+                        <span>
+                            #пойдет
+                            <span class="badge">6</span>
+                        </span>,
+                        <span>
+                            #мясо
+                            <span class="badge">3</span>
+                        </span>,
+                        <span>
+                            #явдрова
+                            <span class="badge">1</span>
+                        </span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        Макдак
+                        <span class="badge">2</span>
+                    </td>
+                    <td>
+                        <span>
+                            #бесплатныйтуалет
+                            <span class="badge">2</span>
+                        </span>,
+                        <span>
+                            #мммкартошечка
+                            <span class="badge">1</span>
+                        </span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div role="tabpanel" class="tab-pane" id="orders">
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="row">
+            <div class="col-md-3">
+                <div>
+                    <b>Частота посещений</b>
+                </div>
+                <span class="label label-success">@contact.FrequencyVisit</span>
+            </div>
+            <div class="col-md-2">
+                <div>
+                    <b>Средний чек</b>
+                </div>
+                <span class="label label-success">12000 руб</span>
+            </div>
+            <div class="col-md-4">
+                <div>
+                    <b>Средняя ТОП 5 блюд:</b>
+                    <span class="label label-success">850 руб</span>
+                </div>
+                <div>
+                    <b>Средняя цена блюда:</b>
+                    <span class="label label-success">@contact.AverageCashCheck.ToString("0.##")</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div>
+                    <b>Самое дорогое блюдо:</b>
+                </div>
+                <span class="label label-success">Шашлык из семги: 1500 руб</span>
+            </div>
+        </div>
+    </div>
+</div>
+<table class="table">
+<thead>
+<tr>
+    <th></th>
+    <th>
+        Номер
+    </th>
+    <th>
+        Открыт
+    </th>
+    <th>
+        Закрыт
+    </th>
+    <th>
+        Гостей
+    </th>
+    <th>
+        Номер столика
+    </th>
+    <th>
+        Наименование
+    </th>
+    <th>
+        Цена
+    </th>
+    <th>
+        Количество
+    </th>
+    <th>
+        Всего
+    </th>
+    <th>
+        Скидка
+    </th>
+    <th>
+        Итого
+    </th>
+    <th>
+    </th>
+</tr>
+</thead>
+<tbody>
+
+
+<tr class="active folded">
+    <td>
+        <button type="button" class="btn btn-default btn-xs fold-rows">&nbsp;+&nbsp;</button>
+    </td>
+    <td>
+        123123
+    </td>
+    <td>
+        12:00 01.01.1970
+    </td>
+    <td>
+        01:00 02.01.1970
+    </td>
+    <td>
+        1
+    </td>
+    <td>
+        5
+    </td>
+    <td/>
+    <td/>
+    <td>25</td>
+    <td>
+        10550
+    </td>
+    <td>
+        550
+    </td>
+    <td>
+        10000
+    </td>
+    <td>
+        <div class="row">
+            <div class="col-md-2">
+                <a href="#" data-toggle="modal" data-target=".instagram-modal-sm">
+                    <img class="icon-16" src="~/Images/img/instagram.png"/>
+                </a>
+            </div>
+            <div class="col-md-2">
+                <a href="#">
+                    <img class="icon-16" src="~/Images/img/facebook.png"/>
+                </a>
+            </div>
+            <div class="col-md-2">
+                <a href="#">
+                    <img class="icon-16" width="24px" src="~/Images/img/vk.png"/>
+                </a>
+            </div>
+        </div>
+        <div class="modal fade instagram-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">Упоминания в Instagramm</h4>
+                    </div>
+                    <div class="modal-body">
+                        <span>
+                            <a href="#">#уютнаяатмосфера</a>
+                            <span class="badge">14</span>
+                        </span>,
+                        <span>
+                            <a href="#">#шефбог</a>
+                            <span class="badge">11</span>,
+                        </span>
+                        <span>
+                            <a href="#">#немогунежратьпослешести</a>
+                            <span class="badge">9</span>
+                        </span>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </td>
+</tr>
+<tr>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td>
+        Салат "Столичный"
+    </td>
+    <td>
+        650.00
+    </td>
+    <td>
+        2
+    </td>
+    <td>
+        1300.00
+    </td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td>
+        Картофель фри
+    </td>
+    <td>
+        300.00
+    </td>
+    <td>
+        1
+    </td>
+    <td>
+        300.00
+    </td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td>
+        Шашлык из курицы
+    </td>
+    <td>
+        750.00
+    </td>
+    <td>
+        2
+    </td>
+    <td>
+        1500.00
+    </td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td>
+        Пельмени с мясом молодых бычков
+    </td>
+    <td>
+        600.00
+    </td>
+    <td>
+        1
+    </td>
+    <td>
+        600.00
+    </td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td>
+        Солянка сборная мясная
+    </td>
+    <td>
+        650.00
+    </td>
+    <td>
+        1
+    </td>
+    <td>
+        650.00
+    </td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td>
+        Вода "Бонаква", 0.25 л. б/г
+    </td>
+    <td>
+        250.00
+    </td>
+    <td>
+        4
+    </td>
+    <td>
+        1000.00
+    </td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td>
+        Ассам
+    </td>
+    <td>
+        450.00
+    </td>
+    <td>
+        1
+    </td>
+    <td>
+        450.00
+    </td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td>
+        Пиво светлое "Bud" 0.5 стекло
+    </td>
+    <td>
+        350.00
+    </td>
+    <td>
+        2
+    </td>
+    <td>
+        700.00
+    </td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td>
+        Русский стандарт оригинал 50 ml
+    </td>
+    <td>
+        350.00
+    </td>
+    <td>
+        10
+    </td>
+    <td>
+        3500.00
+    </td>
+    <td></td>
+    <td></td>
+</tr>
+<tr>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td>
+        Глинтвейн классический
+    </td>
+    <td>
+        550.00
+    </td>
+    <td>
+        1
+    </td>
+    <td>
+        550.00
+    </td>
+    <td></td>
+    <td></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div role="tabpanel" class="tab-pane" id="touches">
+    
+ 
+    <h2>Эффективность каналов касаний</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Канал</th>
+            <th>Количесво касаний</th>
+            <th>Количесво попаданий</th>
+            <th>Процент попаданий</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>WhatsApp</td>
+            <td>
+                <span class="label label-default">12</span>
+            </td>
+            <td>
+                <span class="label label-default">6</span>
+            </td>
+            <td>
+                <span class="label label-success">50%</span>
+            </td>
+        </tr>
+        <tr>
+            <td>Email</td>
+            <td>
+                <span class="label label-default">20</span>
+            </td>
+            <td>
+                <span class="label label-default">1</span>
+            </td>
+            <td>
+                <span class="label label-warning">5%</span>
+            </td>
+        </tr>
+        <tr>
+            <td>SMS</td>
+            <td>
+                <span class="label label-default">20</span>
+            </td>
+            <td>
+                <span class="label label-default">0</span>
+            </td>
+            <td>
+                <span class="label label-danger">0%</span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    
+    <div class="tab-pane" id="chart">
+        <div id="placeholder" style="width: 700px; height: 350px; margin: 0 auto 50px"></div>
+    </div>
+
+    <h2>Касания</h2>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>
+                Номер
+            </th>
+            <th>
+                Дата и время
+            </th>
+            <th>
+                Канал
+            </th>
+            <th>
+                Повод
+            </th>
+            <th>
+                Содержание
+            </th>
+            <th>
+                Дата визита
+            </th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>
+                1211
+            </td>
+            <td>
+                01.01.1970 12:00
+            </td>
+            <td>
+                SMS
+            </td>
+            <td>
+                Акция
+            </td>
+            <td>
+                Закажи три салата — заплати за два
+            </td>
+            <td>
+                <span class="label label-success">01.01.1970 12:00</span>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                1212
+            </td>
+            <td>
+                01.01.1970 12:00
+            </td>
+            <td>
+                WhatsApp
+            </td>
+            <td>
+                Специальное предложение
+            </td>
+            <td>
+                Персональная скидка на пиво — 10%
+            </td>
+        </tr>
+        <tr>
+            <td>
+                1212
+            </td>
+            <td>
+                01.01.2018 13:00
+            </td>
+            <td>
+                Email
+            </td>
+            <td>
+                Специальное предложение
+            </td>
+            <td>
+                Персональная скидка на пиво — 10%
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<div role="tabpanel" class="tab-pane" id="preferences">
+    <table class="table">
+        <tbody>
+        <tr>
+            <th>
+                День недели
+            </th>
+            <td>
+                Пятница
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Время
+            </th>
+            <td>
+                19:00-20:00
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Компания
+            </th>
+            <td>
+                Вдвоем с дамой
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Любимые блюда
+            </th>
+            <td>
+                <ul>
+                  
+                    <li>
+                        Борщ домашний с честноком и перцем
+                    </li>
+                    <li>
+                        Хлеб серый собственного приготовления
+                    </li>
+                    <li>
+                        Американо
+                    </li>
+                    <li>
+                        Джек Дэниэлс 50 гр
+                    </li>
+                    <li>
+                        Капучино
+                    </li>
+                    <li>
+                        Солянка
+                    </li>
+                    <li>
+                        Окрошка с трубочкой с сырн. муссом
+                    </li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Любимый столик
+            </th>
+            <td>
+                5
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Калорийность блюд
+            </th>
+            <td>
+                Высококалорийные
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Основная группа ингредиентов
+            </th>
+            <td>
+                Мясо, овощи
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Форма блюд
+            </th>
+            <td>
+                Второе, алкоголь
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Сорт мяса
+            </th>
+            <td>
+                Говядина
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Регион кухни
+            </th>
+            <td>
+                Американская, европейская
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Объем порции
+            </th>
+            <td>
+                Большие
+            </td>
+        </tr>
+        <tr>
+            <th>
+                Сорт алкоголя
+            </th>
+            <td>
+                Виски, пиво
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="tab-pane" id="rfm">
+    <div id="rfm-chart" style="width: 600px; height: 300px; margin-bottom: 60px"></div>
+    <table class="table">
+        <thead>
+        <th>
+            Дата
+        </th>
+        <th>
+            M
+        </th>
+        <th>
+            R
+        </th>
+        <th>
+            F
+        </th>
+        <th>
+            MRF
+        </th>
+        </thead>
+        <tbody>
+        <tr>
+            <td>
+                01.01.2016
+            </td>
+            <td title="Деньги: хорошие">
+                4
+            </td>
+            <td title="Давность: удовлетворительная">
+                3
+            </td>
+            <td title="Частота: хорошая">
+                4
+            </td>
+            <td title="Деньги: хорошие&#013;Давность: удовлетворительная&#013;Частота: хорошая">
+                434
+            </td>
+        </tr>
+        <tr>
+            <td>
+                01.04.2016
+            </td>
+            <td title="Деньги: отличные">
+                5
+            </td>
+            <td title="Давность: плохая">
+                2
+            </td>
+            <td title="Частота: отличная">
+                5
+            </td>
+            <td title="Деньги: отличные&#013;Давность: плохая&#013;Частота: отличная">
+                525
+            </td>
+        </tr>
+        <tr>
+            <td>
+                01.07.2016
+            </td>
+            <td title="Деньги: хорошие">
+                4
+            </td>
+            <td title="Давность: хорошая">
+                4
+            </td>
+            <td title="Частота: хорошая">
+                4
+            </td>
+            <td title="Деньги: хорошие&#013;Давность: хорошая&#013;Частота: хорошая">
+                444
+            </td>
+        </tr>
+        <tr>
+            <td>
+                01.10.2016
+            </td>
+            <td title="Деньги: удовлетворительные">
+                3
+            </td>
+            <td title="Давность: хорошая">
+                4
+            </td>
+            <td title="Частота: хорошая">
+                4
+            </td>
+            <td title="Деньги: удовлетворительные&#013;Давность: удовлетворительная&#013;Частота: хорошая">
+                344
+            </td>
+        </tr>
+        <tr>
+            <td>
+                01.01.2017
+            </td>
+            <td title="Деньги: удовлетворительные">
+                3
+            </td>
+            <td title="Давность: хорошая">
+                4
+            </td>
+            <td title="Частота: отличная">
+                5
+            </td>
+            <td title="Деньги: удовлетворительные&#013;Давность: хорошая&#013;Частота: отличная">
+                345
+            </td>
+        </tr>
+        <tr>
+            <td>
+                01.04.2017
+            </td>
+            <td title="Деньги: хорошие">
+                4
+            </td>
+            <td title="Давность: хорошая">
+                4
+            </td>
+            <td title="Частота: отличная">
+                5
+            </td>
+            <td title="Деньги: хорошие&#013;Давность: хорошая&#013;Частота: отличная">
+                445
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+@*<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>*@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flot/0.8.3/jquery.flot.time.min.js"></script>
+
+
+<script>
+    $('#tabs a').click(function(e) {
+        e.preventDefault()
+        $(this).tab('show')
+    })
+
+    $('.fold-rows').bind('click',
+        function() {
+            console.log(11);
+
+
+            $(this).parent().parent().toggleClass('folded');
+
+
+        });
+
+    $("#placeholder").bind("plothover",
+        function(event, pos, item) {
+            const datapoint = item ? item.datapoint : null
+
+            if (datapoint) {
+                console.log("You clicked a point!", datapoint);
+            }
+        });
+
+    const initialData = [
+        [1, 1, "01 Jan 2016 00:00:00 GMT"],
+        [2, 3, "01 Apr 2016 00:00:00 GMT"],
+        [4, 8, "01 Jul 2016 00:00:00 GMT"],
+        [3, 6, "01 Oct 2016 00:00:00 GMT"],
+        [5, 9, "01 Jan 2017 00:00:00 GMT"],
+        [5, 11, "01 Apr 2017 00:00:00 GMT"],
+        [6, 15, "01 Jul 2017 00:00:00 GMT"],
+        [7, 16, "01 Oct 2017 00:00:00 GMT"]
+    ]
+
+    const ordersTransformedData = initialData.map(([, orderCount, date]) => [Date.parse(date), orderCount])
+
+    const touchesTransformedData = initialData.map(([touchesCount,, date]) => [Date.parse(date), touchesCount])
+
+    const orders = {
+        label: 'Заказы',
+        points: {
+            show: true,
+            fillColor: '#32CD32'
+        },
+        lines: {
+            show: true,
+        },
+        shadowSize: 0,
+        data: ordersTransformedData
+    }
+
+    const touches = {
+        label: 'Касания',
+        bars: {
+            show: true,
+            zero: false,
+            align: 'center'
+        },
+        data: touchesTransformedData
+    }
+
+    const ordersData = [orders, touches]
+
+    const ordersOptions = {
+        xaxis: {
+            mode: 'time',
+            timeformat: '%q квартал %Y'
+        },
+        colors: ['#32CD32', '#1E90FF'],
+        grid: {
+            borderWidth: {
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 1
+            },
+            borderColor: 'lightgray',
+            axisMargin: 1000,
+            labelMargin: 20,
+            hoverable: true,
+            autoHightLight: true
+        },
+        legend: {
+            show: true
+        }
+    }
+
+    $.plot($("#placeholder"), ordersData, ordersOptions);
+
+    const rfmRawData = [
+        ["01 Jan 2016 00:00:00 GMT", 434],
+        ["01 Apr 2016 00:00:00 GMT", 525],
+        ["01 Jul 2016 00:00:00 GMT", 444],
+        ["01 Oct 2016 00:00:00 GMT", 344],
+        ["01 Jan 2017 00:00:00 GMT", 345],
+        ["01 Apr 2017 00:00:00 GMT", 445],
+    ]
+
+    const rfmTransformedData = rfmRawData.map(([date, rfm]) => [Date.parse(date), rfm])
+
+    const rfmData = {
+        label: 'MRF',
+        points: {
+            show: true,
+            fillColor: '#32CD32'
+        },
+        lines: {
+            show: true,
+        },
+        shadowSize: 0,
+        data: rfmTransformedData
+    }
+
+    const rfmOptions = {
+        xaxis: {
+            mode: 'time',
+            timeformat: '%q квартал %Y'
+        },
+        colors: ['#32CD32', '#1E90FF'],
+        grid: {
+            borderWidth: {
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 1
+            },
+            borderColor: 'lightgray',
+            axisMargin: 1000,
+            labelMargin: 20,
+            hoverable: true,
+            autoHightLight: true
+        },
+        legend: {
+            show: true
+        }
+    }
+
+    $.plot($('#rfm-chart'), [rfmData], rfmOptions)
+
+</script>

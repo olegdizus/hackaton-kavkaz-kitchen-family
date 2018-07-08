@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="CreateEmployeeVariantsByMonthTable" author="apetrosyan">
+
+    <createTable tableName="kpi_EmployeeVariantsByMonth">
+
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+
+      <column name="variant_id" type="INT">
+        <constraints nullable="false" />
+      </column>
+
+      <column name="emploee_id" type="INT">
+        <constraints nullable="false" />
+      </column>
+
+      <column name="month" type="DATETIME">
+        <constraints nullable="false" />
+      </column>
+
+    </createTable>
+
+    <addForeignKeyConstraint referencedColumnNames="id" referencedTableName="kpi_Variants"
+                                 baseColumnNames="variant_id" baseTableName="kpi_EmployeeVariantsByMonth"
+                           constraintName="FK_EmployeeVariantsByMonth_Variants" onDelete="NO ACTION"/>
+
+    <addForeignKeyConstraint referencedColumnNames="id" referencedTableName="dsh_Employee"
+                                 baseColumnNames="emploee_id" baseTableName="kpi_EmployeeVariantsByMonth"
+                           constraintName="FK_EmployeeVariantsByMonth_Emploee" onDelete="NO ACTION"/>
+
+  </changeSet>
+</databaseChangeLog>
+

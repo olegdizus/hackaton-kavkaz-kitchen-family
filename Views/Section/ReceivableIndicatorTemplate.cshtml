@@ -1,0 +1,29 @@
+﻿<script type="text/html" id="receivableIndicatorTemplate">
+    <div data-bind="attr: { id: indicatorCardId }" class="receivable-indicator receivable-card">
+        <table>
+            <tr>
+                <td class="receivable-main-indicator-name"
+                    data-bind="text: mainIndicatorName">
+                </td>
+                <td>
+                    <!-- ko if: mainIndicatorValue() < secondIndicatorValue() -->
+                    <img src="@Href("~/Images/green_flag.png")" />
+                    <!-- /ko -->
+                    <!-- ko if: mainIndicatorValue() >= secondIndicatorValue() -->
+                    <img src="@Href("~/Images/red_flag.png")" />
+                    <!-- /ko -->
+                </td>
+                <td class="receivable-main-indicator-value"
+                    data-bind="attr: { 'data-format' : format, 'data-precision' : precision }, customFormatText: mainIndicatorValue"></td>
+            </tr>
+            <tr>
+                <td class="receivable-second-indicator-name"
+                    data-bind="text: secondIndicatorName">
+                </td>
+                <td></td>
+                <td class="receivable-second-indicator-value"
+                    data-bind="attr: { 'data-format' : format, 'data-precision' : precision }, customFormatText: secondIndicatorValue"></td>
+            </tr>
+        </table>
+    </div>
+</script>

@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="UpdateIsTestReportInByPeriodsIndicators" author="zelim">
+    <sql>
+      UPDATE
+        rbi
+      SET
+        rbi.isTestReport = 1
+      FROM
+        rpt_ByPeriods_Indicators AS rbi
+      WHERE
+        rbi.name LIKE N'Отгрузка факт, руб'
+        OR rbi.name LIKE N'Отгрузка факт, кг'
+        OR rbi.name LIKE N'Количество отгрузок'
+        OR rbi.name LIKE N'Задолженность'
+        OR rbi.name LIKE N'Просроченная задолженность'
+        OR rbi.name LIKE N'Просроченная задолженность от 8 дней'
+        OR rbi.name LIKE N'Плановая сумма, руб'
+        OR rbi.name LIKE N'Количество сработавших точек'
+        OR rbi.name LIKE N'Количество возвратов'
+        OR rbi.name LIKE N'Возвраты, руб'
+    </sql>
+  </changeSet>
+</databaseChangeLog>

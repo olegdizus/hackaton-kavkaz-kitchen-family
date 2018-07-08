@@ -1,0 +1,150 @@
+﻿
+@{
+    ViewBag.Title = "Ожидания клиента";
+}
+@section styles
+{
+    @Styles.Render(Dashboard.Bundles.Kendo.KendoStandart.Css.Key,
+            Dashboard.Bundles.Fontawesome.Css.Key)
+
+    <style>
+
+        #Grid table {
+            width: 970px;
+        }
+    </style>
+    <link rel="stylesheet" href="~/Content/info.css">
+}
+<div class="container layout">
+    <div class="row content">
+        <!--Правая колонка-->
+        <div class="col-md-6">
+            <div class="row" style="margin-bottom: 25px">
+                <div class="col-md-3">
+                    <img width="120px" src="~/Images/img/abama.jpg" alt="..." class="img-circle">
+                    <div class="hb"></div>
+                </div>
+                <div class="col-md-9">
+                    <div><h3>Иванов Иван Иванович</h3></div>
+                    <div><strong>Карта:</strong> 00000434</div>
+                    <div><strong>Статус:</strong> VIP</div>
+                    <div><strong>Скидка:</strong> <span class="label label-default">20%</span></div>
+                </div>
+            </div>
+            <!--Панель Блюда-->
+            <div class="panel panel-default">
+                <div class="panel-heading"><span class="glyphicon glyphicon-thumbs-up"> </span> Рекомендации</div>
+                <div class="panel-body" style="height: 370px">
+                    <ul class="list-group">
+                        <li class="list-group-item">Пузырь вискаря 18 лет <span class="label label-success">Второй в подарок</span></li>
+                        <li class="list-group-item">Паста с морепродуктами</li>
+                        <li class="list-group-item">Цезарь</li>
+                        <li class="list-group-item">Утка по пекински<span class="label label-warning">Скидка 20%</span></li>
+                        <li class="list-group-item">Волшебные креветки</li>
+                        <li class="list-group-item">Паста Поло</li>
+                        <li class="list-group-item">Компот из сухофруктов <span class="label label-warning">Скидка 30%</span></li>
+                        <li class="list-group-item">Яйцо куринное</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!--Левая колонка-->
+        <div class="col-md-6">
+            <!--Панель Предпочтения-->
+            <div class="panel panel-default">
+                <div class="panel-heading"><span class=" glyphicon glyphicon-heart"> </span> Предпочтения</div>
+                <div class="panel-body" style="height: 240px">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th>Любимый столик</th>
+                                <td>5</td>
+                            </tr>
+                            <tr>
+                                <th>Калорийность блюд</th>
+                                <td>Высококалорийные</td>
+                            </tr>
+                            <tr>
+                                <th>Основная группа ингредиентов</th>
+                                <td>Мясо, овощи</td>
+                            </tr>
+                            <tr>
+                                <th>Форма блюд</th>
+                                <td>Второе, алкоголь </td>
+                            </tr>
+                            <tr>
+                                <th>Сорт алкоголя</th>
+                                <td>Виски, пиво</td>
+                            </tr>
+                            <tr>
+                                <th>Сорт мяса</th>
+                                <td>Говядина</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!--Панель Блюда-->
+            <div class="panel panel-default">
+                <div class="panel-heading"><span class="glyphicon glyphicon-leaf"> </span> Блюда</div>
+                <div class="panel-body" style="height: 210px;">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th>
+                                    Виски Chivas regal
+                                </th>
+                                <td>
+                                    <span class="badge">40</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    Пиво Guiness
+                                </th>
+                                <td>
+                                    <span class="badge">34</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    Овощи гриль по индейски
+                                </th>
+                                <td>
+                                    <span class="badge">23</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    Цезарь по Ставропольски
+                                </th>
+                                <td>
+                                    <span class="badge">13</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    Кальян по Казахски
+                                </th>
+                                <td>
+                                    <span class="badge">5</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
+<script>
+$('#tabs a').click(function (e) {
+        e.preventDefault()
+        $(this).tab('show')
+    })</script>
+

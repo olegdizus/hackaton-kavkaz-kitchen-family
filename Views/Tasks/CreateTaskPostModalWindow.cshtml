@@ -1,0 +1,151 @@
+﻿@Styles.Render(Dashboard.Bundles.Arcticmodal.Css.Key)
+
+<div style="display: none;">
+    <div class="box-modal" id="createTaskPostModal">
+        <div class="box-modal_close arcticmodal-close">×</div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>Добавление действия</h4>
+            </div>
+            <div id="createTaskPostFormDiv" class="modal-body">
+                @Html.Partial("CreateTaskPostFormHorizontal")
+            </div>
+	        <div class="modal-footer">
+		        <button type="button" id="closeModalButton" class="btn btn-default close-modal-button">Закрыть</button>
+		        <button type="button" id="saveTaskPostModalButton" class="btn btn-primary">Сохранить</button>
+	        </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(function () {
+    	includeOnce('bundles/arcticmodal');
+    	includeOnce('bundles/Task');
+
+        TaskPostModalManager.getInstance().init();
+    });
+
+    TaskPostModalManager.getInstance = function () {
+        if (!TaskPostModalManager.instance) {
+            TaskPostModalManager.instance = new TaskPostModalManager();
+        }
+
+        return TaskPostModalManager.instance;
+    }
+
+    function TaskPostModalManager() {
+
+        var file;
+
+        this.init = function () {
+            $('.close-modal-button').click(function () {
+                closeCreateTaskPostModal();
+            });
+            initUploadFileButtonChangeText();
+        }
+
+        function closeCreateTaskPostModal() {
+            clearUploadFileBtn();
+            $('#createTaskPostModal').arcticmodal('close');
+        }
+
+        function initUploadFileButtonChangeText() {
+    		$('#uploadFile').on('change', function () {
+    			changeButtonFileName(this);
+    		});
+        }
+
+        function clearUploadFileBtn() {
+            
+            $('.file-input').html($('.file-input').html());
+            $('.file-input span').text("файл не выбран.");
+
+        }
+
+        function changeButtonFileName(btn) {
+            var fileButton = $(btn);
+            fileButton.prev().text(fileButton.prop('value'));
+            file = btn.files[0];
+        }
+
+    	this.openModal = function (taskId, onSuccessCallback) {
+            setCallback(onSuccessCallback);
+
+            TaskPlannerModalManager.getInstance()
+                .clearFormValues('createTaskPostForm');
+
+            TaskPlannerModalManager.getInstance()
+                .showPlannedDate($('#createTaskPostForm'));
+
+            openCreateTaskPostModal();
+
+            TaskPlannerModalManager.getInstance().bindOkButtonClickHandler(
+                'saveTaskPostModalButton',
+                function () {
+                    createNewTaskPost(taskId);
+                });
+
+            TaskPlannerModalManager.getInstance().bindTaskStateSelectedListOnChange($('#createTaskPostForm'));
+            initUploadFileButtonChangeText();
+        }
+
+        function setCallback(onSuccessCallback) {
+            TaskPostModalManager.onSuccessCallback = onSuccessCallback;
+        }
+
+        function openCreateTaskPostModal() {
+            $('#createTaskPostModal').arcticmodal();
+        }
+
+        function createNewTaskPost(taskId) {
+            var callback = getOnSuccessCallback();
+
+            var values = getValues(taskId);
+
+            TaskPlannerModalManager
+                .getInstance()
+                .sendAjax({
+                        url: basePath + 'Tasks/CreateTaskPost',
+                        data: values,
+                        formId: 'createTaskPostFormDiv',
+                        onSuccessCallback: function() {
+                            callback();
+                            closeCreateTaskPostModal();
+                        },
+                        bindHanlersAfterAjax: function(form) {
+                            TaskPlannerModalManager
+                                .getInstance()
+                                .bindDatetimepicker(form);
+
+                            TaskPlannerModalManager
+                                .getInstance()
+                                .bindTaskStateSelectedListOnChange(form);
+                        }
+                    }
+                );
+        }
+
+        function getValues(taskId) {
+           
+            var values = new FormData();
+
+            var taskPostViewModel = $('#createTaskPostForm').serializeArray();
+            taskPostViewModel.push({ name: "task_id", value: taskId });
+
+            $(taskPostViewModel).each(function (i, val) {
+            	values.append(val.name, val.value);
+            });
+
+            values.append("attachedFile", file);
+
+            return values;
+        }
+
+        function getOnSuccessCallback() {
+            return TaskPostModalManager.onSuccessCallback;
+        }
+    }
+
+    
+</script>

@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Update_rpt_GetContacts_StoredProcedure" author="Ura">
+    <createProcedure>
+
+      ALTER PROCEDURE [dbo].[rpt_GetContacts]
+
+
+      AS
+      BEGIN
+
+      select cast('var contacts = {'+
+      (select stuff(
+      (select ','+ cast(id_contact  as nvarchar(10)
+      )+' : {'
+      +'name:'''+ REPLACE ( fullName , '''' , '\''' )+''''
+      +', mng_id:'''+ REPLACE ( isnull(employe_id, '') , '''' , '\''' )+''''
+      +', mainMng_id:'''+ REPLACE ( isnull(mainManager_id,'') , '''' , '\''' )+''''
+      +', region_id:'''+ REPLACE ( isnull(region_id,'') , '''' , '\''' )+''''
+      +', firstLevel_id:'''+ REPLACE ( isnull(firstLevel_id, '') , '''' , '\''' )+''''
+      +', category_id:'''+ REPLACE ( isnull(category_id, '') , '''' , '\''' )+''''
+
+      +'}'
+      from ent_Contacts FOR XML PATH('')),1,1,'') )
+      +'}; var employee={'+
+      (select stuff(
+      (select  ','+ cast(id  as nvarchar(10))+' : '''+  Name  +''''
+      from ent_Employe FOR XML PATH('')),1,1,'') )
+      +'}; var users={'+
+      (select stuff(
+      (select  ','+ cast(id  as nvarchar(10))+' : '''+  Name  +''''
+      from ent_MainManagers FOR XML PATH('')),1,1,'') )
+      +'}; var firstLevel={'+
+      (select stuff(
+      (select  ','+ cast(id  as nvarchar(10))+' : '''+  name  +''''
+      from ent_FirstLevels FOR XML PATH('')),1,1,'') )
+      +'}; var category={'+
+      (select stuff(
+      (select  ','+ cast(id  as nvarchar(10))+' : '''+  name  +''''
+      from ent_ContactCategory FOR XML PATH('')),1,1,'') )
+      +'}; var regions={'+
+      (select stuff(
+      (select  ','+ cast(id  as nvarchar(10))+' : '''+  replace(name, '''','')  +''''
+      from ent_Regions FOR XML PATH('')),1,1,'') )
+      +'};;;;'  as text)
+
+
+
+
+      END
+      
+      
+    </createProcedure>
+
+  </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet id="ChangeTypeToDecimalToSalaryTables" author="Olga">
+
+    <modifyDataType
+                    tableName="dsh_SalaryIndicatorParametrs"
+                    columnName="payedMax"
+                    newDataType="DECIMAL(18,2)"
+    />
+
+    <modifyDataType
+                  tableName="dsh_Salary"
+                  columnName="staticPart"
+                  newDataType="DECIMAL(18,2)"
+    />
+
+    <modifyDataType
+                  tableName="dsh_Salary"
+                  columnName="bonusPart"
+                  newDataType="DECIMAL(18,2)"
+    />
+
+    <modifyDataType
+                  tableName="dsh_Salary"
+                  columnName="bonusPartCalculates"
+                  newDataType="DECIMAL(18,2)"
+    />
+
+    <modifyDataType
+                  tableName="dsh_Salary"
+                  columnName="finesSum"
+                  newDataType="DECIMAL(18,2)"
+    />
+
+    <modifyDataType
+                  tableName="dsh_Salary"
+                  columnName="amount"
+                  newDataType="DECIMAL(18,2)"
+    />
+    <modifyDataType
+                  tableName="dsh_SalaryFines"
+                  columnName="fineValue"
+                  newDataType="DECIMAL(18,2)"
+    />
+    
+  </changeSet>
+</databaseChangeLog>

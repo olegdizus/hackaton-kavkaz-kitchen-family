@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="CreateDshModulesRights" author="Michael">
+    <createTable tableName="dsh_ModulesRight">
+
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+
+      <column name="module_id" type="INT">
+        <constraints nullable="true" />
+      </column>
+
+      <column name="right" type="int">
+        <constraints nullable="false" />
+      </column>
+
+      <column name="role" type="nvarchar(50)">
+        <constraints nullable="false" />
+      </column>
+
+
+
+    </createTable>
+
+    <addForeignKeyConstraint referencedColumnNames="id" referencedTableName="dsh_Module"
+                                 baseColumnNames="module_id" baseTableName="dsh_ModulesRight"
+                           constraintName="FK_Module_ModulesRight" onDelete="NO ACTION"/>
+
+  </changeSet>
+</databaseChangeLog>

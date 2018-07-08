@@ -1,0 +1,45 @@
+﻿@Styles.Render(
+    Dashboard.Bundles.Arcticmodal.Css.Key
+)
+
+<style>
+    #deleteModal {
+        top: 50%;
+        left: 50%;
+        width: 450px;
+        height: 159px;
+        position: absolute;
+        margin-top: -230px;
+        margin-left: -225px;
+        z-index: 99999;
+    }
+
+    #deleteText {
+        color: white;
+        font-size: 18px;
+        line-height: 29px;
+        padding: 0 0 0 20px;
+    }
+</style>
+
+<div style="display: none;">
+    <div class="box-modal" id="deleteModal">
+        <div class="box-modal_close arcticmodal-close close_modal">×</div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 id="headerModal">Удалить запись?</h4>
+            </div>
+            <div id="deleteFormDiv" class="modal-body">
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="closeModalButton" class="btn btn-default close-modal-button close_modal">Отмена</button>
+                <button type="button" id="deleteModalButton" class="btn btn-primary">Удалить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    @Scripts.Render(
+        Dashboard.Bundles.DeleteModalWindowScript.Scripts.Key
+    )

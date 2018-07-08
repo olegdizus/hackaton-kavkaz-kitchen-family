@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="AddColumnSystemHandleAndSystemNalogToEntContact" author="Egorov">
+
+    <addColumn tableName="ent_Contacts">
+
+      <column name="systemHandle_id" type="int">
+        <constraints nullable="true" />
+      </column>
+      
+      <column name="systemNalog_id" type="int">
+        <constraints nullable="true" />
+      </column>
+   
+    </addColumn>
+
+   <addForeignKeyConstraint referencedColumnNames="id" referencedTableName="ent_SystemHandle"
+                     baseColumnNames="systemHandle_id" baseTableName="ent_Contacts"
+               constraintName="FK_SystemHanle_Contacts" onDelete="NO ACTION"/>
+    
+  <addForeignKeyConstraint referencedColumnNames="id" referencedTableName="ent_SystemNalog"
+                     baseColumnNames="systemNalog_id" baseTableName="ent_Contacts"
+               constraintName="FK_SystemNalog_Contacts" onDelete="NO ACTION"/>
+    
+  </changeSet>
+</databaseChangeLog>

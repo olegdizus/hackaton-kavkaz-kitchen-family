@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <include file="2016-10-11--01-CreatePositionTable.xml" relativeToChangelogFile="true"/>
+  <include file="2016-10-13--01-DropPositionTable.xml" relativeToChangelogFile="true"/>
+  <include file="2016-10-13--02-CreatePositionTable.xml" relativeToChangelogFile="true"/>
+  <include file="2016-10-13--03-CreateEmployeeTable.xml" relativeToChangelogFile="true"/>
+  <include file="2016-10-13--04-AddReferencePositionPosition.xml" relativeToChangelogFile="true"/>
+  <include file="2016-10-13--05-AddReferenceEmployeePosition.xml" relativeToChangelogFile="true"/>
+  <include file="2016-10-13--06-AddShortNameToPosition.xml" relativeToChangelogFile="true"/>
+  <include file="2016-10-14--01-CreateKpiVariantsTable.xml" relativeToChangelogFile="true"/>
+  <include file="2016-10-14--02-EditReferenceEmployeePosition.xml" relativeToChangelogFile="true"/>
+  <include file="2016-10-14--03-AddAutoIncrimentToIndicator.xml" relativeToChangelogFile="true"/>
+  <include file="2016-10-17--01-AddTreeKeyColumnToPositions.xml" relativeToChangelogFile="true"/>
+  <include file="2016-10-19--01-CreateSalesPlansTable.xml" relativeToChangelogFile="true"/>
+  <include file="2016-10-19--02-AddMonthColumnToSalesPlans.xml" relativeToChangelogFile="true"/>
+  <include file="2016-10-20--01-CreateEmployeeVariantsByMonthTable.xml" relativeToChangelogFile="true"/>
+  <include file="2016-10-21--01-RenameMdxFiltersKpiVariantsMdxHierarchiesValuesTables.xml" relativeToChangelogFile="true"/>
+  <include file="2016-10-28--01-AddDescriptionColumnToVariants.xml" relativeToChangelogFile="true"/>
+  <include file="2016-11-07--01-AddParentIdColumnToEmployee.xml" relativeToChangelogFile="true"/>
+  <include file="2016-11-07--02-AddTreeKeyColumnToEmployee.xml" relativeToChangelogFile="true"/>
+  <include file="2016-11-14--01-AddIsEffectiveColumnToOlapDelivery.xml" relativeToChangelogFile="true"/>
+  <include file="2016-11-15--01-AddManyColumnsToPlan.xml" relativeToChangelogFile="true"/>
+  <include file="2016-11-15--01-CreateDshModules.xml" relativeToChangelogFile="true"/>
+  <include file="2016-11-15--02-CreateDshModulesRights.xml" relativeToChangelogFile="true"/>
+  <include file="2016-11-16--01-ChangeDecimalColumnsInPlan.xml" relativeToChangelogFile="true"/>
+  <include file="2016-11-17--01-CreateApprovalStatusTable.xml" relativeToChangelogFile="true"/>
+  <include file="2016-11-17--02-CreateApproveHistoryTable.xml" relativeToChangelogFile="true"/>
+  <include file="2016-11-17--03-InsertValuesIntoApprovalStatusTable.xml" relativeToChangelogFile="true"/>
+  <include file="2016-11-28--01-AddTableNameColumnToMdxHierarchi.xml" relativeToChangelogFile="true"/>
+  <include file="2016-11-28--02-AddTableNameColumnToMdxFilters.xml" relativeToChangelogFile="true"/>
+  <include file="2016-11-28--03-AddHierarchyIdColumnToFilter.xml" relativeToChangelogFile="true"/>
+  <include file="2016-11-29--01-DeleteConstraintMdxHierarchiValueId.xml" relativeToChangelogFile="true"/>
+  <include file="2016-11-29--02-DeleteUnusedTableAndColumns.xml" relativeToChangelogFile="true"/>
+  <include file="2016-12-01--01-ChangeIsEffectiveColumnTypeInOlapDelivery.xml" relativeToChangelogFile="true"/>
+  <include file="2016-12-14--01-CreateSalaryTable.xml" relativeToChangelogFile="true"/>
+  <include file="2016-12-14--02-CreateSalaryBonusTable.xml" relativeToChangelogFile="true"/>
+  <include file="2016-12-14--03-CreateSalaryFinesTable.xml" relativeToChangelogFile="true"/>
+  <include file="2017-02-09--01-AddColumnsInByPeriodsIndicators.xml" relativeToChangelogFile="true"/>
+  <include file="2017-02-10--01-InsertRowsInByPeriodsIndicators.xml" relativeToChangelogFile="true"/>
+  <include file="2017-02-10--02-AddMapColumnInIndicators.xml" relativeToChangelogFile="true"/>
+  <include file="2017-02-10--03-UpdateIndicatorIdsInCalculateData.xml" relativeToChangelogFile="true"/>
+  <include file="2017-02-10--04-UpdateIndicatorIdsInCalculateDataByContacts.xml" relativeToChangelogFile="true"/>
+  <include file="2017-02-10--05-RemoveIndicatorsTable.xml" relativeToChangelogFile="true"/>
+  <include file="2017-02-10--06-AddReferencesToCalculateTables.xml" relativeToChangelogFile="true"/>
+  <include file="2017-02-10--07-UpdateIsTestReportInByPeriodsIndicators.xml" relativeToChangelogFile="true"/>
+  <include file="2017-02-10--08-CreateDimensionCategoryTable.xml" relativeToChangelogFile="true"/>
+  <include file="2017-02-10--09-CreateDimensionsTable.xml" relativeToChangelogFile="true"/>
+  <include file="2017-02-10--10-InsertRowsInDimensionCategory.xml" relativeToChangelogFile="true"/>
+  <include file="2017-02-10--11-InsertRowsInDimension.xml" relativeToChangelogFile="true"/>
+
+</databaseChangeLog>
+ 

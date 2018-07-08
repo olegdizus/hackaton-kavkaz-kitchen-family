@@ -1,0 +1,99 @@
+﻿<table style="width: 100%">
+    <tr>
+        <td>
+            <div class="col-xs-3 date-picker">
+                <ul class="pager" style="margin-top: 5px; margin-bottom: 5px; max-width: 260px;">
+                    <li class="previous"><a id="previousDay" href="#"><<</a></li>
+                    <li>
+                        &nbsp;
+                        <label id="currDate"
+                               data-date="@ViewBag.ProductionDate"
+                               data-begin="@ViewBag.ProductionDateBegin"
+                               data-end="@ViewBag.ProductionDateEnd"
+                               style="padding-top: 5px; font-size: 18px;">
+                            @ViewBag.ProductionDateTitle
+                        </label>
+                    </li>&nbsp;
+                    <li class="next"><a id="nextDay" href="#">>></a></li>
+                </ul>
+            </div>
+        </td>
+    </tr>
+</table>
+
+@*TODO: вынести в бандлы!*@
+<script type="text/javascript">
+
+    var date = '@ViewBag.ProductionDate';
+
+    function setHitForPeriodLabel() {
+
+        var curDate = $('#currDate');
+
+        var curDateBegin = curDate.data().begin;
+
+        var curDateEnd = curDate.data().end;
+
+        curDate.attr("title", curDateBegin + " - " + curDateEnd);
+
+    }
+
+    $(function () {
+        setHitForPeriodLabel();
+
+        $('#previousDay').click(function() {
+            onNavigationButtonClick(false);
+        });
+
+        $('#nextDay').click(function () {
+            onNavigationButtonClick(true);
+        });
+
+        function getProductionMonthDate() {
+            var date = $('#currDate').data('date');
+            return date;
+        }
+
+        function onNavigationButtonClick(isNext) {
+            var date = getProductionMonthDate();
+
+            getNeighborProductionMonth(date, isNext);
+        }
+
+        function setDatePickerDate(data) {
+
+            var date = data.month + '-' + data.year;
+
+            var curDate = $('#currDate');
+
+            curDate.data('date', date);
+            curDate.data('begin', data.begin);
+            curDate.data('end', data.end);
+
+            curDate.attr("data-date", date);
+            curDate.attr("data-begin", data.begin);
+            curDate.attr("data-end", data.end);
+
+            curDate.text(data.title);
+        }
+
+        function getNeighborProductionMonth(date, isNextMonth) {
+
+            var url = '@Url.Action("GetNeighborProductionMonth", "Date", null, Request.Url.Scheme)';
+
+            var params = {
+                date: getProductionMonthDate(),
+                isNextMonth: isNextMonth
+            };
+
+            $.post(url, params)
+                .done(function (data) {
+                    setDatePickerDate(data);
+
+                    setHitForPeriodLabel();
+
+                    MonthChanged(data.month + '-' + data.year);
+            });
+        }
+    });
+</script>

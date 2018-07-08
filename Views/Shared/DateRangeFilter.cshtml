@@ -1,0 +1,19 @@
+﻿<style>
+    .static_width {
+        width: 130px;
+    }
+</style>
+<div class="col-lg-6 col-md-6 col-xs-6 col-sm-6 data-range">
+    <div style="width:153px;display:inline-block;"><h5>С:</h5></div>
+    <div style="width:110px;display:inline-block;"><input type="text" data-bind="value: beginDate" class="datepicker form-control activateRefreshButton" id="beginDatepicker" name="beginDatepicker"></div>
+    <div style="width:70px;display:inline-block;text-align:center"><h5>По:</h5></div>
+    <div style="width:110px;display:inline-block;"><input type="text" data-bind="value: endDate" class="datepicker form-control activateRefreshButton" id="endDatepicker" name="endDatepicker"></div>
+    <div style="width:150px;display:inline-block;margin-left: 30px">
+        <input type="button" value="Обновить" class="form-control btn btn-primary submitButton" id="refresh" style="display:inline-block">
+        <div id="loadingFilterEnabled" style="display:none;float:none;">
+            <img alt="загрузка" src="~/Images/loading.GIF" width="30" height="30">
+        </div>
+    </div>
+    
+</div>
+

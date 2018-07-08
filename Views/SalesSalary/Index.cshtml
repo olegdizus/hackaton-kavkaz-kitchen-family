@@ -1,0 +1,69 @@
+﻿@{
+    ViewBag.Title = "Расчет мотивации сотрудников";
+}
+
+@section scripts
+    {
+    <script src="@Url.Content("~/Scripts/Extentions/DateExt.js")"></script>
+
+    <script
+        data-main="@Url.Content("~/Scripts/angular/config/salaryCalculator.js")" 
+        src="@Url.Content("~/Scripts/angular/lib/require.js")" 
+        type="text/javascript">
+    </script>
+}
+
+@section styles
+{
+    @Styles.Render(
+    Dashboard.Bundles.SalesSalaryStyleCss.Css.Key,
+    Dashboard.Bundles.Kendo.kendo.Css.Key)
+}
+
+<h2>@ViewBag.Title</h2>
+
+@Html.Partial("~/Views/Shared/ProductionMonthControl.cshtml")
+
+<div id="showMenu" style="float: left; padding-right: 10px">
+    @Html.Partial("~/Views/Shared/HierarchyMenuControl.cshtml")
+</div>
+
+<salary-calculator-main>
+    Выполняется загрузка страницы...
+</salary-calculator-main>
+
+
+    @Scripts.Render(
+            Dashboard.Bundles.Extentions.Scripts.Key,
+            Dashboard.Bundles.SalesSalaryScript.Scripts.Key)
+
+
+
+<script>
+    var employeeName = "@ViewBag.employeeName";
+    var $treeMenuEmployes = $('#treeViewMenu').treeview({ data: getTreeData() });
+
+    var displayMotivationEmployee = function () {
+
+        var employee = employeeName
+            .replace(")", ">")
+            .replace("(", "<")
+            .replace(/<.*?>/g, "")
+            .trim();
+
+        var options = {
+            ignoreCase: true,
+            exactMatch: false,
+            revealResults: true
+        };
+
+
+        var findSelectableNodes = function () {
+            return window.$treeMenuEmployes.treeview('search', [employee, options]);
+        };
+
+        var selectedNodeEmployee = findSelectableNodes();
+        window.$treeMenuEmployes.treeview('selectNode', [selectedNodeEmployee, { silent: false }]);
+
+    }
+</script>

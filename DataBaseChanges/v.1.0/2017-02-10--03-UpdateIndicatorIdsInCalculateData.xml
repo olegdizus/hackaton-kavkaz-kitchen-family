@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="UpdateIndicatorIdsInCalculateData" author="zelim">
+
+    <!-- Создаем временный столбец для новых индикаторов -->
+    <addColumn tableName="tst_CalculateData">
+      <column name="indicator_new_id" type="INT" defaultValue="0">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+
+    <!-- Сопоставляем с новыми id -->
+    <sql>
+      UPDATE
+        tcd
+      SET
+        tcd.indicator_new_id = ti.indicator_new_id
+      FROM
+        tst_CalculateData AS tcd
+        INNER JOIN tst_Indicators AS ti
+          ON ti.id = tcd.indicator_id
+    </sql>
+
+  </changeSet>
+</databaseChangeLog>

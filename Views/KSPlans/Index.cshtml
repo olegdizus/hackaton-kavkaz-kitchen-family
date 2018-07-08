@@ -1,0 +1,146 @@
+﻿@{
+    ViewBag.Title = "Планы продаж КС";
+}
+
+@section styles
+{
+    @Styles.Render(Dashboard.Bundles.Kendo.kendo.Css.Key,
+                Dashboard.Bundles.Fontawesome.Css.Key)
+}
+
+<h2>@ViewBag.Title</h2>
+
+@Html.Partial("~/Views/Shared/CalendarMonthControl.cshtml")
+@Html.Partial("~/Views/KSPlans/ImportExcelModal.cshtml")
+
+<div class="row">
+    
+    <div class="col-md-2">
+        <label>Регион: </label>
+        @Html.DropDownList("Regions", null, new { @class = "form-control" })
+    </div>
+    <div class="col-md-2">
+        <label>Индикатор: </label>
+        @Html.DropDownList("Indicators", null, new { @class = "form-control" })
+    </div>
+    <div class="col-md-2">
+        <label>Импорт Excel:</label>
+        <br><button class="btn btn-default"><img src="./Images/file_Exel_download-128.png" width="20" height="20" data-toggle="modal" data-target="#importPlanFromExcel"></button>
+        
+        @*<button class="fa fa-file-excel-o fa-2x btn btn-default" data-toggle="modal" data-target="#importPlanFromExcel">
+            </button>*@
+    </div>
+</div>
+
+
+<div class="col-md-12">
+    <div id="grid"></div>
+</div>
+
+
+
+@section Scripts
+{
+    @Scripts.Render(
+        Dashboard.Bundles.jquery.jqueryval.Scripts.Key,
+        Dashboard.Bundles.Extentions.Scripts.Key,
+        Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+        Dashboard.Bundles.Knockout.Scripts.Key,
+        Dashboard.Bundles.Kendo.kendoHelp.Scripts.Key,
+        Dashboard.Bundles.Reports.KSPlans.Scripts.Key
+        )
+
+    <script>
+    $(function () {
+
+            
+
+            KSPlansKPIGrid("#grid");
+
+            window.dateManager = new DateManager(function() {
+
+                $("#grid").data('kendoGrid').dataSource.read();
+
+            });
+
+            $("#Regions").change(function() {
+
+                $("#grid").data('kendoGrid').dataSource.read();
+            });
+            $("#Indicators").change(function() {
+                $("#grid").data('kendoGrid').dataSource.read();
+
+            });
+
+            KendoPlugins.attach($("#grid").data("kendoGrid"), KendoPlugins.initGroupHeaderNamesPlugin);
+
+            KendoPlugins.GroupsManage('#grid', true);
+        });
+
+        function onDataBound() {
+            showOnlyNotEmplyColumn('.util-row', 0);
+        }
+
+
+        $('#buttonDownloadExcel').on('click',
+            function () {
+                $('#message').empty();
+            });
+
+        $('.btn-success').on('click',
+            function (e) {
+                e.preventDefault();
+                var files = document.getElementById('uploadExcel').files;
+                if (files.length > 0) {
+                    if (window.FormData !== undefined) {
+                        var data = new FormData();
+                        for (var x = 0; x < files.length; x++) {
+                            data.append("file" + x, files[x]);
+                        }
+
+                        $.ajax({
+                            type: "POST",
+                            url: '@Url.Action("ImportExcel", "KSPlansExcelImport")',
+                        contentType: false,
+                        processData: false,
+                        data: data,
+                        success: function (response) {
+                            viewMessage(response.message, response.counts, response.success);
+                        }
+                    });
+                } else {
+                    alert("Браузер не поддерживает загрузку файлов HTML5!");
+                }
+
+            }
+        });
+
+    function viewMessage(message, counts, type) {
+        if (type) {
+            $('#message').append("<div id='infoMessage' class='alert alert-success'>" +
+                "<strong>Успешно!</strong>" +
+                "</br><strong>Добавлено : </strong>" + counts[0] +
+                "</br><strong>Обновлено : </strong>" + counts[1] +
+                "</br><strong>Ошибок : </strong>" + counts[2] +
+                "</br><strong>Всего : </strong>" + +counts[3] +
+                "</br></div>");
+
+            for (i = 0; i < message.length; i++) {
+                $('#message').append("<div id='infoMessage' class='alert alert-danger'>" +
+                    "<strong>Ошибка! </strong>" +
+                    message[i] +
+                    "</div>");
+            }
+            $("#grid").data('kendoGrid').dataSource.read();
+        } else {
+            for (i = 0; i < message.length; i++) {
+                $('#message').append("<div id='infoMessage' class='alert alert-danger'>" +
+                    "<strong>Ошибка! </strong>" +
+                    message[i] +
+                    "</div>"
+                );
+            }
+        }
+    }
+    </script>
+}

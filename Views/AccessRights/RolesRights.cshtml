@@ -1,0 +1,53 @@
+﻿@{
+    ViewBag.Title = "Привязка пользователей к должностям и фильтрам в данных";
+}
+
+@section styles
+{
+    @Styles.Render(
+        Dashboard.Bundles.Kendo.KendoStandart.Css.Key,
+        Dashboard.Bundles.AccessRights.Css.Key,
+        Dashboard.Bundles.Fontawesome.Css.Key
+    )
+}
+
+<h2>Разрешения на роль</h2>
+
+<div class="row">
+    <div class="col-lg-3">
+        <h5>Пользователь:</h5>
+        @Html.DropDownList("Roles", ViewBag.Roles as SelectList, new { id = "Roles", @class = "form-control" })
+    </div>
+   
+</div>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div id="treelist"></div>
+    </div>
+</div>
+
+@section scripts{
+    @Scripts.Render(
+        Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+        Dashboard.Bundles.AccessModules.Scripts.Key
+    )
+
+    <script type="text/javascript">
+        $(function() {
+
+            $('#Roles').change(function () {
+
+                var role = $(this).val();
+                var treeDiv = "#treelist";
+
+                $(treeDiv).empty();
+
+                InitAccessRigthsTree(treeDiv, role);
+            });
+        });
+    </script>
+}
+
+
+

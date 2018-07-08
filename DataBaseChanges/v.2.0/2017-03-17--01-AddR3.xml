@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="AddR3" author="ura">
+
+    <insert tableName="rpt_ByPeriods_Indicators">
+      <column name="name" value="R3, %" />
+	    <column name="aggregateType" value="percent" />
+	    <column name="measureName" value="R3" />
+	    <column name="kategory_id" value="1" />
+	    <column name="isTestReport" value="False" />
+    </insert>
+
+    <addColumn tableName="olap_Delivery">
+      <column name="isMmlRazvitiePercent" type="INT" defaultValue="0">
+      </column>
+    </addColumn>
+
+
+
+
+  </changeSet>
+</databaseChangeLog>

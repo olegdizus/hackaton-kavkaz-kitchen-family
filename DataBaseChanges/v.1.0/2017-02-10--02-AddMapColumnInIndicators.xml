@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="AddMapColumnInIndicators" author="zelim">
+
+    <!-- Создаем временный столбец для новых индикаторов -->
+    <addColumn tableName="tst_Indicators">
+      <column name="indicator_new_id" type="INT" defaultValue="0">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+
+    <!-- Добавляем недостающую строку -->
+    <insert tableName="rpt_ByPeriods_Indicators">
+      <column name="name" value="Количество возвратов" />
+      <column name="aggregateType" value="simple" />
+      <column name="kategory_id" value="2" />
+      <column name="isTestReport" value="1" />
+    </insert>
+    
+    <!-- Сопоставляем с новыми id -->
+    <sql>
+      UPDATE
+        ti
+      SET
+        ti.indicator_new_id = rbi.id
+      FROM
+        tst_Indicators AS ti
+        INNER JOIN rpt_ByPeriods_Indicators AS rbi
+          ON rbi.name LIKE N'Отгрузка факт, руб'
+      WHERE
+        ti.name LIKE N'Сумма продаж';
+        
+      UPDATE
+        ti
+      SET
+        ti.indicator_new_id = rbi.id
+      FROM
+        tst_Indicators AS ti
+        INNER JOIN rpt_ByPeriods_Indicators AS rbi
+          ON rbi.name LIKE N'Отгрузка факт, кг'
+      WHERE
+        ti.name LIKE N'Вес продаж';
+        
+      UPDATE
+        ti
+      SET
+        ti.indicator_new_id = rbi.id
+      FROM
+        tst_Indicators AS ti
+        INNER JOIN rpt_ByPeriods_Indicators AS rbi
+          ON rbi.name LIKE N'Количество отгрузок'
+      WHERE
+        ti.name LIKE N'Количество отгрузок';
+        
+              UPDATE
+        ti
+      SET
+        ti.indicator_new_id = rbi.id
+      FROM
+        tst_Indicators AS ti
+        INNER JOIN rpt_ByPeriods_Indicators AS rbi
+          ON rbi.name LIKE N'Задолженность'
+      WHERE
+        ti.name LIKE N'Задолженность';
+		
+      UPDATE
+        ti
+      SET
+        ti.indicator_new_id = rbi.id
+      FROM
+        tst_Indicators AS ti
+        INNER JOIN rpt_ByPeriods_Indicators AS rbi
+          ON rbi.name LIKE N'Просроченная задолженность'
+      WHERE
+        ti.name LIKE N'Просроченная задолженность';
+		
+      UPDATE
+        ti
+      SET
+        ti.indicator_new_id = rbi.id
+      FROM
+        tst_Indicators AS ti
+        INNER JOIN rpt_ByPeriods_Indicators AS rbi
+          ON rbi.name LIKE N'Просроченная задолженность от 8 дней'
+      WHERE
+        ti.name LIKE N'Просроченная задолженность от 8 дней';
+		
+      UPDATE
+        ti
+      SET
+        ti.indicator_new_id = rbi.id
+      FROM
+        tst_Indicators AS ti
+        INNER JOIN rpt_ByPeriods_Indicators AS rbi
+          ON rbi.name LIKE N'Плановая сумма, руб'
+      WHERE
+        ti.name LIKE N'Плановая сумма';
+		
+      UPDATE
+        ti
+      SET
+        ti.indicator_new_id = rbi.id
+      FROM
+        tst_Indicators AS ti
+        INNER JOIN rpt_ByPeriods_Indicators AS rbi
+          ON rbi.name LIKE N'Количество сработавших точек'
+      WHERE
+        ti.name LIKE N'Количество сработавших ТТ';
+		
+      UPDATE
+        ti
+      SET
+        ti.indicator_new_id = rbi.id
+      FROM
+        tst_Indicators AS ti
+        INNER JOIN rpt_ByPeriods_Indicators AS rbi
+          ON rbi.name LIKE N'Количество возвратов'
+      WHERE
+        ti.name LIKE N'Количество возвратов';
+		
+      UPDATE
+        ti
+      SET
+        ti.indicator_new_id = rbi.id
+      FROM
+        tst_Indicators AS ti
+        INNER JOIN rpt_ByPeriods_Indicators AS rbi
+          ON rbi.name LIKE N'Возвраты, руб'
+      WHERE
+        ti.name LIKE N'Сумма по возвратам';
+    </sql>
+
+  </changeSet>
+</databaseChangeLog>

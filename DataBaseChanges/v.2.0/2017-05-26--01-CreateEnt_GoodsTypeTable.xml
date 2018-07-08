@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="CreateEnt_GoodsTypeTable" author="ura">
+
+    <createTable tableName="ent_GoodsType">
+
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+
+      <column name="name"
+        type="nvarchar(250)">
+        <constraints nullable="false"/>
+      </column>
+
+    </createTable>
+
+
+    <insert tableName="ent_GoodsType">
+      <column name="name" value="Другое" />
+    </insert>
+    
+    <insert tableName="ent_GoodsType">
+      <column name="name" value="Продукт Сатурн" />
+    </insert>
+    
+    <insert tableName="ent_GoodsType">
+      <column name="name" value="Коммерческий продукт" />
+    </insert>
+    
+  </changeSet>
+</databaseChangeLog>

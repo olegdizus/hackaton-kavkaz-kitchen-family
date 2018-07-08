@@ -1,0 +1,108 @@
+﻿.btn-primary {
+    margin: 20px 0;
+}
+
+textarea {
+    width: 100%; /* Ширина поля в процентах */
+    resize: none; /* Запрещаем изменять размер */
+    max-width: 100%;
+}
+
+table {
+    border-color: rgb(68, 68, 68);
+    border: 1px;
+    width: 100%;
+}
+
+td {
+    border-color: rgb(229, 229, 229);
+    padding: 4px 4px 4px 4px;
+    text-align: center;
+}
+
+.difChildrenLabel {
+    background-color: #4F6228;
+    color: white;
+}
+
+.difChildrenDescr {
+    background-color: #EBF1DE;
+    vertical-align: bottom;
+}
+
+.dogsLabel {
+    background-color: #800000;
+    color: white;
+}
+
+.dogsDescr {
+    background-color: #F2DCDB;
+    vertical-align: bottom;
+}
+
+.starsLabel {
+    background-color: #E26B0A;
+    color: white;
+}
+
+.starsDescr {
+    background-color: #FCD5B4;
+    vertical-align: bottom;
+}
+
+.cowsLabel {
+    background-color: #366092;
+    color: white;
+}
+
+.cowsDescr {
+    background-color: #B8CCE4;
+    vertical-align: bottom;
+}
+
+.tdTotal {
+    text-align: right;
+    font-weight: bold;
+}
+
+.tdTotal {
+    text-align: right;
+    font-weight: bold;
+}
+
+.k-grid td {
+    padding: .3em .5em;
+}
+
+#grid {
+    margin-top: 20px;
+}
+
+#buttonsDiv {
+    margin-top: 20px;
+}
+
+#updateButtonDiv {
+    margin-top: 20px;
+}
+
+#bcgMatrix {
+    margin-top: 20px;
+}
+
+#bcgReport {
+    margin-top: 10px;
+}
+
+.brandNameTd {
+    text-align: left;
+}
+
+.brandSumTd {
+    text-align: right;
+}
+
+.brandFooterTd {
+    text-align: right;
+    font-weight: bold;
+}

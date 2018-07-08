@@ -1,0 +1,107 @@
+﻿@using Dashboard.DB.Models.Reports
+@using Dashboard.Helpers
+@{
+    ViewBag.Title = "Отчет по ДЗ";
+}
+
+@section styles
+{
+    @Styles.Render(
+        Dashboard.Bundles.Kendo.kendo.Css.Key,
+        Dashboard.Bundles.HighlightStyle.Css.Key,
+            Dashboard.Bundles.BootstrapTagsInput.Css.Key,
+                Dashboard.Bundles.UserSetting.Scripts.Key,
+                Dashboard.Bundles.Tooltipster.Css.Key,
+                Dashboard.Bundles.DeliveryStyle.Css.Key)
+    <style>
+    .tooltip {
+        position: relative;
+        font-size: 14px;
+        opacity: 1;
+    }
+    </style>
+}
+
+@Html.Partial("UserSettingModal")
+
+<h2>@ViewBag.Title</h2>
+<div class="row" style="padding-left: 16px;margin-bottom:20px;">
+    <table>
+        <tr>
+            <td>
+                <input style="text-align: justify" type="text" id="beginDatepicker" data-date-format="dd.mm.yyyy" class="datepicker form-control">
+                <input type="hidden" id='endDatepicker' value="24.04.2018"/>
+            </td>
+            <td>
+                <input type="button" value="Обновить" class="form-control btn btn-primary submitButton" id="refresh">
+            </td>
+        </tr>
+    </table>
+</div>
+<div style="vertical-align: top;">
+    <div id="FilterContainer" style="display:inline-block;">
+        @foreach (GrenceColor grenceColor in ViewBag.grenceColor)
+        {
+            <div style="display:inline-block;margin:0px 3px">
+                <a class="delayFilter active" category="@(grenceColor.DelayCategory)" href="#">
+                    <div style="background-color: @grenceColor.color;margin-right: 2px;" class="color" id="colorDiv"></div>@Html.Raw(grenceColor.name)
+                </a>
+            </div>
+        }
+    </div>
+    <button type="button" class="btn btn-default" id="openSettingsModalButton" style="vertical-align: top;">
+        Настройки
+    </button>
+</div>
+<div id="Grid"></div>
+
+@section Scripts    
+{
+    <script>
+        var userSettings = JSON.parse(@Html.JsonRaw((object) ViewBag.userSettings));
+
+
+        var grenceColor = [
+            @{int i = 0;
+
+                foreach (GrenceColor grenceColor in ViewBag.grenceColor)
+                {
+                    @Html.Raw(string.Format("{2}{{value: {0}, color: '{1}'}}", grenceColor.value, grenceColor.color, i == 0 ? "" : ","))
+                    ;
+                    i++;
+                }
+            }
+        ];
+
+   
+    </script>
+    
+    <script src="~/Scripts/Reports/Debitore/ExpiredPeriodsManager.js"></script>
+    <script src="~/Scripts/Reports/Debitore/DebitoreExpiredManager.js"></script>
+
+    @Scripts.Render(
+        Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+        Dashboard.Bundles.Knockout.Scripts.Key,
+        Dashboard.Bundles.Kendo.kendoHelp.Scripts.Key,
+
+        Dashboard.Bundles.Extentions.Scripts.Key,
+        Dashboard.Bundles.bootstrapplugins.Scripts.Key,
+        Dashboard.Bundles.UserSetting.Scripts.Key,
+
+        Dashboard.Bundles.Reports.ReportHelper.Scripts.Key,
+        Dashboard.Bundles.Reports.AnalizeByPeriods.Scripts.Key,
+
+        Dashboard.Bundles.Helpers.Scripts.Key,
+        Dashboard.Bundles.PrMonthAlert.Scripts.Key,
+
+        Dashboard.Bundles.Tooltipster.Scripts.Key,
+        Dashboard.Bundles.Underscore.Scripts.Key,
+
+
+        Dashboard.Bundles.Reports.DebitoreReportOlap.Scripts.Key
+        
+        
+    )
+
+    
+}

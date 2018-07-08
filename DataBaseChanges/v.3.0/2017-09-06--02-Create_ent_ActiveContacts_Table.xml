@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Create_ent_ActiveContacts_Table" author="Ura">
+
+    <createTable tableName="ent_ActiveContacts">
+
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+
+      
+      <column name="yearProd" type="INT">
+        <constraints nullable="false" />
+      </column>
+
+      <column name="monthNumberProd" type="INT">
+        <constraints nullable="false" />
+      </column>
+
+      <column name="startDate" type="DATE">
+        <constraints nullable="false" />
+      </column>
+
+      <column name="id_contact" type="INT">
+        <constraints nullable="false" />
+      </column>
+      
+      <column name="isActive" type="INT">
+        <constraints nullable="false" />
+      </column>
+      
+      <column name="isWork" type="INT">
+        <constraints nullable="false" />
+      </column>
+      
+     
+
+    </createTable>
+  </changeSet>
+</databaseChangeLog>

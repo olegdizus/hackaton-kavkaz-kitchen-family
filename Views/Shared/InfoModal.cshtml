@@ -1,0 +1,55 @@
+﻿
+@Styles.Render(
+    Dashboard.Bundles.Arcticmodal.Css.Key
+)
+
+<style>
+    #infoModal {
+        top: 50%;
+        left: 50%;
+        width: 400px;
+        height: 100px;
+        position: absolute;
+        margin-top: -230px;
+        margin-left: -225px;
+        z-index: 99999;
+    }
+
+</style>
+
+<div style="display: none;">
+    <div class="box-modal" id="infoModal">
+        <div class="box-modal_close arcticmodal-close close_modal">×</div>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 id="headerModal">Уведомление</h4>
+            </div>
+            <div id="FormDiv" class="modal-body">
+                <label id="text"></label>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="closeModalButton" class="btn btn-primary">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    
+    function showInfoModal(text, header) {
+
+        $('#text').html(text);
+
+        if(header)
+        {
+            $('#headerModal').html(header);
+        }
+
+        $('#closeModalButton').click(function () {
+            $('#infoModal').arcticmodal('close');
+        });
+
+        $('#infoModal').arcticmodal();
+    }
+
+</script>

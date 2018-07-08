@@ -1,0 +1,328 @@
+﻿@using Dashboard.DB.Models.TaskPlanner
+@using Dashboard.Models
+@using Dashboard.DB.Models.ModelExt
+@model IEnumerable<TaskPost>
+
+@Styles.Render("~/Content/Tasks/TaskPostsTape")
+
+<div id="taskPostTape">
+    <style>
+        
+    </style>
+
+    <div class="modal modal-overflow in" style=" margin-top: 300px;" id="removeTask">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">Удаление задачи</h4>
+            </div>
+            <div class="modal-body">
+                <h6>Вы уверены, что хотите удалить задачу?</h6>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Отменить</button>
+                <a data-task-id="@ViewBag.task.id" onclick="deleteTask(this)" href="#" class="btn btn-primary">
+                    Удалить
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal modal-overflow in" style=" margin-top: 300px;" id="removeTaskPost">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">Удаление действия</h4>
+            </div>
+            <div class="modal-body">
+                <h6>Вы уверены, что хотите удалить это действие?</h6>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Отменить</button>
+                <a onclick="deleteTaskPost(this)" id="confirmDeleteTaskPost" href="#" class="btn btn-primary">
+                    Удалить
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <span class="field-validation-valid text-danger" id="errorSpan"></span>
+
+    <div class="alert alert-dismissible alert-success clearfix">
+        <div class="btn-actions-block">
+            <a href="#" data-task-id="@ViewBag.task.id" onclick="callCreateTaskPostModal(this)"
+               class="btn btn-default btn-xs">
+                Создать действие
+            </a>
+            @if (User.IsInRole(DashboardRoles.Administrator))
+            {
+                var currentState = (TaskState)ViewBag.task.State;
+                if (currentState.NotClosed())
+                {
+                    <a data-task-id="@ViewBag.task.id" onclick="closeTask(this)" href="#"
+                       class="btn btn-default btn-xs">
+                        Закрыть
+                    </a>
+                }
+
+                <a href="#" onclick="callRemoveTaskModal()" class="btn btn-default btn-xs">
+                    Удалить
+                </a>
+            }
+		
+	        
+        </div>
+        <table class="post-info-table left">
+            <tr>
+                <td class="bold">
+                    @ViewBag.task.Theme
+                </td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>
+                    Исполняет:
+                </td>
+                <td>
+                    @ViewBag.task.From.name
+                </td>
+            </tr>
+        </table>
+        <div class="right">
+            <span class="bold">Текущий статус: </span>
+            @ViewBag.task.State.name
+        </div>
+    </div>
+
+    @foreach (var post in Model)
+    {
+        <div class="alert alert-dismissible alert-old-post clearfix">
+            <div class="btn-actions-block">
+                @if (post.IsLastPost && post.State.NotClosed())
+                {
+                    if (ViewBag.userCanDeletePosts)
+                    {
+                        <a data-post-id="@post.id"
+                           data-task-id="@post.task_id"
+                           href="#"
+                           onclick="callDeleteTaskPostModal(this)"
+                           class="btn btn-primary btn-xs">
+                            Удалить
+                        </a>
+                    }
+                }
+            </div>
+	        <table class="post-info-table left">
+		        <tr>
+			        <td>
+				        Статус:
+			        </td>
+			        <td>
+				        @post.State.name
+			        </td>
+		        </tr>
+		        <tr>
+			        <td>
+				        Назначил:
+			        </td>
+			        <td>
+				        @post.From.name
+			        </td>
+		        </tr>
+		        <tr>
+			        <td>
+				        Дата создания:
+			        </td>
+			        <td>
+				        @post.CreationDate.ToString("dd.MM.yyyy HH:mm")
+			        </td>
+			        <td>
+
+		
+			        </td>
+
+		        </tr>
+		        @if (post.State.HasPlannedDate())
+		        {
+			        <tr>
+				        <td>
+					        Планируемая дата выполнения:
+				        </td>
+				        <td>
+					        @post.PlannedDate.ToString("dd.MM.yyyy HH:mm")
+				        </td>
+			        </tr>
+		        }
+	        </table>
+			<table style="height: 90px;" class="right">
+				<tr>
+					<td>
+						<div class="right">
+							@Html.Raw(post.Body)
+						</div>
+					</td>
+
+				</tr>
+				<tr>
+					<td style="vertical-align: bottom;">
+						<div>
+							<br />
+							@if (post.AttachedFiles.Any())
+							{
+								<a href="@Url.Action("GetAttachedFile", new {taskPost_id = post.id})" class="btn btn-default btn-xs">
+                                    <i class="fa fa-paperclip" aria-hidden="true" style="font-size:18px;color:black;"></i>
+									&nbsp;&nbsp;@post.AttachedFiles.FirstOrDefault().Name
+								</a>
+							}
+						</div>
+					</td>
+
+				</tr>
+			</table>
+	        
+	       
+			</div>
+    }
+</div>
+<script>
+    function callRemoveTaskModal() {
+        var removeTaskModalWindow = $('#removeTask');
+
+        showModalWindowOnCenter(removeTaskModalWindow);
+
+        return false;
+    }
+
+    function showModalWindowOnCenter(modalWindow) {
+        modalWindow.modal('show');
+        modalWindow.css("margin-top", "300px");
+    }
+
+    function callCreateTaskPostModal(element) {
+        var taskId = getTaskId(element);
+
+        TaskPostModalManager.getInstance()
+            .openModal(
+                taskId,
+                function () {
+                    updateTaskPostTape(taskId);
+                    updateTasksList(taskId);
+                });
+    }
+
+    function updateTaskPostTape(taskId) {
+        getTaskPostsFromServer(taskId);
+    }
+
+    function updateTasksList(taskId) {
+        kendoGridDataBind();
+
+        kendoGrid.onDataBound(function () {
+            kendoGridSetSelectedRow(taskId);
+        });
+    }
+
+    function getTaskId(element) {
+        return $(element).data('taskId');
+    }
+
+    function closeTask(element) {
+        var taskId = getTaskId(element);
+
+        $.ajax({
+            url: basePath + "Tasks/CloseTask",
+            data: { task_id: taskId },
+            type: 'POST',
+            success: function (data) {
+                if (resultIsSuccess(data)) {
+                    updateTaskPostTape(taskId);
+                    updateTasksList(taskId);
+                } else {
+                    setErrorToSpan('Неизвестная ошибка');
+                }
+            },
+            error: function () {
+                goToErrorPage();
+            }
+        });
+
+        return false;
+    }
+
+    function resultIsSuccess(data) {
+        return $('#answer', data).length > 0;
+    }
+
+    function setErrorToSpan(errorText) {
+        $('#errorSpan').html('');
+        $('#errorSpan').html(errorText);
+    }
+
+    function deleteTask(element) {
+        var taskId = getTaskId(element);
+
+        $.ajax({
+            url: basePath + "Tasks/DeleteTask",
+            data: {
+                task_id: taskId
+            },
+            type: 'POST',
+            success: function (data) {
+                if (resultIsSuccess(data)) {
+                    updateTasksList();
+                    clearTaskPostsTape();
+                    $('#removeTask').modal('hide');
+                } else {
+                    setErrorToSpan('Неизвестная ошибка');
+                    $('#removeTaskPost').modal('hide');
+                }
+            },
+            error: function () {
+                goToErrorPage();
+            }
+        });
+    }
+
+    function goToErrorPage() {
+        window.location.replace(basePath + 'Shared/Error');
+    }
+
+    function callDeleteTaskPostModal(element) {
+        var removeTaskModalWindow = $('#removeTaskPost');
+
+        var confirmDeleteLink = removeTaskModalWindow.find('#confirmDeleteTaskPost');
+
+        confirmDeleteLink.data('postId', $(element).data('postId'));
+        confirmDeleteLink.data('taskId', $(element).data('taskId'));
+
+        showModalWindowOnCenter(removeTaskModalWindow);
+
+        return false;
+    }
+
+    function deleteTaskPost(element) {
+        var postId = $(element).data('postId');
+        var taskId = $(element).data('taskId');
+
+        $.ajax({
+            url: basePath + "Tasks/DeleteTaskPost",
+            data: {
+                taskPost_id: postId
+            },
+            type: 'POST',
+            success: function (data) {
+                if (resultIsSuccess(data)) {
+                    updateTasksList(taskId);
+                    updateTaskPostTape(taskId);
+                    $('#removeTaskPost').modal('hide');
+                } else {
+                    setErrorToSpan('Неизвестная ошибка');
+                    $('#removeTaskPost').modal('hide');
+                }
+            },
+            error: function () {
+                goToErrorPage();
+            }
+        });
+    }
+</script>

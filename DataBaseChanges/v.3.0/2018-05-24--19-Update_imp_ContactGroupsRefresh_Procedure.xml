@@ -1,0 +1,138 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Update_imp_ContactGroupsRefresh_Procedure" author="Andrey">
+    <createProcedure>
+ALTER PROCEDURE  [dbo].[imp_ContactGroupsRefresh]
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	declare @importId uniqueidentifier
+
+	CREATE TABLE #importIdTable 
+	 (
+	  importId uniqueidentifier
+	 )
+
+	while 0 &lt; (select count(*)
+				from imp_ContactGroups
+				where importId not in (select importId from #importIdTable))
+	begin
+		
+		set @importId = (select top 1 importId
+						from imp_ContactGroups
+						where importId not in (select importId from #importIdTable)
+						order by id)
+
+		insert into #importIdTable (importId) values (@importId);
+				
+		MERGE ent_ContactGroups AS T
+		USING 
+		(select d.[key]
+		  ,d.name
+		  ,d.[isDeleted]
+		  ,d.[user1C]
+		  ,d.[guid]
+	  FROM imp_ContactGroups d
+	  where d.id in (select max(id) from imp_ContactGroups group by [guid])
+	  and importId=@importId
+	   ) AS S
+	  on T.[guid] = S.[guid]
+	  WHEN MATCHED 
+			THEN
+				UPDATE
+				SET 
+					 T.name = S.name
+		  ,T.[isDeleted] = S.[isDeleted]
+		  ,T.[user1C] = S.[user1C]
+		  ,T.[key] = S.[key]
+ 
+		WHEN NOT MATCHED BY TARGET 
+			THEN INSERT (
+			[key]
+			,name
+			,[isDeleted]
+			,[user1C]
+			,[guid]
+			,hst_datetime)
+		VALUES (
+			[key]
+			,name
+			,[isDeleted]
+			,[user1C]
+			,[guid]
+			,Getdate()
+			);
+		
+	end
+
+		MERGE ent_ContactGroups AS T
+		USING 
+		(select cg.id as parent_id
+				,d.[guid]
+	  FROM imp_ContactGroups d
+	  inner join ent_ContactGroups cg on cg.guid = d.parentGuid
+	  where d.id in (select max(id) from imp_ContactGroups group by [guid])
+	   ) AS S
+	  on T.[guid] = S.[guid]
+	  WHEN MATCHED 
+		and (T.parent_id != S.parent_id or T.parent_id is not null and S.parent_id is null or T.parent_id is null and S.parent_id is not null
+     ) 
+		THEN
+				UPDATE
+				SET 
+					 T.parent_id = S.parent_id;
+
+--проверяем количество обработанных данных	
+	insert into imp_importLog ([date]
+           ,[entity]
+           ,[key])
+		select getdate(),
+			 'Группа контрагенов',
+			 i.[key] 
+		from imp_ContactGroups i
+		where 
+			i.[key] not in (
+				select [key] 
+				from ent_ContactGroups);
+
+delete from imp_ContactGroups where importId in (select importId from #importIdTable);
+
+
+	WITH Tree (id, treeKey) AS
+    (
+        SELECT id,   CONVERT(varchar(255), id) as treeKey         
+        FROM ent_ContactGroups
+        WHERE parent_id is null
+        UNION ALL
+        SELECT g.id, 
+         CONVERT(varchar(255), Parent.treeKey  + '.' + CONVERT(varchar(255), g.id)) AS treeKey
+
+        FROM ent_ContactGroups g
+        INNER JOIN Tree as Parent ON Parent.id = g.parent_id
+    )
+	MERGE ent_ContactGroups AS T
+	USING (
+	
+    SELECT id, treeKey FROM Tree) AS S
+
+	ON T.id = S.id	 
+	WHEN MATCHED 
+	and (T.treeKey != S.treeKey or T.treeKey is not null and S.treeKey is null or T.treeKey is null and S.treeKey is not null
+     ) 
+		THEN
+			UPDATE
+			SET T.treeKey = S.treeKey;
+
+
+END
+
+    </createProcedure>
+
+  </changeSet>
+</databaseChangeLog>

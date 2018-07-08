@@ -1,0 +1,225 @@
+﻿@using Core.Web.Security.Principal
+@using Dashboard.Models
+@model UserViewModel
+
+@{
+    ViewBag.Title = "Редактирование пользователя " + Model.UserName;
+}
+
+@section styles
+{
+    @Styles.Render(
+        Dashboard.Bundles.Kendo.KendoStandart.Css.Key,
+        Dashboard.Bundles.AccessRights.Css.Key,
+        Dashboard.Bundles.Fontawesome.Css.Key
+    )
+}
+
+<h2>@ViewBag.Title </h2>
+
+<br>
+
+<div class="row">
+        
+        <div class="form-horizontal">
+    <div class="form-group">
+        @Html.LabelFor(model => model.UserName, htmlAttributes: new { @class = "control-label col-md-2" })
+        <div class="col-md-10">
+                    @Html.EditorFor(model => model.UserName, new { htmlAttributes = new { @class = "form-control", readOnly = true, id = "userName" } })
+        </div>
+
+    </div>
+    
+            <div class="form-group">
+                @Html.LabelFor(model => model.Role, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.DropDownListFor(model => model.Role, (IEnumerable<SelectListItem>)ViewBag.Roles, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.Role, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            
+            
+            <div class="form-group">
+                @Html.LabelFor(model => model.Email, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control", id = "Email" } })
+                    @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.IsSubsidiary, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.CheckBoxFor(model => model.IsSubsidiary)
+                    @Html.ValidationMessageFor(model => model.IsSubsidiary, "", new { @class = "text-danger" })
+                </div>
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.MainUserName, htmlAttributes: new { @class = "control-label col-md-2" })
+                <div class="col-md-10">
+                    @Html.DropDownListFor(model => model.MainUserName, (IEnumerable<SelectListItem>)ViewBag.UserNames, new { @class = "form-control MainUserName" })
+                    @Html.ValidationMessageFor(model => model.MainUserName, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            
+            
+            
+            
+
+    @{
+        var hasAccess = User.IsInRoles(
+            DashboardRoles.Administrator
+            , DashboardRoles.Director
+            , DashboardRoles.SmallAdmin);
+
+        var hasNotAccess = !hasAccess; //эта переменная объявлена потому что в скрипте нельзя написать @!hasAccess
+    }
+
+    @if (hasAccess)
+    {
+        <div class="col-lg-3">
+            <h5>Иерархия:</h5>
+                    @Html.DropDownList("MdxHierarchy", ViewBag.MdxHierarchy as SelectList, new { id = "MdxHierarchy", @class = "form-control" })
+        </div>
+        <div class="col-lg-3">
+            <h5>Значение:</h5>
+                    @Html.DropDownList("MdxHierarchyValues", ViewBag.MdxHierarchyValues as SelectList, new { id = "MdxHierarchyValues", @class = "form-control" })
+        </div>
+        <div class="col-lg-3">
+            <a id="addUserFilter" class="btn btn-primary">Добавить</a>
+        </div>
+    }
+         
+        </div>
+
+    </div>
+
+
+<div class="row">
+    <div class="col-lg-12">
+        <br />
+        <div id="grid"></div>
+    </div>
+</div>
+
+
+
+<div class="row">
+    <div class="col-lg-3">
+        <br />
+    </div>
+</div>
+
+
+<div class="form-group">
+    <div class="col-md-10">
+        <input type="submit" value="Сохранить" class="btn btn-primary" id="UpdateUser" />
+    </div>
+</div>
+
+
+@section scripts{
+    @Scripts.Render(
+        Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+        Dashboard.Bundles.AccessRights.Scripts.Key
+        )
+
+    <script type="text/javascript">
+
+    var isReport = @hasNotAccess.ToString().ToLower();
+    
+    var isSubsidiary = @ViewBag.IsSubsidiary.ToString().ToLower();
+
+
+
+    $(function() {
+        
+        $('#IsSubsidiary').prop('checked', isSubsidiary );
+
+        disableForm(!isSubsidiary);
+
+        $('#IsSubsidiary').change(function() {
+
+            disableForm(!this.checked);
+        });
+
+
+            $('#MdxHierarchy').change(function() {
+                var id = $(this).val();
+                $.ajax({
+                    type: 'GET',
+                    url: basePath + 'AccessRights/GetItems/' + id,
+                    success: function(data) {
+                        $('#MdxHierarchyValues').replaceWith(data);
+                    }
+                });
+            });
+
+            var userName = $("#userName").val();
+
+            AccessRightsGrid("#grid", userName, isReport);
+
+            $('#addUserFilter').click(function() {
+                var hierarchyId = $('#MdxHierarchy').val();
+
+                var value = $('#MdxHierarchyValues').val();
+
+                if (value != undefined) {
+                    var options = {
+                        userName: userName,
+                        hierarchyValueId: value,
+                        hierarchyId: hierarchyId,
+                        grid: '#grid'
+                    }
+
+                    addAccessRightElement(options);
+                }
+            });
+
+        });
+
+
+        $('#UpdateUser').click(function() {
+
+            var userName = $("#userName").val();
+            var newRoleName = $("#Role").val();
+            var email = $("#Email").val();
+
+            var isSubsidiary = $("#IsSubsidiary").is(':checked');
+            var mainUserName = $("#MainUserName").val();
+
+            $.ajax({
+                type: 'GET',
+                url: basePath + 'Account/UpdateUser',
+                data: {
+                    userName: userName,
+                    newRoleName: newRoleName,
+                    Email: email,
+                    isSubsidiary: isSubsidiary,
+                    mainUserName: mainUserName
+                },
+
+                success: function(response) {
+
+                    if (response.success) {
+                        window.location.replace(basePath + 'Account/UsersList');
+                    } else {
+                        if (response.message) {
+                            alert(response.message);
+                        }
+                    }
+                },
+                error: function() {
+                    alert("Не удалось поменять роль пользователю!");
+                }
+            });
+        });
+
+        function disableForm(isDisabled) {
+            $(".MainUserName").prop('disabled', isDisabled);
+        }
+
+    </script>
+}

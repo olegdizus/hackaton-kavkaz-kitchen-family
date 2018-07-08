@@ -1,0 +1,112 @@
+﻿<!-- begin Modal -->
+@Scripts.Render("~/Scripts/jquery/jquery-sortable.js")
+<style>
+    .up,
+    .down {
+        cursor: pointer;
+    }
+
+    .up {
+        color: green;
+    }
+
+    .down {
+        color: blue;
+    }
+
+    .arrows {
+        display: inline-block;
+    }
+    ul {
+        list-style-type: none;
+    }
+
+    body.dragging, body.dragging * {
+        cursor: move !important;
+    }
+
+    .dragged {
+        position: absolute;
+        opacity: 0.5;
+        z-index: 2000;
+    }
+
+    ul.userSettingList li.placeholder {
+        display: block;
+        margin: 2px;
+        padding: 2px;
+        border: 1px solid #cccccc;
+        background: #428bca;
+        border-radius: 2px;
+    }
+
+    ul.userSettingList li.placeholder:before {
+        position: absolute;
+        cursor: pointer;
+
+    }
+
+    ul.userSettingList li {
+        display: block;
+        cursor: pointer;
+    }
+
+</style>
+
+<div class="modal fade" id="userSettingsModal" tabindex="-1" style="z-index:2000" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">
+                    Настройки
+                </h4>
+            </div>
+            <div class="modal-body">
+                <span class="error-span" data-bind="text: errors"></span>
+                <form class="form-horizontal">
+                    <div class="form-group">
+                        <label class="col-sm-4 control-label" for="userSetting">
+                            Отображаемые столбцы
+                        </label>
+                        <div class="col-sm-8" data-bind="foreach: fieldGroups">
+                            <div>
+                                <div data-bind="text: groupAlias"></div>
+                                <ul class='userSettingList' id="userSetting" data-bind="foreach: fields">
+                                    <li>
+                                        <div class="settingValue tooltip">
+                                            <div data-bind="attr: { field: field }" class="arrows">
+                                            </div>
+                                            <input type="checkbox" data-bind="checked: isActive, enable: readOnly" class="activateRefreshButton" />
+                                            <span data-bind="text: title"></span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-11 right-align">
+                            <button type="button" class="btn btn-default" id="selectAllActiveColumnButton">
+                                Выделить всё
+                            </button>
+                            <button type="button" class="btn btn-default" id="unSelectAllActiveColumnButton">
+                                Сбросить всё
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="saveSettingsButton">
+                    Сохранить
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Закрыть
+                </button>
+            </div>
+        </div>
+    </div>
+</div><!-- end Modal -->

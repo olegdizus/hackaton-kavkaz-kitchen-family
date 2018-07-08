@@ -1,0 +1,26 @@
+﻿@{
+    ViewBag.Title = "Сохраненные отчеты БКГ";
+}
+<h2>@ViewBag.Title</h2>
+
+@section styles
+{
+    @Styles.Render(
+        Dashboard.Bundles.Kendo.KendoStandart.Css.Key,
+        Dashboard.Bundles.Fontawesome.Css.Key,
+        Dashboard.Bundles.BCG.Css.Key
+    )
+}
+
+<a href="@Url.Action("BCGInitialDataView", "BCG")" class="btn btn-primary">Создать</a>
+
+<div id="grid"></div>
+
+@section Scripts
+{
+    @Scripts.Render(
+        Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+        Dashboard.Bundles.Reports.SavedBCGReport.Scripts.Key
+    )
+}
+

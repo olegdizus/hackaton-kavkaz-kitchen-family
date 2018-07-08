@@ -1,0 +1,1525 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Update_MergeDetails_Procedures" author="Emil">
+    <createProcedure>
+ALTER PROCEDURE  [dbo].[imp_PriceGoodsRefresh]
+			
+        AS
+BEGIN
+
+print 'выполнение imp_PriceGoodsRefresh'
+
+SET NOCOUNT ON;
+	declare @importId uniqueidentifier
+
+	--drop table #importIdTable
+	CREATE TABLE #importIdTable 
+	(
+		importId uniqueidentifier
+	)
+	---------------Отладочный вывод----------------------
+--	select importId from #importIdTable
+
+----select *
+----from imp_PriceGoods
+
+--select count(*)
+--from imp_PriceGoods
+--where importId not in (select importId from #importIdTable)
+----------------------------------------------------------
+
+	while 0 &lt; (
+		select count(*)
+			from imp_PriceGoods
+			where importId not in (select importId from #importIdTable))
+	begin
+		
+		set @importId = (select top 1 importId
+			from imp_PriceGoods
+			where importId not in (select importId from #importIdTable)
+			order by id)
+
+
+			print 'ImportId = '+cast(@importId as nvarchar(50))
+		insert into #importIdTable (importId) values (@importId);
+		
+
+		--TODO: выбирает детали и не для последних (максимальных по ид) прайсов
+		--TODO: удаляет детали прайсов. Должен удалять деталь, только если она отсутсвует в импортированном прайсе
+		--TODO: сейчас вообще не удаляет детали прайсов да и сами прайсы (помним про IsDeleted).
+		--TODO: ошибка скорее всего повторена в других хранимках импорта
+
+		--select
+		--	importId,
+		--	d.[key]
+		--	,d.[date]
+		--	,d.[isDeleted]
+		--	,d.[user1C]
+		--	,d.[guid]
+		--	,d.[binaryGuid]
+		--	,d.[priceType_id]
+			
+		--FROM imp_PriceGoods d
+		--where d.id in (select max(id) from imp_PriceGoods group by [guid])
+		--and importId=@importId
+
+
+		--SELECT importId, g.id_good as good_id,
+		--	d.id as priceGoods_id
+		--	,dd.[price]
+		--	,dd.recNum
+		--FROM [dbo].[imp_PriceGoodsDetails] dd
+		--	join ent_goods g on dd.goodGuid=g.[guid]
+		--	join ent_PriceGoods d on dd.priceGoodsGuid=d.[guid]
+		--where dd.id in (select max(id) from [imp_PriceGoodsDetails] where importId=@importId group by goodGuid, priceGoodsGuid, recNum)
+	
+		--and importId=@importId
+
+		MERGE ent_PriceGoods AS T
+		USING 
+		(select
+			d.[key]
+			,d.[date]
+			,d.[isDeleted]
+			,d.[user1C]
+			,d.[guid]
+			,d.[binaryGuid]
+			,d.[priceType_id]
+		FROM imp_PriceGoods d
+		where d.id in (select max(id) from imp_PriceGoods group by [guid])
+		and importId=@importId
+		and priceType_id is not null
+		--and d.isdeleted = 0
+		) AS S
+		on T.[guid] = S.[guid]
+		WHEN MATCHED 
+		THEN
+		UPDATE
+		SET 
+		T.[date] = S.[date]
+		,T.[isDeleted] = S.[isDeleted]
+		,T.[user1C] = S.[user1C]
+		,T.[key] = S.[key]
+		,T.[binaryGuid] = S.[binaryGuid]
+		,T.[priceType_id] = S.[priceType_id]
+
+
+		WHEN NOT MATCHED BY TARGET 
+		THEN INSERT (
+		[key]
+		,[date]
+		,[isDeleted]
+		,[user1C]
+		,[guid]
+		,[binaryGuid]
+		,hst_datetime
+		,[priceType_id])
+		VALUES (
+		[key]
+		,[date]
+		,[isDeleted]
+		,[user1C]
+		,[guid]
+		,[binaryGuid]
+		,Getdate()
+		,[priceType_id]
+		);
+
+		MERGE ent_PriceGoodsDetails AS T
+		USING 
+		(SELECT g.id_good as good_id,
+		d.id as priceGoods_id
+		,dd.[price]
+		,dd.recNum
+		FROM [dbo].[imp_PriceGoodsDetails] dd
+			join ent_goods g on dd.goodGuid=g.[guid]
+			join ent_PriceGoods d on dd.priceGoodsGuid=d.[guid]
+		where dd.id in (
+			select max(id)
+			from [imp_PriceGoodsDetails]
+			where importId=@importId
+			group by goodGuid, priceGoodsGuid, recNum)
+				and importId=@importId
+		--and d.isdeleted = 0
+		) AS S
+		on T.priceGoods_id = S.priceGoods_id and T.recNum = S.recNum --and T.good_id = S.good_id
+		WHEN MATCHED 
+		and (T.price != S.price
+		or T.good_id != S.good_id)
+		THEN
+		UPDATE
+		SET 
+		
+		T.price = S.price
+		,T.good_id = S.good_id
+
+		WHEN NOT MATCHED BY TARGET 
+		THEN INSERT (
+			good_id
+			,priceGoods_id
+			,price
+			,recNum)
+		VALUES (
+			good_id
+			,priceGoods_id
+			,price
+			,recNum
+		)
+		WHEN NOT MATCHED BY SOURCE 
+		and 
+		 (T.priceGoods_id in (select d.id
+      					from [imp_PriceGoodsDetails] dd
+      					join ent_PriceGoods d on dd.priceGoodsGuid=d.[guid]
+						where dd.importId=@importId))
+		THEN DELETE;
+
+end ;
+--проверяем количество обработанных данных	
+insert into imp_importLog ([date]
+	,[entity]
+	,[key]
+	,[entityDate])
+	select getdate(),
+	'Цены номенклатуры',
+	i.[key],
+	i.date
+from imp_PriceGoods i
+where 
+	i.[key] not in (
+		select [key] 
+		from ent_PriceGoods);
+
+		
+		
+		
+		-- добавляем в таблицу логов запись, о попадании цены с типом цены null
+	 insert into dsh_ImportLog
+      select importData.importId as [importGuid], importData.goodGuid as [guid],
+
+      case when importData.countNullPriceType = 0
+      then 'Цены на номенклатуры импортированы успешно'
+      else 'Проимпортировано ' +  cast(countNullPriceType as varchar) + ' цен на номеклатуры с типом цены NULL'
+      END as [message],
+      GETDATE() as [hst_datetime]
+
+      from
+      (
+      SELECT  count(id) as countNullPriceType, importId, max(guid) goodGuid
+		FROM [imp_PriceGoods]
+
+		where priceType_id is null
+		
+		group by importId) as importData
+		
+
+delete from imp_PriceGoods where importId in (select importId from #importIdTable);
+delete from [imp_PriceGoodsDetails] where importId in (select importId from #importIdTable);
+END;
+    </createProcedure>
+	<createProcedure>
+ALTER PROCEDURE  [dbo].[imp_DeliveriesRefresh]
+
+      AS
+      BEGIN
+      SET NOCOUNT ON;
+
+      -- Добавление новых складов, если таковых нет
+      MERGE ent_Stock
+      USING (select distinct stock from imp_Delivery where stock is not null) AS impDeliveryStocks
+      ON ent_Stock.name = impDeliveryStocks.stock
+      WHEN NOT MATCHED BY TARGET
+      THEN INSERT ([name]) VALUES (stock);
+
+      -- Сливаем данные из таблицы для импорта в основную таблицу
+
+      declare @importId uniqueidentifier
+
+      CREATE TABLE #importIdTable
+      (
+      importId uniqueidentifier
+      )
+
+      while 0 &lt; (select count(*)
+      from imp_Delivery
+      where importId not in (select importId from #importIdTable))
+      begin
+
+      set @importId = (select top 1 importId
+      from imp_Delivery
+      where importId not in (select importId from #importIdTable)
+      order by id)
+
+      insert into #importIdTable (importId) values (@importId);
+
+      --Пишем в договор минимальную дату для пересчета
+      MERGE ent_Agreement AS T
+      USING
+      (select agreement_id, min(date) as date
+      from (select contactAgreement.[id] as agreement_id, d.[date] as date
+      FROM imp_Delivery d
+      join ent_Agreement as contactAgreement on d.[contactAgreement] = contactAgreement.[key]
+      where d.id in (select max(id) from imp_Delivery group by [guid])
+      and importId=@importId
+      union
+      select d.[agreement_id] as agreement_id, d.[date] as date
+      FROM ent_Delivery d
+      where d.guid in (select del.guid
+      FROM imp_Delivery del
+      where del.id in (select max(id) from imp_Delivery group by [guid])
+      and importId=@importId)
+      ) ss
+      group by agreement_id
+      )as S
+      ON T.id = S.agreement_id
+      WHEN MATCHED
+      and (T.recalculateFromDate &gt; S.date OR T.recalculateFromDate is null)
+      THEN
+      UPDATE
+      SET
+      T.recalculateFromDate = S.[date];
+
+
+      MERGE ent_Delivery AS T
+      USING
+      (select d.[deliveryKey] as [key]
+      ,d.[date]
+      ,d.[isDeleted]
+      ,contact.[id_contact] as contact_id
+      ,contactAgreement.[id] as agreement_id
+      ,payer.[id_contact] as payContact_id
+      ,payerAgreement.[id] as payAgreement_id
+      ,d.[orderDoc]
+      ,stock.id as stock_id
+      ,d.[sum]
+      ,d.[totalWeight] as grossWeight
+      ,d.[user1C]
+      ,d.[guid]
+      ,d.[Time]
+      ,d.sumByAgreement
+      ,d.binaryGuid
+      FROM imp_Delivery d
+      join ent_Contacts as contact on d.contactKey = contact.contactKey
+      join ent_Agreement as contactAgreement on d.[contactAgreement] = contactAgreement.[key]
+      left join ent_Contacts as payer on d.[payerKey] = payer.contactKey
+      left join ent_Agreement as payerAgreement on d.[payerAgreement] = payerAgreement.[key]
+      left join ent_Stock as stock on d.[stock] = stock.name
+      where d.id in (select max(id) from imp_Delivery group by [guid])
+      and importId=@importId
+      --and d.isdeleted = 0
+      ) AS S
+      on T.[guid] = S.[guid]
+      WHEN MATCHED
+      THEN
+      UPDATE
+      SET
+      T.[date] = S.[date]
+      ,T.[isDeleted] = S.[isDeleted]
+      ,T.contact_id = S.contact_id
+      ,T.agreement_id = S.agreement_id
+      ,T.payContact_id = S.payContact_id
+      ,T.payAgreement_id = S.payAgreement_id
+      ,T.[orderDoc] = S.[orderDoc]
+      ,T.stock_id = S.stock_id
+      ,T.[sumAll] = S.[sum]
+      ,T.grossWeight = S.grossWeight
+      ,T.[user1C] = S.[user1C]
+      ,T.[guid] = S.[guid]
+      ,T.[Time] = S.[Time]
+      ,T.sumByAgreement = S.sumByAgreement
+      ,T.binaryGuid = S.binaryGuid
+
+      WHEN NOT MATCHED BY TARGET
+      THEN INSERT (
+      [key]
+      ,[date]
+      ,[isDeleted]
+      ,contact_id
+      ,agreement_id
+      ,payContact_id
+      ,payAgreement_id
+      ,[orderDoc]
+      ,stock_id
+      ,[sumAll]
+      ,grossWeight
+      ,[user1C]
+      ,[guid]
+      ,[Time]
+      ,hst_datetime
+      ,sumByAgreement
+      ,binaryGuid
+      )
+      VALUES (
+      [key]
+      ,[date]
+      ,[isDeleted]
+      ,contact_id
+      ,agreement_id
+      ,payContact_id
+      ,payAgreement_id
+      ,[orderDoc]
+      ,stock_id
+      ,[sum]
+      ,grossWeight
+      ,[user1C]
+      ,[guid]
+      ,[Time]
+      ,Getdate()
+      ,sumByAgreement
+      ,binaryGuid
+
+      );
+
+      MERGE ent_DeliveryDetails AS T
+      USING
+      (SELECT g.id_good as good_id,
+      d.id as delivery_id
+      ,dd.[amount]
+      ,dd.[weight]
+      ,dd.[sumPrice]
+      ,dd.recNum
+      FROM [dbo].[imp_DeliveryDetails] dd
+      join ent_goods g on dd.goodGuid=g.[guid]
+      join ent_delivery d on dd.deliveryGuid=d.[guid]
+      where dd.id in (select max(id) from [imp_DeliveryDetails] group by goodGuid, deliveryGuid, recNum)
+      and importId=@importId
+      --and d.isdeleted = 0
+      ) AS S
+      on T.delivery_id = S.delivery_id and T.recNum = S.recNum --and T.good_id = S.good_id
+      WHEN MATCHED
+      and (T.amount != S.amount
+      or T.good_id != S.good_id
+      or T.[weight] != S.[weight]
+      or T.sumPrice != S.sumPrice)
+      THEN
+      UPDATE
+      SET
+
+      T.amount = S.amount
+      ,T.[weight] = S.[weight]
+      ,T.good_id = S.good_id
+      ,T.sumPrice = S.sumPrice
+
+      WHEN NOT MATCHED BY TARGET
+      THEN INSERT (
+      good_id
+      ,delivery_id
+      ,amount
+      ,[weight]
+      ,sumPrice
+      ,recNum)
+      VALUES (
+      good_id
+      ,delivery_id
+      ,amount
+      ,[weight]
+      ,sumPrice
+      ,recNum
+      )
+      WHEN NOT MATCHED BY SOURCE
+       and (T.delivery_id in (select d.id
+      					from imp_DeliveryDetails dd
+      					join ent_delivery d on dd.deliveryGuid=d.[guid]
+						where dd.importId=@importId))
+      	THEN DELETE
+      ;
+
+   --   delete from ent_DeliveryDetails
+   --   where id in (
+	  --select dd.id
+   --   from ent_DeliveryDetails dd
+   --   left join (
+		 -- select d.id, dd.recNum, [sumPrice]
+		 -- from imp_DeliveryDetails dd
+		 -- join ent_delivery d on dd.deliveryGuid=d.[guid]
+		 -- where dd.importId=@importId
+   --   ) t on dd.delivery_id = t.id and dd.recNum =t.recNum and dd.[sumPrice]=t.[sumPrice]
+   --   where dd.delivery_id in (
+		 -- select distinct d.id
+		 -- from imp_DeliveryDetails dd
+			--join ent_delivery d on dd.deliveryGuid=d.[guid]
+		 -- where dd.importId=@importId
+   --   ) and t.id is null)
+
+
+      --проверяем количество обработанных данных
+
+      insert into imp_importLog ([date]
+      ,[entity]
+      ,[key]
+      ,[entityDate])
+      select getdate(),
+      'Реализации',
+      i.deliveryKey,
+      i.date
+      from imp_Delivery i
+      where importId=@importId
+      and
+      i.guid not in (
+      select guid
+      from ent_Delivery);
+
+      delete from ent_DeliveryDetails
+      where delivery_id in (select id
+      from ent_Delivery d
+      where sumAll = 0
+      and d.id in (select e.id
+      from imp_Delivery i
+      inner join ent_Delivery e on e.guid = i.guid
+      where i.importId in (select importId from #importIdTable)));
+
+
+
+
+      insert into dsh_ImportLog
+      select @importId as [importGuid], importData.deliveryGuid as [guid],
+
+      case when importData.sumDiff = 0
+      then 'Реализация импортирована успешно'
+      else 'Сумма реализации отличается от суммы по деталям. Разница = ' +  cast(sumDiff as varchar)
+      END
+      as [message],
+      GETDATE() as [hst_datetime]
+
+      from
+      (
+      select dd.deliveryGuid,
+      sum(dd.sumPrice) as detailsSum,
+      max(d.sum)  as deliverySum,
+      sum(dd.sumPrice)-max(d.sum) as sumDiff
+
+      FROM imp_DeliveryDetails as dd
+      join imp_Delivery as d
+      on d.guid = dd.deliveryGuid
+
+      where d.importId = @importId
+
+      group by deliveryGuid) as importData
+
+      delete from imp_Delivery where importId in (select importId from #importIdTable);
+      delete from imp_DeliveryDetails where importId in (select importId from #importIdTable);
+
+      END
+
+      END	
+	</createProcedure>
+	<createProcedure>
+ALTER PROCEDURE [dbo].[imp_PaymentOrdersOutcomeRefresh] 
+	-- Add the parameters for the stored procedure here
+AS
+BEGIN
+
+print 'выполнение imp_PaymentOrdersOutcomeRefresh'
+
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+		
+	declare @importId uniqueidentifier
+
+	CREATE TABLE #importIdTable 
+	 (
+	  importId uniqueidentifier
+	 )
+
+  --DROP TABLE #Agreements
+	CREATE TABLE #Agreements 
+	 (
+	  agreement_id int, date date
+	 )
+
+	while 0 &lt; (select count(*)
+				from [imp_PaymentOrderOutcome]
+				where importId not in (select importId from #importIdTable))
+	begin
+		
+		set @importId = (select top 1 importId
+						from [imp_PaymentOrderOutcome]
+						where importId not in (select importId from #importIdTable)
+						order by id)
+
+		insert into #importIdTable (importId) values (@importId);
+		
+
+--Пишем в договор минимальную дату для пересчета и дату изменения
+	 insert into #Agreements
+	 select agreement_id, min(date) as date
+	 from (select a.id as agreement_id, p.[date] as date
+			 FROM [imp_PaymentOrderOutcome] p
+				join [imp_PaymentOrderOutcomeDetails] pd on pd.PaymentOrderOutcome_guid = p.guid and p.importId = pd.importId
+				join ent_agreement a on a.[guid]=pd.agreementGuid
+		  where p.id in (select max(id) from [imp_PaymentOrderOutcome] group by [guid])
+		  and p.importId=@importId
+		  union
+		  select pd.[agreement_id] as agreement_id, p.[date] as date
+			 FROM ent_PaymentOrderOutcome p
+			 join ent_PaymentOrderOutcomeDetails pd on pd.PaymentOrderOutcome_id = p.id
+		  where p.guid in (select pay.guid
+							 FROM [imp_PaymentOrderOutcome] pay
+						  where pay.id in (select max(id) from [imp_PaymentOrderOutcome] group by [guid])
+						  and importId=@importId)
+			) ss
+	group by agreement_id
+
+	MERGE ent_Agreement AS T
+	USING 
+	(select agreement_id, date from #Agreements
+	 )as S
+	 ON T.id = S.agreement_id
+	 WHEN MATCHED 
+	 and (T.recalculateFromDate &gt; S.date OR T.recalculateFromDate is null)
+	 THEN  
+		UPDATE
+			SET 
+				 T.recalculateFromDate = S.[date];
+				
+	update ent_Agreement set changeDate = getDate() where id in (select agreement_id from #Agreements)
+				 
+				 
+	MERGE ent_PaymentOrderOutcome AS T
+	USING 
+	(
+	SELECT 
+      p.[guid]
+      ,p.[key]
+      ,p.[user1C]
+      ,p.[date]
+      ,p.[time]
+      ,p.[isDeleted]
+      ,p.[sum]
+	  ,c.id_contact as contact_id
+	  ,a.id as agreement_id
+	  ,p.binaryGuid
+  FROM [imp_PaymentOrderOutcome] p
+join ent_Contacts c on c.guid=p.contactGuid
+left join ent_agreement a on a.guid=p.agreementGuid
+where p.id in (select max(id) from [imp_PaymentOrderOutcome] group by [guid])
+	  and importId=@importId
+) AS S
+
+	ON T.[guid] = S.[guid]	 
+	WHEN MATCHED 
+	and (
+	 T.[key] != S.[key] or T.[key] is not null and S.[key] is null or T.[key] is null and S.[key] is not null
+      or T.[user1C] != S.[user1C] or T.[user1C] is not null and S.[user1C] is null or T.[user1C] is null and S.[user1C] is not null
+      or T.[date] != S.[date] or T.[date] is not null and S.[date] is null or T.[date] is null and S.[date] is not null
+      or T.[time] != S.[time] or T.[time] is not null and S.[time] is null or T.[time] is null and S.[time] is not null
+      or T.[isDeleted] != S.[isDeleted] or T.[isDeleted] is not null and S.[isDeleted] is null or T.[isDeleted] is null and S.[isDeleted] is not null
+      or T.agreement_id != S.agreement_id or T.agreement_id is not null and S.agreement_id is null or T.agreement_id is null and S.agreement_id is not null
+      or T.[sum] != S.[sum] or T.[sum] is not null and S.[sum] is null or T.[sum] is null and S.[sum] is not null
+      or T.binaryGuid != S.binaryGuid or T.binaryGuid is not null and S.binaryGuid is null or T.binaryGuid is null and S.binaryGuid is not null 
+	 or T.contact_id != S.contact_id or T.contact_id is not null and S.contact_id is null or T.contact_id is null and S.contact_id is not null)
+		THEN
+			UPDATE
+			SET 
+				  
+      T.[key] = S.[key]
+      ,T.contact_id = S.contact_id
+      ,T.user1C = S.user1C
+      ,T.[date] = S.[date]
+      ,T.[time] = S.[time]
+      ,T.[isDeleted] = S.[isDeleted]
+      ,T.[agreement_id] = S.agreement_id
+      ,T.[sum] = S.[sum]
+      ,T.binaryGuid = S.binaryGuid
+	WHEN NOT MATCHED BY TARGET 
+		THEN INSERT (
+			  [guid]
+      ,[key]
+      ,[contact_id]
+      ,[user1C]
+      ,[date]
+      ,[time]
+      ,[isDeleted]
+      ,[agreement_id]
+      ,[sum]
+	  ,binaryGuid
+	  ,hst_datetime)
+     VALUES (
+		[guid]
+      ,[key]
+      ,[contact_id]
+      ,[user1C]
+      ,[date]
+      ,[time]
+      ,[isDeleted]
+      ,[agreement_id]
+      ,[sum]
+	,binaryGuid
+	,getdate());
+
+	MERGE ent_PaymentOrderOutcomeDetails AS T
+	USING 
+		(select p.id as PaymentOrderOutcome_id
+				,pd.amount
+				,a.id as agreement_id
+				,dt.id as entityType_id
+				,pd.entity_guid
+				,pd.recNum
+		from imp_PaymentOrderOutcomeDetails pd
+		join ent_PaymentOrderOutcome p on p.guid = pd.PaymentOrderOutcome_guid
+		join ent_Agreement a on a.[guid] = pd.agreementGuid
+		join ent_DocumentTypes dt on dt.name = pd.entityType_name
+		  where pd.id in (select max(id) from imp_PaymentOrderOutcomeDetails group by PaymentOrderOutcome_guid, recNum)
+		  and importId=@importId
+		   ) AS S
+	  on T.PaymentOrderOutcome_id = S.PaymentOrderOutcome_id and T.recNum = S.recNum 
+		WHEN MATCHED 
+		  and (
+	 T.amount != S.amount or T.amount is not null and S.amount is null or T.amount is null and S.amount is not null
+      or T.agreement_id != S.agreement_id or T.agreement_id is not null and S.agreement_id is null or T.agreement_id is null and S.agreement_id is not null
+      or T.entityType_id != S.entityType_id or T.entityType_id is not null and S.entityType_id is null or T.entityType_id is null and S.entityType_id is not null
+      or T.entity_guid != S.entity_guid or T.entity_guid is not null and S.entity_guid is null or T.entity_guid is null and S.entity_guid is not null)
+
+				THEN
+					UPDATE
+					SET 
+		
+				T.amount = S.amount
+				,T.agreement_id = S.agreement_id
+				,T.entityType_id = S.entityType_id
+				,T.entity_guid = S.entity_guid
+
+			WHEN NOT MATCHED BY TARGET 
+				THEN INSERT (
+				PaymentOrderOutcome_id
+				,amount
+				,agreement_id
+				,entityType_id
+				,entity_guid
+				,recNum)
+			VALUES (
+				PaymentOrderOutcome_id
+				,amount
+				,agreement_id
+				,entityType_id
+				,entity_guid
+				,recNum
+				)
+		WHEN NOT MATCHED BY SOURCE
+		   and (T.PaymentOrderOutcome_id in (select distinct d.id
+											from imp_PaymentOrderOutcomeDetails dd
+											join ent_PaymentOrderOutcome d on dd.PaymentOrderOutcome_guid=d.[guid]
+											where dd.importId=@importId
+											))
+      	THEN DELETE;
+
+		--delete from ent_PaymentOrderOutcomeDetails
+		--where id in (select dd.id 
+		--				from ent_PaymentOrderOutcomeDetails dd
+		--				left join (select d.id, dd.recNum
+		--									from imp_PaymentOrderOutcomeDetails dd
+		--									join ent_PaymentOrderOutcome d on dd.PaymentOrderOutcome_guid=d.[guid]
+		--									where dd.importId=@importId
+		--									) t on dd.PaymentOrderOutcome_id = t.id and dd.recNum =t.recNum
+		--				where dd.PaymentOrderOutcome_id in (select distinct d.id
+		--									from imp_PaymentOrderOutcomeDetails dd
+		--									join ent_PaymentOrderOutcome d on dd.PaymentOrderOutcome_guid=d.[guid]
+		--									where dd.importId=@importId
+		--									) and t.id is null)
+
+
+
+	delete from [imp_PaymentOrderOutcome] where importId in (select importId from #importIdTable);
+	delete from [imp_PaymentOrderOutcomeDetails] where importId in (select importId from #importIdTable);
+
+	end ;
+
+END
+	</createProcedure>
+	<createProcedure>
+ALTER PROCEDURE [dbo].[imp_PaymentOrdersRefresh]
+	-- Add the parameters for the stored procedure here
+AS
+BEGIN
+
+print 'выполнение imp_PaymentOrdersRefresh'
+
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+	DECLARE @importId UNIQUEIDENTIFIER
+
+	CREATE TABLE #importIdTable (importId UNIQUEIDENTIFIER)
+
+	--DROP TABLE #Agreements
+	CREATE TABLE #Agreements (
+		agreement_id INT
+		,DATE DATE
+		)
+
+	WHILE 0 &lt; (
+			SELECT count(*)
+			FROM [imp_PaymentOrder]
+			WHERE importId NOT IN (
+					SELECT importId
+					FROM #importIdTable
+					)
+			)
+	BEGIN
+		SET @importId = (
+				SELECT TOP 1 importId
+				FROM [imp_PaymentOrder]
+				WHERE importId NOT IN (
+						SELECT importId
+						FROM #importIdTable
+						)
+				ORDER BY id
+				)
+
+		INSERT INTO #importIdTable (importId)
+		VALUES (@importId);
+
+		--Пишем в договор минимальную дату для пересчета и дату изменения
+		INSERT INTO #Agreements
+		SELECT agreement_id
+			,min(DATE) AS DATE
+		FROM (
+			SELECT a.id AS agreement_id
+				,p.[date] AS DATE
+			FROM [imp_PaymentOrder] p
+			JOIN [imp_PaymentOrderDetails] pd ON pd.paymentOrder_guid = p.guid
+				AND p.importId = pd.importId
+			JOIN ent_agreement a ON a.[key] = pd.agreementKey
+			WHERE p.id IN (
+					SELECT max(id)
+					FROM [imp_PaymentOrder]
+					GROUP BY [guid]
+					)
+				AND p.importId = @importId
+			
+			UNION
+			
+			SELECT pd.[agreement_id] AS agreement_id
+				,p.[date] AS DATE
+			FROM ent_PaymentOrder p
+			JOIN ent_PaymentOrderDetails pd ON pd.paymentOrder_id = p.id
+			WHERE p.guid IN (
+					SELECT pay.guid
+					FROM [imp_PaymentOrder] pay
+					WHERE pay.id IN (
+							SELECT max(id)
+							FROM [imp_PaymentOrder]
+							GROUP BY [guid]
+							)
+						AND importId = @importId
+					)
+			) ss
+		GROUP BY agreement_id
+
+		MERGE ent_Agreement AS T
+		USING (
+			SELECT agreement_id
+				,DATE
+			FROM #Agreements
+			) AS S
+			ON T.id = S.agreement_id
+		WHEN MATCHED
+			AND (
+				T.recalculateFromDate &gt; S.DATE
+				OR T.recalculateFromDate IS NULL
+				)
+			THEN
+				UPDATE
+				SET T.recalculateFromDate = S.[date];
+
+		UPDATE ent_Agreement
+		SET changeDate = getDate()
+		WHERE id IN (
+				SELECT agreement_id
+				FROM #Agreements
+				)
+
+		MERGE ent_PaymentOrder AS T
+		USING (
+			SELECT p.[guid]
+				,p.[key]
+				,p.[user1C]
+				,p.isPay
+				,p.[date]
+				,p.[time]
+				,p.[isDeleted]
+				,p.[sum]
+				,p.isPartialPay
+				,c.id_contact AS contact_id
+				,a.id AS agreement_id
+				,p.binaryGuid
+				,p.paymentDate
+			FROM [imp_PaymentOrder] p
+			JOIN ent_Contacts c ON c.contactKey = p.contactKey
+			LEFT JOIN ent_agreement a ON a.[key] = p.agreementKey
+			WHERE p.id IN (
+					SELECT max(id)
+					FROM [imp_PaymentOrder]
+					GROUP BY [guid]
+					)
+				AND importId = @importId
+			) AS S
+			ON T.[guid] = S.[guid]
+		WHEN MATCHED
+			AND (
+	T.[key] != S.[key] or T.[key] is not null and S.[key] is null or T.[key] is null and S.[key] is not null
+      or T.[user1C] != S.[user1C] or T.[user1C] is not null and S.[user1C] is null or T.[user1C] is null and S.[user1C] is not null
+      or T.isPay != S.isPay or T.isPay is not null and S.isPay is null or T.isPay is null and S.isPay is not null
+      or T.[date] != S.[date] or T.[date] is not null and S.[date] is null or T.[date] is null and S.[date] is not null
+      or T.[time] != S.[time] or T.[time] is not null and S.[time] is null or T.[time] is null and S.[time] is not null
+      or T.[isDeleted] != S.[isDeleted] or T.[isDeleted] is not null and S.[isDeleted] is null or T.[isDeleted] is null and S.[isDeleted] is not null
+      or T.agreement_id != S.agreement_id or T.agreement_id is not null and S.agreement_id is null or T.agreement_id is null and S.agreement_id is not null
+      or T.[sum] != S.[sum] or T.[sum] is not null and S.[sum] is null or T.[sum] is null and S.[sum] is not null
+      or T.isPartialPay != S.isPartialPay or T.isPartialPay is not null and S.isPartialPay is null or T.isPartialPay is null and S.isPartialPay is not null 
+      or T.binaryGuid != S.binaryGuid or T.binaryGuid is not null and S.binaryGuid is null or T.binaryGuid is null and S.binaryGuid is not null 
+      or T.paymentDate != S.paymentDate or T.paymentDate is not null and S.paymentDate is null or T.paymentDate is null and S.paymentDate is not null 
+	 or T.contact_id != S.contact_id or T.contact_id is not null and S.contact_id is null or T.contact_id is null and S.contact_id is not null
+
+				)
+			THEN
+				UPDATE
+				SET T.[key] = S.[key]
+					,T.contact_id = S.contact_id
+					,T.user1C = S.user1C
+					,T.isPay = S.isPay
+					,T.[date] = S.[date]
+					,T.[time] = S.[time]
+					,T.[isDeleted] = S.[isDeleted]
+					,T.[agreement_id] = S.agreement_id
+					,T.[sum] = S.[sum]
+					,T.isPartialPay = S.isPartialPay
+					,T.paymentDate = S.paymentDate
+					,T.binaryGuid = S.binaryGuid
+		WHEN NOT MATCHED BY TARGET
+			THEN
+				INSERT (
+					[guid]
+					,[key]
+					,[contact_id]
+					,[user1C]
+					,isPay
+					,[date]
+					,[time]
+					,[isDeleted]
+					,[agreement_id]
+					,[sum]
+					,isPartialPay
+					,paymentDate
+					,binaryGuid
+					,hst_datetime
+					,nds
+					)
+				VALUES (
+					[guid]
+					,[key]
+					,[contact_id]
+					,[user1C]
+					,isPay
+					,[date]
+					,[time]
+					,[isDeleted]
+					,[agreement_id]
+					,[sum]
+					,isPartialPay
+					,paymentDate
+					,binaryGuid
+					,getdate()
+					,0
+					);
+
+		MERGE ent_PaymentOrderDetails AS T
+		USING (
+			SELECT p.id AS paymentOrder_id
+				,pd.amount
+				,a.id AS agreement_id
+				,dt.id AS entityType_id
+				,pd.entity_guid
+				,pd.recNum
+			FROM imp_PaymentOrderDetails pd
+			JOIN ent_PaymentOrder p ON p.guid = pd.paymentOrder_guid
+			JOIN ent_Agreement a ON a.[key] = pd.agreementKey
+			JOIN ent_DocumentTypes dt ON dt.NAME = pd.entityType_name
+			WHERE pd.id IN (
+					SELECT max(id)
+					FROM imp_PaymentOrderDetails
+					GROUP BY paymentOrder_guid
+						,recNum
+					)
+				AND importId = @importId
+			) AS S
+			ON T.paymentOrder_id = S.paymentOrder_id
+				AND T.recNum = S.recNum
+		WHEN MATCHED
+			AND (
+				T.amount != S.amount or T.amount is not null and S.amount is null or T.amount is null and S.amount is not null
+				  or T.agreement_id != S.agreement_id or T.agreement_id is not null and S.agreement_id is null or T.agreement_id is null and S.agreement_id is not null
+				  or T.entityType_id != S.entityType_id or T.entityType_id is not null and S.entityType_id is null or T.entityType_id is null and S.entityType_id is not null
+				  or T.entity_guid != S.entity_guid or T.entity_guid is not null and S.entity_guid is null or T.entity_guid is null and S.entity_guid is not null
+				)
+			THEN
+				UPDATE
+				SET T.amount = S.amount
+					,T.agreement_id = S.agreement_id
+					,T.entityType_id = S.entityType_id
+					,T.entity_guid = S.entity_guid
+		WHEN NOT MATCHED BY TARGET
+			THEN
+				INSERT (
+					paymentOrder_id
+					,amount
+					,agreement_id
+					,entityType_id
+					,entity_guid
+					,recNum
+					)
+				VALUES (
+					paymentOrder_id
+					,amount
+					,agreement_id
+					,entityType_id
+					,entity_guid
+					,recNum
+					)
+		WHEN NOT MATCHED BY SOURCE
+		   and (T.paymentOrder_id in (select distinct d.id
+										from imp_PaymentOrderDetails dd
+										join ent_PaymentOrder d on dd.paymentOrder_guid=d.[guid]
+										where dd.importId=@importId
+										))
+      	THEN DELETE;
+
+		--delete from ent_PaymentOrderDetails
+		--where id in (select dd.id 
+		--				from ent_PaymentOrderDetails dd
+		--				left join (select d.id, dd.recNum
+		--									from imp_PaymentOrderDetails dd
+		--									join ent_PaymentOrder d on dd.paymentOrder_guid=d.[guid]
+		--									where dd.importId=@importId
+		--									) t on dd.paymentOrder_id = t.id and dd.recNum =t.recNum
+		--				where dd.paymentOrder_id in (select distinct d.id
+		--									from imp_PaymentOrderDetails dd
+		--									join ent_PaymentOrder d on dd.paymentOrder_guid=d.[guid]
+		--									where dd.importId=@importId
+		--									) and t.id is null)
+		DELETE
+		FROM [imp_PaymentOrder]
+		WHERE importId IN (
+				SELECT importId
+				FROM #importIdTable
+				);
+
+		DELETE
+		FROM [imp_PaymentOrderDetails]
+		WHERE importId IN (
+				SELECT importId
+				FROM #importIdTable
+				);
+	END;
+END
+	</createProcedure>
+	<createProcedure>
+ALTER PROCEDURE [dbo].[imp_PaymentsRefresh] 
+	-- Add the parameters for the stored procedure here
+AS
+BEGIN
+
+print 'выполнение imp_PaymentsRefresh'
+
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+	
+	
+
+	MERGE ent_booking AS T
+	USING (
+		select distinct bookingName
+		from imp_Payment)
+   AS S
+	ON T.name = S.bookingName
+	WHEN NOT MATCHED BY TARGET 
+		THEN INSERT (
+			name)
+     VALUES (
+			bookingName
+		   );
+
+	declare @importId uniqueidentifier
+
+	CREATE TABLE #importIdTable 
+	 (
+	  importId uniqueidentifier
+	 )
+
+  --DROP TABLE #Agreements1
+	CREATE TABLE #Agreements1
+	 (
+	  agreement_id int, date date
+	 )
+
+	while 0 &lt; (select count(*)
+				from [imp_Payment]
+				where importId not in (select importId from #importIdTable))
+	begin
+		
+		set @importId = (select top 1 importId
+						from [imp_Payment]
+						where importId not in (select importId from #importIdTable)
+						order by id)
+
+		insert into #importIdTable (importId) values (@importId);
+		
+
+--Пишем в договор минимальную дату для пересчета
+	 insert into #Agreements1
+	 select agreement_id, min(date) as date
+	 from (select a.id as agreement_id, p.[date] as date
+			 FROM [imp_Payment] p
+				join [imp_PaymentDetails] pd on pd.payment_guid = p.guid and p.importId = pd.importId
+				join ent_agreement a on a.[key]=pd.agreementKey
+		  where p.id in (select max(id) from [imp_Payment] group by [guid])
+		  and p.importId=@importId
+		  union
+		  select pd.[agreement_id] as agreement_id, p.[date] as date
+			 FROM ent_Payment p
+			 join ent_PaymentDetails pd on pd.payment_id = p.id
+		  where p.guid in (select pay.guid
+							 FROM [imp_Payment] pay
+						  where pay.id in (select max(id) from [imp_Payment] group by [guid])
+						  and importId=@importId)
+			) ss
+	group by agreement_id
+
+	MERGE ent_Agreement AS T
+	USING 
+	 (select agreement_id, date from #Agreements1
+	 )as S
+	 ON T.id = S.agreement_id
+	 WHEN MATCHED 
+	 and (T.recalculateFromDate &gt; S.date OR T.recalculateFromDate is null)
+	 THEN  
+		UPDATE
+			SET 
+				 T.recalculateFromDate = S.[date];
+				 
+	update ent_Agreement set changeDate = getDate() where id in (select agreement_id from #Agreements1)
+			 
+	MERGE ent_Payment AS T
+	USING 
+	(
+	SELECT 
+      p.[guid]
+      ,p.[payment_key]
+      ,p.[user1C]
+      ,p.[department]
+      ,p.[date]
+      ,p.[time]
+      ,p.[isDeleted]
+      ,p.[agreementKey]
+      ,p.[amount]
+	  ,b.id as booking_id
+	  ,c.id_contact as contact_id
+	  ,a.id as agreement_id
+	  ,p.binaryGuid
+  FROM [imp_Payment] p
+join ent_booking b on p.bookingName=b.Name
+join ent_Contacts c on c.contactKey=p.contactKey
+left join ent_agreement a on a.[key]=p.agreementKey
+where p.id in (select max(id) from [imp_Payment] group by [guid])
+	  and importId=@importId
+) AS S
+
+	ON T.[guid] = S.[guid]	 
+	WHEN MATCHED 
+	and (
+	 T.payment_key != S.payment_key or T.payment_key is not null and S.payment_key is null or T.payment_key is null and S.payment_key is not null
+      or T.[user1C] != S.[user1C] or T.[user1C] is not null and S.[user1C] is null or T.[user1C] is null and S.[user1C] is not null
+      or T.[department] != S.[department] or T.[department] is not null and S.[department] is null or T.[department] is null and S.[department] is not null
+      or T.[date] != S.[date] or T.[date] is not null and S.[date] is null or T.[date] is null and S.[date] is not null
+      or T.[time] != S.[time] or T.[time] is not null and S.[time] is null or T.[time] is null and S.[time] is not null
+      or T.[isDeleted] != S.[isDeleted] or T.[isDeleted] is not null and S.[isDeleted] is null or T.[isDeleted] is null and S.[isDeleted] is not null
+      or T.agreement_id != S.agreement_id or T.agreement_id is not null and S.agreement_id is null or T.agreement_id is null and S.agreement_id is not null
+      or T.[amount] != S.[amount] or T.[amount] is not null and S.[amount] is null or T.[amount] is null and S.[amount] is not null
+      or T.booking_id != S.booking_id or T.booking_id is not null and S.booking_id is null or T.booking_id is null and S.booking_id is not null 
+      or T.binaryGuid != S.binaryGuid or T.binaryGuid is not null and S.binaryGuid is null or T.binaryGuid is null and S.binaryGuid is not null 
+	 or T.contact_id != S.contact_id or T.contact_id is not null and S.contact_id is null or T.contact_id is null and S.contact_id is not null)
+		THEN
+			UPDATE
+			SET 
+				  
+      T.payment_key = S.payment_key
+      ,T.contact_id = S.contact_id
+      ,T.user1C = S.user1C
+      ,T.department = S.department
+      ,T.[date] = S.[date]
+      ,T.[time] = S.[time]
+      ,T.[isDeleted] = S.[isDeleted]
+      ,T.[agreement_id] = S.agreement_id
+      ,T.[amount] = S.[amount]
+      ,T.[booking_id] = S.[booking_id]
+      ,T.binaryGuid = S.binaryGuid
+	WHEN NOT MATCHED BY TARGET 
+		THEN INSERT (
+			  [guid]
+      ,[payment_key]
+      ,[contact_id]
+      ,[user1C]
+      ,[department]
+      ,[date]
+      ,[time]
+      ,[isDeleted]
+      ,[agreement_id]
+      ,[amount]
+      ,[booking_id]
+	  ,binaryGuid)
+     VALUES (
+			  [guid]
+      ,[payment_key]
+      ,[contact_id]
+      ,[user1C]
+      ,[department]
+      ,[date]
+      ,[time]
+      ,[isDeleted]
+      ,[agreement_id]
+      ,[amount]
+      ,[booking_id]
+		,binaryGuid   );
+
+	MERGE ent_PaymentDetails AS T
+	USING 
+		(select p.id as payment_id
+				,pd.amount
+				,a.id as agreement_id
+				,dt.id as entityType_id
+				,pd.entity_guid
+				,pd.recNum
+		from imp_PaymentDetails pd
+		join ent_Payment p on p.guid = pd.payment_guid
+		join ent_Agreement a on a.[key] = pd.agreementKey
+		join ent_DocumentTypes dt on dt.name = pd.entityType_name
+		  where pd.id in (select max(id) from imp_PaymentDetails group by payment_guid, recNum)
+		  and importId=@importId
+		   ) AS S
+	  on T.payment_id = S.payment_id and T.recNum = S.recNum 
+		WHEN MATCHED 
+		  and (
+	 T.amount != S.amount or T.amount is not null and S.amount is null or T.amount is null and S.amount is not null
+      or T.agreement_id != S.agreement_id or T.agreement_id is not null and S.agreement_id is null or T.agreement_id is null and S.agreement_id is not null
+      or T.entityType_id != S.entityType_id or T.entityType_id is not null and S.entityType_id is null or T.entityType_id is null and S.entityType_id is not null
+      or T.entity_guid != S.entity_guid or T.entity_guid is not null and S.entity_guid is null or T.entity_guid is null and S.entity_guid is not null)
+
+				THEN
+					UPDATE
+					SET 
+		
+				T.amount = S.amount
+				,T.agreement_id = S.agreement_id
+				,T.entityType_id = S.entityType_id
+				,T.entity_guid = S.entity_guid
+
+			WHEN NOT MATCHED BY TARGET 
+				THEN INSERT (
+				payment_id
+				,amount
+				,agreement_id
+				,entityType_id
+				,entity_guid
+				,recNum)
+			VALUES (
+				payment_id
+				,amount
+				,agreement_id
+				,entityType_id
+				,entity_guid
+				,recNum
+				)
+			WHEN NOT MATCHED BY SOURCE
+				and (T.payment_id in (select distinct d.id
+										from imp_PaymentDetails dd
+										join ent_Payment d on dd.payment_guid=d.[guid]
+										where dd.importId=@importId
+										))
+      		THEN DELETE;
+
+		--delete from ent_PaymentDetails
+		--where id in (select dd.id 
+		--				from ent_PaymentDetails dd
+		--				left join (select d.id, dd.recNum
+		--									from imp_PaymentDetails dd
+		--									join ent_Payment d on dd.payment_guid=d.[guid]
+		--									where dd.importId=@importId
+		--									) t on dd.payment_id = t.id and dd.recNum =t.recNum
+		--				where dd.payment_id in (select distinct d.id
+		--									from imp_PaymentDetails dd
+		--									join ent_Payment d on dd.payment_guid=d.[guid]
+		--									where dd.importId=@importId
+		--									) and t.id is null)
+
+
+
+	delete from [imp_Payment] where importId in (select importId from #importIdTable);
+	delete from [imp_PaymentDetails] where importId in (select importId from #importIdTable);
+
+	end ;
+
+END
+	</createProcedure>
+	<createProcedure>
+ALTER PROCEDURE  [dbo].[imp_ReturnsRefresh]
+
+      AS
+      BEGIN
+      SET NOCOUNT ON;
+
+      insert into ent_causeReturn
+      select distinct cause from imp_ReturnDetails
+      where cause not in (select name from ent_causeReturn)
+
+      declare @importId uniqueidentifier
+
+      --drop table #importIdTable
+
+      CREATE TABLE #importIdTable
+      (
+      importId uniqueidentifier
+      )
+
+      select count(*)
+      from [imp_ReturnDetails]
+      where importId not in (select importId from #importIdTable)
+
+      while 0 &lt; (select count(*)
+				from [imp_ReturnDetails]
+				where importId not in (select importId from #importIdTable))
+	begin
+		
+		set @importId = (select top 1 importId
+						from [imp_ReturnDetails]
+						where importId not in (select importId from #importIdTable)
+						order by id)
+
+		insert into #importIdTable (importId) values (@importId);
+
+		--SELECT g.id_good as good_id,
+		--d.id as return_id
+  --    ,dd.[amount]
+  --    ,dd.[weight]
+  --    ,dd.[sumPrice]
+	 -- ,cr.id as cause_id
+	 -- ,dd.recNum
+  --FROM [dbo].[imp_ReturnDetails] dd
+  --join ent_goods g on dd.goodGuid=g.[guid]
+  --join ent_returnGoods d on dd.returnGuid=d.[guid]
+  --join ent_causeReturn cr on cr.name=dd.cause
+  --where dd.id in (select max(id) from [imp_ReturnDetails] group by goodGuid, returnGuid, cause, recNum)
+  --and importId=@importId
+
+	MERGE ent_ReturnGoodsDetails AS T
+	USING 
+	(SELECT g.id_good as good_id,
+		d.id as return_id
+      ,dd.[amount]
+      ,dd.[weight]
+      ,dd.[sumPrice]
+	  ,cr.id as cause_id
+	  ,dd.recNum
+  FROM [dbo].[imp_ReturnDetails] dd
+  join ent_goods g on dd.goodGuid=g.[guid]
+  join ent_returnGoods d on dd.returnGuid=d.[guid]
+  join ent_causeReturn cr on cr.name=dd.cause
+  where dd.id in (select max(id) from [imp_ReturnDetails] group by goodGuid, returnGuid, cause, recNum)
+  and importId=@importId
+	--and d.isdeleted = 0
+   ) AS S
+  on T.return_id = S.return_id and T.recNum = S.recNum -- and T.good_id = S.good_id and T.cause_id = S.cause_id
+  WHEN MATCHED 
+  and (T.amount != S.amount
+		or T.good_id != S.good_id
+		or T.cause_id != S.cause_id
+		or T.[weight] != S.[weight]
+		or T.sumPrice != S.sumPrice)
+		THEN
+			UPDATE
+			SET 
+		
+		T.amount = S.amount
+		,T.[weight] = S.[weight]
+		,T.sumPrice = S.sumPrice
+		,T.cause_id = S.cause_id
+		,T.good_id = S.good_id
+
+	WHEN NOT MATCHED BY TARGET 
+		THEN INSERT (
+		good_id
+		,return_id
+		,amount
+		,[weight]
+		,sumPrice
+		,cause_id
+		,recNum)
+    VALUES (
+		good_id
+		,return_id
+		,amount
+		,[weight]
+		,sumPrice
+		,cause_id
+		,recNum
+		)
+	WHEN NOT MATCHED BY SOURCE
+				and (T.return_id in (select distinct d.id
+									from imp_ReturnDetails dd
+									join ent_ReturnGoods d on dd.returnGuid=d.[guid]
+									where dd.importId=@importId))
+    THEN DELETE;
+
+	--delete from ent_ReturnGoodsDetails
+	--where id in
+	--	 (
+	--		select dd.id 
+	--		from ent_ReturnGoodsDetails dd
+	--		left join (
+	--			select d.id, dd.recNum			-- select dd.id, dd.recNum
+	--			from imp_ReturnDetails dd
+	--				join ent_ReturnGoods d on dd.returnGuid=d.[guid]
+	--			where dd.importId=@importId
+	--			) impDD on dd.return_id = impDD.id and dd.recNum =impDD.recNum
+
+	--			where dd.return_id in (
+	--				select distinct d.id
+	--				from imp_ReturnDetails dd
+	--				join ent_ReturnGoods d on dd.returnGuid=d.[guid]
+	--				where dd.importId=@importId
+	--			) 
+	--			and impDD.id is null
+	--	)
+
+
+
+
+	insert into dsh_ImportLog
+	select @importId as [importGuid], importData.returnGuid as [guid], 
+	 case when importData.sumDiff = 0
+	 then 'Возврат импортирован успешно'
+	 else 'Сумма возврата отличается от суммы по деталям. Разница = ' +  cast(sumDiff as varchar)
+	 END 
+	 as [message],
+	GETDATE() as [hst_datetime]
+
+	from
+	(
+	  select rd.returnGuid, 
+			 sum(rd.sumPrice) as detailsSum, 
+			 max(rg.sumAll)  as returnSum, 
+			 sum(rd.sumPrice)-max(rg.sumAll) as sumDiff
+  
+	  FROM imp_ReturnDetails as rd
+		join ent_ReturnGoods as rg
+			on rg.guid = rd.returnGuid
+
+	  where rd.importId = @importId
+
+	  group by returnGuid) as importData
+
+
+	end ;	
+	delete from imp_ReturnDetails where importId in (select importId from #importIdTable);
+ 
+END
+	</createProcedure>
+	<createProcedure>
+ALTER PROCEDURE [dbo].[imp_ProductsDeliveryDetailsRefresh]
+
+      AS
+      BEGIN
+      SET NOCOUNT ON;
+
+
+      DECLARE @importId UNIQUEIDENTIFIER
+
+      CREATE TABLE #importIdTable (
+      importId UNIQUEIDENTIFIER
+      )
+
+      WHILE 0 &lt; (SELECT
+      COUNT(*)
+    FROM imp_ProductsDeliveryDetails
+    WHERE importId NOT IN (SELECT importId FROM #importIdTable))
+  BEGIN
+
+  SET @importId = (SELECT TOP 1
+      importId
+    FROM imp_ProductsDeliveryDetails
+    WHERE importId NOT IN (SELECT importId FROM #importIdTable)
+    ORDER BY id)
+
+  INSERT INTO #importIdTable (importId)
+    VALUES (@importId);
+
+
+	MERGE ent_ProductsDeliveryDetails AS T
+	USING (SELECT
+		
+      ipdd.[Weight],
+      ipdd.[user1C],
+      ipdd.[hst_datetime],
+	  ipdd.[DeliveryGuid],
+
+	  pd.id AS productsDelivery_id,
+	  d.id AS delivery_id
+
+	FROM imp_ProductsDeliveryDetails ipdd
+
+		LEFT JOIN ent_ProductsDelivery pd ON pd.[guid] = ipdd.productsDeliveryGuid
+
+		LEFT JOIN ent_Delivery d ON d.[guid] = ipdd.DeliveryGuid
+
+    WHERE ipdd.importId = @importId
+	) AS S
+
+  ON T.productsDelivery_id = S.productsDelivery_id AND T.[DeliveryGuid] = S.[DeliveryGuid]
+  WHEN MATCHED
+
+  THEN UPDATE
+      SET 
+		 T.[Weight] = S.[Weight],
+		 T.delivery_id = S.delivery_id
+	
+  WHEN NOT MATCHED BY TARGET
+    THEN INSERT (
+      [productsDelivery_id],
+	  [Weight],
+	  [delivery_id],
+	  [DeliveryGuid],
+	  [hst_datetime]
+	  )
+        VALUES (      
+      [productsDelivery_id],
+	  [Weight],
+	  [delivery_id],
+	  [DeliveryGuid],
+	  [hst_datetime]
+	  )
+  WHEN NOT MATCHED BY SOURCE
+				and (T.productsDelivery_id in (select d.id
+      					from imp_ProductsDeliveryDetails dd
+      					join [dbo].[ent_ProductsDelivery] d on dd.[DeliveryGuid]=d.[guid]
+						where dd.importId=@importId))
+ THEN DELETE;
+
+	   print 'Удаление из импортной таблицы';
+
+  DELETE FROM imp_ProductsDeliveryDetails
+  WHERE importId IN (SELECT
+        importId
+      FROM #importIdTable);
+  END;
+  DROP TABLE #importIdTable
+
+
+END	
+	</createProcedure>
+  </changeSet>
+</databaseChangeLog>

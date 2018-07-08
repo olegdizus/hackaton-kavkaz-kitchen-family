@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="ChangeDatatype_RoutesForwarders" author="Ura">
+
+    <modifyDataType
+                    tableName="imp_RoutesForwarders"
+                    columnName="logisticsNorm"
+                    newDataType="decimal(18,2)"
+                    ></modifyDataType>
+    <modifyDataType
+                    tableName="imp_RoutesForwarders"
+                    columnName="logisticsMax"
+                    newDataType="decimal(18,2)"
+                    ></modifyDataType>
+
+    <modifyDataType
+                  tableName="imp_RoutesForwarders"
+                  columnName="minInvoice"
+                  newDataType="decimal(18,2)"
+                    ></modifyDataType>
+    
+    <modifyDataType
+                tableName="imp_RoutesForwarders"
+                columnName="minAverageInvoice"
+                newDataType="decimal(18,2)"
+                    ></modifyDataType>
+
+
+
+    <modifyDataType
+                  tableName="ent_RoutesForwarders"
+                  columnName="logisticsNorm"
+                  newDataType="decimal(18,2)"
+                    ></modifyDataType>
+    <modifyDataType
+                    tableName="ent_RoutesForwarders"
+                    columnName="logisticsMax"
+                    newDataType="decimal(18,2)"
+                    ></modifyDataType>
+
+    <modifyDataType
+                  tableName="ent_RoutesForwarders"
+                  columnName="minInvoice"
+                  newDataType="decimal(18,2)"
+                    ></modifyDataType>
+
+    <modifyDataType
+                tableName="ent_RoutesForwarders"
+                columnName="minAverageInvoice"
+                newDataType="decimal(18,2)"
+                    ></modifyDataType>  
+      
+  </changeSet>
+</databaseChangeLog>

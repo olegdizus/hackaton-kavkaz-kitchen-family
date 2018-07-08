@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Insert_HierarchyLevels_To_MdxHierarchy" author="Ura">
+
+    <insert tableName="mdxHierarchy">
+      <column name="name" value="2-й уровень иерархии" />
+      <column name="mdxName" value="Contact_SecondLevel" />
+    </insert>
+
+    <insert tableName="mdxHierarchy">
+      <column name="name" value="3-й уровень иерархии" />
+      <column name="mdxName" value="Contact_ThirdLevel" />
+    </insert>
+
+  </changeSet>
+</databaseChangeLog>

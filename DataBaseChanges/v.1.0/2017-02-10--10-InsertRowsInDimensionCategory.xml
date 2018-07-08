@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="InsertRowsInDimensionCategory" author="zelim">
+
+    <insert tableName="rpt_DimensionCategory">
+      <column name="name" value="Контакты" />
+    </insert>
+
+    <insert tableName="rpt_DimensionCategory">
+      <column name="name" value="Календарные даты" />
+    </insert>
+
+    <insert tableName="rpt_DimensionCategory">
+      <column name="name" value="Производственные даты" />
+    </insert>
+
+    <insert tableName="rpt_DimensionCategory">
+      <column name="name" value="Номенклатура" />
+    </insert>
+
+  </changeSet>
+</databaseChangeLog>

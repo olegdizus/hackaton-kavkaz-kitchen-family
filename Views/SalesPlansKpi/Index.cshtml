@@ -1,0 +1,55 @@
+﻿@{
+    ViewBag.Title = "Планы продаж";
+}
+
+@section styles
+{
+    @Styles.Render(Dashboard.Bundles.Kendo.kendo.Css.Key,
+                Dashboard.Bundles.Fontawesome.Css.Key)
+}
+
+<h2>@ViewBag.Title</h2>
+
+@Html.Partial("ApproveConfirm")
+
+@Html.Partial("~/Views/Shared/ProductionMonthControl.cshtml")
+
+
+<div style="float: left" >
+    @Html.Partial("~/Views/Shared/HierarchyMenuControl.cshtml")
+</div>
+
+
+<div style="display: table-cell; padding-left: 10px">
+    @Html.Label("Все показатели")
+    @Html.CheckBox("DisplayAllValue", false)
+    <div id="VariantsDiv">
+    </div>
+    
+    <br/>
+
+    <div>
+        <div id="grid"></div>
+    </div>
+</div>
+
+
+
+
+@section Scripts
+{
+    @Scripts.Render(Dashboard.Bundles.jquery.jqueryval.Scripts.Key)
+
+    <script>
+        var APPROVE_STATUSES = @Html.Raw(Json.Encode(ViewBag.ApproveStatuses));
+        var STATUS_NAMES = @Html.Raw(Json.Encode(ViewBag.ApproveStatusNames));
+    </script>
+
+    @Scripts.Render(
+        Dashboard.Bundles.Extentions.Scripts.Key,
+        Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+        Dashboard.Bundles.Knockout.Scripts.Key,
+        Dashboard.Bundles.Reports.SalesPlansKPI.Scripts.Key,
+        Dashboard.Bundles.Reports.SalesPlansKpiGetVariantsListScript.Scripts.Key
+        )
+}

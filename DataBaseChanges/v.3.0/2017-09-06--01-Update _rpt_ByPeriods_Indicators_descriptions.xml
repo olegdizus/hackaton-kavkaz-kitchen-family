@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Update _rpt_ByPeriods_Indicators_descriptions" author="ura">
+
+    <sql>
+      
+      Update rpt_ByPeriods_Indicators set description='Суммарная стоимость отправленного товара с учетом возвратов по контрагентам из папок: Покупатели, Сотрудники, Прямые продажи, Регионы 1, Регионы 2, Регионы 3, Сети' where name='Отгрузка факт, руб'
+      Update rpt_ByPeriods_Indicators set description='Суммарный вес отправленного товара с учетом возвратов по контрагентам из папок: Покупатели, Сотрудники, Прямые продажи, Регионы 1, Регионы 2, Регионы 3, Сети' where name='Отгрузка факт, кг'
+      Update rpt_ByPeriods_Indicators set description='Количество отгрузивщихся контрагентов' where name='Количество сработавших точек, шт'
+      Update rpt_ByPeriods_Indicators set description='Количество документов реализаций в 1С' where name='Количество отгрузок, шт'
+      Update rpt_ByPeriods_Indicators set description='С учетом возвратов' where name='Средняя стоимость одной отгрузки, руб'
+      Update rpt_ByPeriods_Indicators set description='ММЛ Зеленые + Развитие, руб' where name='Отгрузка ММЛ + Развитие, руб'
+      Update rpt_ByPeriods_Indicators set description='ММЛ Зеленые + Развитие доля денег в общем сумме отгрузок' where name='Отгрузка ММЛ + Развитие, руб (доля, %)'
+      Update rpt_ByPeriods_Indicators set description='Общая сумма отгрузок (руб) разделить на общий вес (кг)' where name='Средняя стоимость 1 кг, руб'
+      Update rpt_ByPeriods_Indicators set description='Суммарная стоимость возвратов контрагентов из папок: Покупатели, Сотрудники, Прямые продажи, Регионы 1, Регионы 2, Регионы 3, Сети' where name='Возвраты, руб'
+      Update rpt_ByPeriods_Indicators set description='Сумма (руб) возвратов разделить на сумму отгрузок (руб)' where name='% возвратов от оборота'
+      Update rpt_ByPeriods_Indicators set description='По прайсу "Базовый"' where name='Себестоимость, руб'
+      Update rpt_ByPeriods_Indicators set description='По прайсу "Базовый"' where name='Валовая прибыль, руб'
+      Update rpt_ByPeriods_Indicators set description='Количество отгрузок / (4 * плановое количество отгрузок по контрагенту (из 1С)) * 100' where name='R1, %'
+      Update rpt_ByPeriods_Indicators set description='Количество эффективных отгрузок / (4 * плановое количество отгрузок по контрагенту из 1С) * 100. Эффективная отгрузка - вес больше планового веса из 1С' where name='R2, %'
+      Update rpt_ByPeriods_Indicators set description='ММЛ Зеленые + Развитие, кг' where name='Отгрузка ММЛ + Развитие, кг'
+      Update rpt_ByPeriods_Indicators set description='ММЛ Зеленые + Развитие доля веса в общем весе отгрузок' where name='Отгрузка ММЛ + Развитие, кг (доля, %)'
+      Update rpt_ByPeriods_Indicators set description='Количество контрагентов отгрузившихся за производственный месяц 4-ре и более раз (без учета 53-ей недели)' where name='АКБ, кол-во'
+      Update rpt_ByPeriods_Indicators set description='Количество контрагентов отгрузившихся за производственный месяц хотя бы раз' where name='Количество сработавших точек 2, шт'
+      Update rpt_ByPeriods_Indicators set description='Процент активных ТТ из отгрузившихся точек за производственный месяц' where name='CTT, %'
+      Update rpt_ByPeriods_Indicators set description='Эффективная отгрузка - вес больше планового веса из 1С' where name='Количество эффективных отгрузок, шт'
+      Update rpt_ByPeriods_Indicators set description='Количество возвратов по контрагентам из папок: Покупатели, Сотрудники, Прямые продажи, Регионы 1, Регионы 2, Регионы 3, Сети' where name='Количество возвратов, кол-во'
+      Update rpt_ByPeriods_Indicators set description='По прайсу "Базовый (Плановые)"' where name='Себестоимость (плановая), руб'
+      Update rpt_ByPeriods_Indicators set description='Количество отгрузок с ММЛ не менее 50% и отгрузка эффективная (вес больше планового)' where name='R3, %'
+      Update rpt_ByPeriods_Indicators set description='Количество отгрузок по контрагенту за производственный месяц без учета 53-ей недели' where name='Плановая кратность отгрузки, кол-во'
+      Update rpt_ByPeriods_Indicators set description='Валовая прибыль деленая на сумму отгрузок с учетом возвратов' where name='Рентабельность, %'
+      Update rpt_ByPeriods_Indicators set description='Валовая прибыль (Плановая) деленая на сумму отгрузок с учетом возвратов' where name='Рентабельность по плановой цене, %'
+      Update rpt_ByPeriods_Indicators set description='Сумма отгрузок (руб) по товарам из папки коммерческий продукт' where name='Коммерческий продукт, руб'
+      Update rpt_ByPeriods_Indicators set description='По прайсу "Базовый (Плановые)"' where name='Валовая прибыль (Плановая), руб'
+      Update rpt_ByPeriods_Indicators set description='Суммарный вес отгрузок по товарам из папки коммерческий продукт' where name='Коммерческий продукт, кг'
+      Update rpt_ByPeriods_Indicators set description='Валовая прибыль по товарам из папки коммерческий продукт по прайсу "Базовый (Плановые)"' where name='Валовая прибыль (коммерческий продукт), руб'
+      Update rpt_ByPeriods_Indicators set description='Валовая прибыль по товарам из папки коммерческий продукт по прайсу "Базовый (Плановые)"' where name='Валовая прибыль (плановая, коммерческий продукт), руб'
+      Update rpt_ByPeriods_Indicators set description='Средний отгружаемый вес в день с учетом возвратов по контрагентам из папок: Покупатели, Сотрудники, Прямые продажи, Регионы 1, Регионы 2, Регионы 3, Сети' where name='Среднедневная отгрузка за последн. 30 дн, кг'
+      Update rpt_ByPeriods_Indicators set description='Средняя выручка в день с учетом возвратов по контрагентам из папок: Покупатели, Сотрудники, Прямые продажи, Регионы 1, Регионы 2, Регионы 3, Сети' where name='Среднедневная выручка за последн. 30 дн, руб'
+      Update rpt_ByPeriods_Indicators set description='С учетом возвратов' where name='Средний вес отгрузки, кг'
+      Update rpt_ByPeriods_Indicators set description='ММЛ Зеленые, ММЛ Красные' where name='Доля ММЛ, руб'
+      Update rpt_ByPeriods_Indicators set description='Выручка - себестоимость разделить на себестоимость' where name='Наценка, %'
+      Update rpt_ByPeriods_Indicators set description='3% выручки по MML+Развитие + 1% выручки Паровоз' where name='Лимит возвратов, руб'
+      Update rpt_ByPeriods_Indicators set description='Лимит возвратов - сумма по возвратам' where name='Превышение лимита возвратов, руб'
+      
+    </sql>
+
+  </changeSet>
+</databaseChangeLog>

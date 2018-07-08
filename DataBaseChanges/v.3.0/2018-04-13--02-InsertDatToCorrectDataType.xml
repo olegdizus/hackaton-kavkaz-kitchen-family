@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="InsertDataToCorrectData" author="Andrey">
+
+    <insert tableName="ent_CorrectDataType">
+      <column name="id" value="100"/>
+      <column name="Name" value="Дублирование пользователя в сотрудниках" />
+      <column name="System" value="Сатурн CRM" />
+      <column name="Destination" value="Справочники/сотрудники" />
+      <column name="Description" value="Сотрудникам &lt;перечисление ФИО сотрудников> сопоставлен один и тот же пользователь &lt;имя пользователя>" />
+      <column name="idName" value="SameUserForSomeCustomers"/>
+    </insert>
+
+    <insert tableName="ent_CorrectDataType">
+      <column name="id" value="101"/>
+      <column name="Name" value="Сотруднику не указан пользователь" />
+      <column name="System" value="Сатурн CRM" />
+      <column name="Destination" value="Справочник/сотрудники" />
+      <column name="Description" value="В карточке сотрудника &lt;перечисление ФИО пользователя> не указан пользователь" />
+      <column name="idName" value="NoUserForCustomers"/>
+    </insert>
+
+    <insert tableName="ent_CorrectDataType">
+      <column name="id" value="102"/>
+      <column name="Name" value="Отличие цены от предыдущей более чем на 50%" />
+      <column name="System" value="1С" />
+      <column name="Destination" value="Установка цен номенклатуры" />
+      <column name="Description" value="Цены товара &lt;товар> в документах &lt;номер дата документа 1> и &lt;номер дата документа 2> отличаются более, чем на &lt;процент> &lt;цена документа 1> и &lt;цена документа 2>" />
+      <column name="idName" value="PriceInDocumentsHigher"/>
+    </insert>
+
+    <insert tableName="ent_CorrectDataType">
+      <column name="id" value="103"/>
+      <column name="Name" value="Дублирование цен для товара" />
+      <column name="System" value="1С" />
+      <column name="Destination" value="Установка цен номенклатуры" />
+      <column name="Description" value="Дублирование цены для товара &lt;код, наименование товара> в документе &lt;документ дата, код>" />
+      <column name="idName" value="SamePriceInOneDate"/>
+    </insert>
+
+    <insert tableName="ent_CorrectDataType">
+      <column name="id" value="104"/>
+      <column name="Name" value="Пользователю не назначени сотрудник" />
+      <column name="System" value="Сатурн CRM" />
+      <column name="Destination" value="Администрирование/Пользователи" />
+      <column name="Description" value="Отсутствует сопоставление сотрудника пользователю &lt;имя пользователя>" />
+      <column name="idName" value="NoCustomerForUser"/>
+    </insert>
+
+    <insert tableName="ent_CorrectDataType">
+      <column name="id" value="105"/>
+      <column name="Name" value="Контрагенту не назначен сотрудник" />
+      <column name="System" value="1С" />
+      <column name="Destination" value="Справочники/Контрагенты" />
+      <column name="Description" value="У контрагента &lt;код контрагента> и &lt;имя контрагента> не назначены сотрудники следующих должностей: &lt;должности>" />
+      <column name="idName" value="NoCustomerForContact"/>
+    </insert>
+
+    <insert tableName="ent_CorrectDataType">
+      <column name="id" value="106"/>
+      <column name="Name" value="Иерархия подчинения сотрудника не соответствует в Сатурн CRM и 1С" />
+      <column name="System" value="1С" />
+      <column name="Destination" value="Администрирование/Пользователи" />
+      <column name="Description" value="Контрагенту &lt;код, имя> в 1С назначены сотрудники: &lt;должность, ФИО сотрудника 1С>; а в Сатурн CRM: &lt;должность, ФИО сотрудника Сатурн>" />
+      <column name="idName" value="NoSameHierarhyCustomerAndContact"/>
+    </insert>
+
+    <insert tableName="ent_CorrectDataType">
+      <column name="id" value="107"/>
+      <column name="Name" value="В подчинении должны быть сотрудники одного уровня" />
+      <column name="System" value="Сатурн CRM" />
+      <column name="Destination" value="Справочники/Сотрудники" />
+      <column name="Description" value="У каждого сотрудника должны быть в подчинении сотрудники одного уровня. У сотрудника &lt;ФИО сотрудника1> в подчинении: &lt;перечисление&lt;&lt;ФИО сотрудника> с должностью &lt;название должности>>>"/>
+      <column name="idName" value="IncorrectCustomerHierarchy"/>
+    </insert>
+
+    <insert tableName="ent_CorrectDataType">
+      <column name="id" value="108"/>
+      <column name="Name" value="Отсутствует привязка по регионам" />
+      <column name="System" value="Сатурн CRM" />
+      <column name="Destination" value="Администрирование/Пользователи" />
+      <column name="Description" value="Сотруднику &lt;ФИО сотрудника> не назначен регион" />
+      <column name="idName" value="NoReferenceRegionsForCustomer"/>
+    </insert>
+
+    <insert tableName="ent_CorrectDataType">
+      <column name="id" value="109"/>
+      <column name="Name" value="Фильтр для пользователя  не соответствует должности сопоставленному сотруднику" />
+      <column name="System" value="Сатурн CRM" />
+      <column name="Destination" value="Администрирование/Пользователи" />
+      <column name="Description" value="Пользователю &lt;имя пользователя> сопоставлен сотрудник &lt;ФИО сотрудника> с должностью &lt;имя должноcти> для которого должен быть указан фильтр &lt;имя уровня> в данный момент указан &lt;имя текущего уровня>" />
+      <column name="idName" value="NoCustomerFilter"/>
+    </insert>
+
+    <insert tableName="ent_CorrectDataType">
+      <column name="id" value="110"/>
+      <column name="Name" value="Пользователю не назначены регионы" />
+      <column name="System" value="Сатурн CRM" />
+      <column name="Destination" value="Администрирование/Пользователи" />
+      <column name="Description" value="У пользователя &lt;userName> сотрудника &lt;ФИО сотрудника> не назначены регионы &lt;перечисление регионов>" />
+      <column name="idName" value="IncorrectRegionsFilter"/>
+    </insert>
+
+  </changeSet>
+
+</databaseChangeLog>

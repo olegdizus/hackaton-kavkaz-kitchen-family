@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="CreateTask" author="Andrey">
+
+  <createTable tableName="ent_Task">
+
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+
+	  <column name="CreationDate"  type="datetime">
+        <constraints nullable="false" />
+      </column>
+	  
+	  <column name="DoneDate"  type="datetime">
+        <constraints nullable="true" />
+      </column>
+	  
+      <column name="Theme" type="nvarchar(500)">
+		<constraints nullable="false"/>
+      </column>
+
+      <column name="target_id"  type="INT">
+		<constraints nullable="true"/>
+      </column>
+	  
+	  <column name="employeeFrom_id"  type="INT">
+		<constraints nullable="true"/>
+      </column>
+	  
+	  <column name="employeeTo_id"  type="INT">
+		<constraints nullable="true"/>
+      </column>
+
+    </createTable>
+    
+	<addForeignKeyConstraint referencedColumnNames="id" referencedTableName="dsh_Employee"
+		 baseColumnNames="employeeFrom_id" baseTableName="ent_Task"
+		 constraintName="FK_Task_Employee_employeFrom" onDelete="NO ACTION"/>
+		 
+	<addForeignKeyConstraint referencedColumnNames="id" referencedTableName="dsh_Employee"
+		 baseColumnNames="employeeTo_id" baseTableName="ent_Task"
+		 constraintName="FK_Task_Employee_employeeTo" onDelete="NO ACTION"/>
+	
+  </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,71 @@
+﻿@section styles
+{
+    @Styles.Render(Dashboard.Bundles.BCG.Css.Key)
+}
+
+<div id="bcgMatrix">
+    <table border="1">
+        <tr>
+            <td colspan="2"></td>
+            <td>Наименование</td>
+            <td>Объем</td>
+            <td>Наименование</td>
+            <td>Объем</td>
+        </tr>
+        <tr>
+            <td rowspan="4">Темп роста</td>
+            <td rowspan="2">Больше 10%</td>
+            <td colspan="2" class="difChildrenLabel">Трудные дети</td>
+            <td colspan="2" class="starsLabel">Звезды</td>
+        </tr>
+        <tr>
+            <td colspan="2" class="difChildrenDescr">
+                <table border="1" data-bind="foreach: difficultChildren">
+                    <tr><td class="brandNameTd" data-bind="text: brand"></td><td class="brandSumTd" data-bind="numericText: IndicatorValue"></td></tr>
+                </table>
+                <table border="1">
+                    <tr><td class="brandFooterTd">ИТОГО</td><td class="tdTotal" data-bind="numericText: difficultChildrenTotal"></td></tr>
+                </table>
+            </td>
+            <td colspan="2" class="starsDescr">
+                <table border="1" data-bind="foreach: starts">
+                    <tr><td class="brandNameTd" data-bind="text: brand"></td><td class="brandSumTd" data-bind="numericText: IndicatorValue"></td></tr>
+                </table>
+                <table border="1">
+                    <tr><td class="brandFooterTd">ИТОГО</td><td class="tdTotal" data-bind="numericText: startsTotal"></td></tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td rowspan="2">Меньше 10%</td>
+            <td colspan="2" class="dogsLabel">Собаки</td>
+            <td colspan="2" class="cowsLabel">Дойные коровы</td>
+        </tr>
+        <tr>
+            <td colspan="2" class="dogsDescr">
+                <table border="1" data-bind="foreach: dogs">
+                    <tr><td class="brandNameTd" data-bind="text: brand"></td><td class="brandSumTd" data-bind="numericText: IndicatorValue"></td></tr>
+                </table>
+                <table border="1">
+                    <tr><td class="brandFooterTd">ИТОГО</td><td class="tdTotal" data-bind="numericText: dogsTotal"></td></tr>
+                </table>
+            </td>
+            <td colspan="2" class="cowsDescr">
+                <table border="1" data-bind="foreach: cows">
+                    <tr><td class="brandNameTd" data-bind="text: brand"></td><td class="brandSumTd" data-bind="numericText: IndicatorValue"></td></tr>
+                </table>
+                <table border="1">
+                    <tr><td class="brandFooterTd">ИТОГО</td><td class="tdTotal" data-bind="numericText: cowsTotal"></td></tr>
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" rowspan="2"></td>
+            <td colspan="2">Меньше 1</td>
+            <td colspan="2">Больше 1</td>
+        </tr>
+        <tr>
+            <td colspan="4">Относительная доля рынка</td>
+        </tr>
+    </table>
+</div>

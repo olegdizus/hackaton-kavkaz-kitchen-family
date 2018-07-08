@@ -1,0 +1,188 @@
+﻿@using Dashboard.Helpers
+@{
+    ViewBag.Title = "Пузырьковая диаграмма";
+}
+
+@section meta
+{
+    <meta http-equiv="content-type" content="text/html; charset=UTF8">
+}
+
+@section styles
+{
+    @Styles.Render(
+    
+                    Dashboard.Bundles.Kendo.kendo.Css.Key,
+                    "~/Content/dc.min.css",
+                    "~/Content/bootstrap-slider.min.css",
+                    
+                    Dashboard.Bundles.BootstrapTagsInput.Css.Key,
+                    
+                    Dashboard.Bundles.FilterControl.Css.Key,
+                    Dashboard.Bundles.Tooltipster.Css.Key
+    )
+}
+<style>
+    .tooltip {
+        opacity: 1;
+        font-size: 14px; 
+    }
+</style>
+
+<h2>@ViewBag.Title</h2>
+    
+@Html.Partial("SelectedPeriodControl")
+@Html.Partial("infoModal")
+
+<div style="width: 40%; float: right">
+    <a id="SaveUserSettingsLink" href="#">Поделиться отчетом</a>
+</div>
+
+<div class="row top-buffer">
+    <div class="col-lg-1 col-md-1 col-xs-1 col-sm-1">
+        <h5>Оси:</h5>
+    </div>
+    <div class="col-lg-2 col-md-2 col-xs-2 col-sm-2">
+        <button type="button" class="btn btn-default" data-toggle="collapse" data-target="#collapsedDimensions" id="toggleButton">
+            <span class="glyphicon glyphicon-chevron-down"></span> Развернуть
+        </button>
+    </div>
+</div>
+
+<div id="collapsedDimensions" class="collapse">
+    <div class="row top-buffer">
+        <div class="col-md-1 col-xs-1 col-sm-1 right-align">
+            <h5>X:</h5>
+        </div>
+        <div class="col-md-3 col-xs-2 col-sm-2">
+            <select class="form-control activateRefreshButton tooltip" id="xDimensionsList" name="xDimensions">
+                @foreach (var i in @ViewBag.Indicators)
+                {
+                    <option value="@(i.measureName)" measurename="@(i.measureName)" title="@(i.description)">
+                        @(i.name)
+                    </option>
+                }
+            </select>
+        </div>
+    </div>
+
+    <div class="row top-buffer">
+        <div class="col-lg-1 col-md-1 col-xs-1 col-sm-1 right-align">
+            <h5>Y:</h5>
+        </div>
+        <div class="col-md-3 col-xs-2 col-sm-2">           
+            <select class="form-control activateRefreshButton tooltip" id="yDimensionsList" name="yDimensions">
+                @foreach (var i in @ViewBag.Indicators)
+                {
+                    <option value="@(i.measureName)" measurename="@(i.measureName)" title="@(i.description)">
+                        @(i.name)
+                    </option>
+                }
+            </select>                
+        </div>
+        
+        <div class="col-md-3 col-xs-2 col-sm-2">
+            <input type="checkbox" id="isLastPeriod" data-toggle="collapse" data-target="#collapsePeriods"> Сравнить с пред. периодом
+        </div>
+        <div class="col-md-4 col-xs-4 col-sm-4 collapse" id="collapsePeriods">
+            <select class="form-control" id="periodsList" name="periods" style="max-width: 1200px !important;"></select>
+        </div>
+    </div>
+
+    <div class="row top-buffer">
+        <div class="col-lg-1 col-md-1 col-xs-1 col-sm-1 right-align">
+            <h5>Размер:</h5>
+        </div>
+        <div class="col-md-3 col-xs-2 col-sm-2">    
+            <select class="form-control activateRefreshButton tooltip" id="zDimensionsList" name="zDimensions">
+                @foreach (var i in @ViewBag.Indicators)
+                {
+                    <option value="@(i.measureName)" measureName="@(i.measureName)" title="@(i.description)">
+                        @(i.name)
+                    </option>
+                }
+            </select>                
+        </div>
+    </div>
+</div>
+<div class="row top-buffer">
+    <div class="col-lg-1 col-md-1 col-xs-1 col-sm-1">
+        <h5>Категория:</h5>
+    </div>
+    <div class="col-lg-3 col-md-3 col-xs-2 col-sm-2">
+        @Html.DropDownList("labels", null, new { @class = "form-control activateRefreshButton", @id = "labelsList"})
+    </div>
+</div>
+
+@Html.Partial("FilterControl")
+
+<div class="row top-buffer">
+    <div id="bubbleParentDiv" class="col-lg-9 col-md-9 col-xs-9 col-sm-9" style="height: 400px;">
+        <div id="bubble-chart">
+            <div class="clearfix"></div>
+        </div>
+        <div class="onchart-element">
+            <button type="button" class="btn btn-default" id="resizeBubbleChartButton">
+                <span class="glyphicon glyphicon-fullscreen"></span>
+            </button>
+            <button type="button" class="btn btn-default" id="fullScreenButton">
+                <span class="glyphicon glyphicon-resize-full"></span>
+            </button>
+        </div>
+    </div>
+</div>
+<p>
+    Величина радиуса: <input id="ex6" type="text" data-slider-min="0.1" data-slider-max="5" data-slider-step="0.1" data-slider-value="1" />
+</p>
+<div id="grid" style="height: 300px; width: 800px;"></div>
+<div class="k-grid k-widget" style="width: 800px;" id="gridTotal">
+    <table class="k-focusable">
+        <tr>
+            <td>
+                Всего: <span id="totalItems">0</span>, из них скрыто <span id="totalHidden">0</span>, на сумму <span id="totalSum">0</span>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div>
+    @section scripts
+    {
+        <script>
+            var userSettings = JSON.parse(@Html.JsonRaw((object) ViewBag.userSettings));
+        </script>
+
+        @Scripts.Render(
+            Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+            Dashboard.Bundles.Reports.ReportHelper.Scripts.Key,
+            Dashboard.Bundles.Kendo.kendoCustomize.Scripts.Key,
+            Dashboard.Bundles.Knockout.Scripts.Key,
+            Dashboard.Bundles.D3.Scripts.Key,
+            Dashboard.Bundles.Moment.Scripts.Key,
+            Dashboard.Bundles.bootstrapplugins.Scripts.Key,
+            Dashboard.Bundles.Reports.ReportHelper.Scripts.Key,
+            Dashboard.Bundles.UserSetting.Scripts.Key,
+            Dashboard.Bundles.Extentions.Scripts.Key,
+            Dashboard.Bundles.Reports.BubbleChart.BubbleChartReport.Scripts.Key,
+            Dashboard.Bundles.Helpers.Scripts.Key,
+           Dashboard.Bundles.Tooltipster.Scripts.Key
+        )
+    }
+</div>
+<script>
+    $(document).ready(function () {
+        $('.tooltip').tooltipster(
+            {
+                content: 'Loading...',
+                theme: 'tooltipster-light',
+                functionBefore: function (instance, helper) {
+
+                    var $origin = $(helper.origin);
+                    var attributes = $(helper.origin).find("option:selected").attr("measureName");
+
+                    getTooltipAjax(instance, $origin, attributes);
+                }
+            }
+        );
+    });
+</script>

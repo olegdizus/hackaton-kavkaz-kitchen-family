@@ -1,0 +1,31 @@
+﻿<div class="modal  modal-wide fade" id="approveConfirmModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">
+                    Согласование
+                </h4>
+            </div>
+            <div class="modal-body">
+                <span class="error-span" data-bind="text: errors"></span>
+                <div class="row">
+                    <div class="col-md-12">
+                        <label for="approveComment">Введите комментарий:</label>
+                        <textarea id="approveComment" class="form-control" rows="5"  style="max-width: none !important; resize: none;"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="sendApproveConfirm">
+                    Отправить
+                </button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">
+                    Закрыть
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

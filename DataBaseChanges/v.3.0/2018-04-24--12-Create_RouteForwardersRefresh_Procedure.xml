@@ -1,0 +1,199 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Create_demo_ReplaceData_Procedure" author="Andrey">
+    <createProcedure>
+
+-- =============================================
+-- Author:		Alexey
+-- Create date: 2017-04-09
+-- Description:	Description,,
+-- =============================================
+CREATE PROCEDURE [dbo].[RouteForwardersRefresh]
+AS
+BEGIN
+	SET NOCOUNT ON;
+
+	
+  DECLARE @importId UNIQUEIDENTIFIER
+
+  CREATE TABLE #importIdTable (
+    importId UNIQUEIDENTIFIER
+  )
+
+  WHILE 0 &lt; (SELECT
+      COUNT(*)
+    FROM imp_RoutesForwarders
+    WHERE importId NOT IN (SELECT importId FROM #importIdTable))
+  BEGIN
+
+  SET @importId = (SELECT TOP 1
+      importId
+    FROM imp_RoutesForwarders
+    WHERE importId NOT IN (SELECT importId FROM #importIdTable)
+    ORDER BY id)
+
+  INSERT INTO #importIdTable (importId)
+    VALUES (@importId);
+
+
+
+	--Импорт Экспедиторов
+	MERGE ent_Forwarders AS T
+  USING (SELECT
+      irf.forwarderGuid AS [guid],
+	  irf.forwarderName AS name,
+	   irf.hst_datetime AS hst_datetime
+
+    FROM  imp_RoutesForwarders irf 
+
+    WHERE irf.id in (select max(id) from imp_RoutesForwarders group by forwarderGuid)
+         AND irf.forwarderGuid IS NOT NULL
+		 AND irf.forwarderGuid != '00000000-0000-0000-0000-000000000000'
+		 --AND irf.importId = @importId
+	) AS S
+
+  ON T.[guid] = S.[guid]
+  WHEN MATCHED
+  AND (T.name != S.name OR T.name IS NOT NULL AND S.name IS NULL OR T.name IS NULL AND S.name IS NOT NULL)
+
+  THEN UPDATE
+      SET T.[guid] = S.[guid]
+         ,T.name = S.name
+		 ,T.hst_datetime = S.hst_datetime
+
+  WHEN NOT MATCHED BY TARGET
+    THEN INSERT (
+      [guid],
+	  name,
+	  hst_datetime)
+        VALUES ([guid], name, hst_datetime);
+
+			--Импорт маршрутов
+	MERGE ent_RoutesForwarders AS T
+  USING (SELECT
+       irf.[guid],
+	   irf.name,
+	   irf.isDeleted,
+	   irf.isGroup,
+	   irf.distance,
+	   irf.outTime,
+	   irf.costCruise,
+	   irf.logisticsNorm,
+	   irf.logisticsMax,
+	   irf.minInvoice,
+	   irf.minAverageInvoice,
+	   irf.directDelivery,
+	   irf.user1C,
+	   irf.typeObject,
+	   irf.hst_datetime,
+
+	   ef.id AS forwarder_id,
+	   ed.id AS direction_id,
+	   er.id AS region_id
+
+    FROM  imp_RoutesForwarders irf
+	LEFT JOIN ent_Forwarders ef  ON ef.[guid] = irf.forwarderGuid
+
+	LEFT JOIN ent_Directions ed  ON ed.[guid] = irf.directionGuid
+
+	LEFT JOIN ent_Regions er  ON er.[guid] = irf.regionGuid
+
+
+    WHERE irf.forwarderGuid != '00000000-0000-0000-0000-000000000000'
+	     AND irf.forwarderGuid IS NOT NULL
+	     AND irf.importId = @importId
+	) AS S
+
+  ON T.[guid] = S.[guid]
+  WHEN MATCHED
+  AND (T.name != S.name OR T.name IS NOT NULL AND S.name IS NULL OR T.name IS NULL AND S.name IS NOT NULL
+  OR T.isDeleted != S.isDeleted OR T.name IS NOT NULL AND S.isDeleted IS NULL OR T.isDeleted IS NULL AND S.isDeleted IS NOT NULL
+  OR T.isGroup != S.isGroup OR T.isGroup IS NOT NULL AND S.isGroup IS NULL OR T.isGroup IS NULL AND S.isGroup IS NOT NULL
+  OR T.distance != S.distance OR T.distance IS NOT NULL AND S.distance IS NULL OR T.distance IS NULL AND S.distance IS NOT NULL
+  OR T.outTime != S.outTime OR T.outTime IS NOT NULL AND S.outTime IS NULL OR T.outTime IS NULL AND S.outTime IS NOT NULL
+  OR T.costCruise != S.costCruise OR T.costCruise IS NOT NULL AND S.costCruise IS NULL OR T.costCruise IS NULL AND S.costCruise IS NOT NULL
+  OR T.logisticsNorm != S.logisticsNorm OR T.logisticsNorm IS NOT NULL AND S.logisticsNorm IS NULL OR T.logisticsNorm IS NULL AND S.logisticsNorm IS NOT NULL
+  OR T.logisticsMax != S.logisticsMax OR T.logisticsMax IS NOT NULL AND S.logisticsMax IS NULL OR T.logisticsMax IS NULL AND S.logisticsMax IS NOT NULL
+  OR T.minInvoice != S.minInvoice OR T.minInvoice IS NOT NULL AND S.minInvoice IS NULL OR T.minInvoice IS NULL AND S.minInvoice IS NOT NULL
+  OR T.minAverageInvoice != S.minAverageInvoice OR T.minAverageInvoice IS NOT NULL AND S.minAverageInvoice IS NULL OR T.minAverageInvoice IS NULL AND S.minAverageInvoice IS NOT NULL
+  OR T.directDelivery != S.directDelivery OR T.directDelivery IS NOT NULL AND S.directDelivery IS NULL OR T.directDelivery IS NULL AND S.directDelivery IS NOT NULL
+  OR T.user1C != S.user1C OR T.user1C IS NOT NULL AND S.user1C IS NULL OR T.user1C IS NULL AND S.user1C IS NOT NULL
+  OR T.forwarder_id != S.forwarder_id OR T.forwarder_id IS NOT NULL AND S.forwarder_id IS NULL OR T.forwarder_id IS NULL AND S.forwarder_id IS NOT NULL
+  OR T.direction_id != S.direction_id OR T.direction_id IS NOT NULL AND S.direction_id IS NULL OR T.direction_id IS NULL AND S.direction_id IS NOT NULL
+  OR T.region_id != S.region_id OR T.region_id IS NOT NULL AND S.region_id IS NULL OR T.region_id IS NULL AND S.region_id IS NOT NULL
+  )
+
+  THEN UPDATE
+      SET T.[guid] = S.[guid]
+         ,T.name = S.name
+		 ,T.isDeleted = S.isDeleted
+		 ,T.isGroup = S.isGroup 
+		 ,T.distance = S.distance 
+		 ,T.outTime = S.outTime 
+		 ,T.costCruise = S.costCruise 
+		 ,T.logisticsNorm = S.logisticsNorm 
+		 ,T.logisticsMax = S.logisticsMax 
+		 ,T.minInvoice = S.minInvoice 
+		 ,T.minAverageInvoice = S.minAverageInvoice 
+		 ,T.directDelivery = S.directDelivery 
+		 ,T.user1C = S.user1C 
+		 ,T.forwarder_id = S.forwarder_id 
+		 ,T.direction_id = S.direction_id 
+		 ,T.region_id = S.region_id
+		 ,T.hst_datetime = S.hst_datetime
+
+  WHEN NOT MATCHED BY TARGET
+    THEN INSERT (
+      [guid],
+	  name,
+	  isDeleted,
+	  isGroup,
+	  distance,
+	  outTime,
+	  costCruise,
+	  logisticsNorm,
+	  logisticsMax,
+	  minInvoice,
+	  minAverageInvoice,
+	  directDelivery,
+	  user1C,
+	  forwarder_id,
+	  direction_id,
+	  region_id,
+	  hst_datetime
+	  )
+        VALUES (      
+	  [guid],
+	  name,
+	  isDeleted,
+	  isGroup,
+	  distance,
+	  outTime,
+	  costCruise,
+	  logisticsNorm,
+	  logisticsMax,
+	  minInvoice,
+	  minAverageInvoice,
+	  directDelivery,
+	  user1C,
+	  forwarder_id,
+	  direction_id,
+	  region_id,
+	  hst_datetime);
+
+	 --  print 'Удаление из импортной таблицы';
+  --DELETE FROM imp_RoutesForwarders
+  --WHERE importId IN (SELECT
+  --      importId
+  --    FROM #importIdTable);
+  END;
+  DROP TABLE #importIdTable
+END
+</createProcedure>
+  </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <include file="2017-08-31--01-CreateKSPlansTable.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-09-01--01-ChangeDecimalTypeToKSPlans.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-09-04--01-CreateImportTableRouteAndDirection.xml" relativeToChangelogFile="true"/>
+  <include file="2017-09-04--02-CreateTableRouteAndDirection.xml" relativeToChangelogFile="true"/>
+    
+  <include file="2017-09-05--01-CreateTableLoggingChanges.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-09-04--01-Update_demo_ActualDateProcedure.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-09-05--01-ChangeLength_rpt_ByPeriods_Indicators_description.xml" relativeToChangelogFile="true"/>
+  <include file="2017-09-05--02-Inserts_to_rptByPeriods_Indicators.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-09-06--01-Update _rpt_ByPeriods_Indicators_descriptions.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-09-11--01-UpdateOlap_RefreshDataProcedure.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-09-12--01-Insert_to_rptByPeriods_Indicators.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-09-15--01-Add_classification_id_to_bcg_InitialData.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-09-18--01-Rename_brand_id_in_bcg_InitialDataDetails.xml" relativeToChangelogFile="true"/>
+  <include file="2017-09-18--02-Update_goodsType_id_in_rpt_ByPeriods_Indicators.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-09-19--01-Add_contact_id_To_ent_RoutesForwarders.xml" relativeToChangelogFile="true"/>
+  <include file="2017-09-19--02-CreateImp_RouteForwardersRefreshProcedure.xml" relativeToChangelogFile="true"/>
+  <include file="2017-09-19--03-Update_dsh_RecalculateReportDaysData.xml" relativeToChangelogFile="true"/>
+  <include file="2017-09-19--04-ChangeDatatype_RoutesForwarders.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-09-20--01-CreateImp_imp_DirectionRefreshProcedure.xml" relativeToChangelogFile="true"/>
+  <include file="2017-09-20--02-Update_dsh_RecalculateReportDaysData.xml" relativeToChangelogFile="true"/>
+  <include file="2017-09-20--03-Create_ent_ContactCruiseCost_Table.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-09-21--01-UpdateOlap_RefreshDataProcedure.xml" relativeToChangelogFile="true"/>
+  <include file="2017-09-21--02-Inserts_to_rptByPeriods_Indicators.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-09-22--01-Update_dsh_GetGroupItemsProcedure.xml" relativeToChangelogFile="true"/>
+  <include file="2017-09-22--02-CreateImportTable_ProductsDelivery_ProductsDeliveryDetails.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-09-25--01-CreateTable_ProductsDelivery_ProductsDeliveryDetails.xml" relativeToChangelogFile="true"/>
+  <include file="2017-09-25--02-Create_ProductsDeliveryRefresh_Procedure.xml" relativeToChangelogFile="true"/>
+  <include file="2017-09-25--03-Create_ProductsDeliveryDetailsRefresh_Procedure.xml" relativeToChangelogFile="true"/>
+  <include file="2017-09-25--04-Update_dsh_RecalculateReportDaysData.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-09-26--01-UpdateOlap_RefreshDataProcedure.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-09-27--01-Drop_Create_ent_ContactCruiseCost_Table.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-09-27--01-AddColumnKSPlan.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-10-13--01-AddMeasureNameFromPlans.xml" relativeToChangelogFile="true"/>
+  <include file="2017-10-13--02-UpdateMeasureNameFromPlans.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-10-18--01-CreateTableRevisionHistory.xml" relativeToChangelogFile="true"/>
+
+  <include file="2017-10-27--01-RenameEmploeeColumnToEmployee.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-11-16--01-AddGuidTo_dsh_UserSettingValue.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-11-16--01-Inserts_to_dsh_UserSetting.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-11-23--01-AddGuidTo_dsh_UserSettingValue.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-12-01--01-Updateimp_PersonesRefreshProcedure.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-12-26--01-Add_NewHierarchesTo_Contact_Table.xml" relativeToChangelogFile="true"/>
+  <include file="2017-12-26--02-Add_NewHierarchesTo_impContact_Table.xml" relativeToChangelogFile="true"/>
+  <include file="2017-12-26--03-Update_imp_ContactsRefresh_Procedure.xml" relativeToChangelogFile="true"/>
+  <include file="2017-12-26--04-Update_dsh_GetGroupsByPeriod_Procedure.xml" relativeToChangelogFile="true"/>
+  <include file="2017-12-26--05-Insert_HierarchyLevels_To_MdxHierarchy.xml" relativeToChangelogFile="true"/>
+  <include file="2017-12-26--06-Insert_HierarchyLevels_To_Rpt_Dimension.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2017-12-27--01-CreateTaskStateTable.xml" relativeToChangelogFile="true"/>
+  <include file="2017-12-27--02-CreateTaskTable.xml" relativeToChangelogFile="true"/>
+  <include file="2017-12-27--03-CreateTaskPostTable.xml" relativeToChangelogFile="true"/>
+  <include file="2017-12-27--04-CreateTaskFileTable.xml" relativeToChangelogFile="true"/>
+  <include file="2017-12-29--01-CreateTaskTask_IdColumn.xml" relativeToChangelogFile="true"/>
+  <include file="2018-01-09--01-Create_dsh_GetMdxFilters_Procedure.xml" relativeToChangelogFile="true"/>
+  <include file="2018-01-09--02-Add_GroupFields_To_mdxHierarchy.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-01-11--01-InsertTaskStateDefaultValues.xml" relativeToChangelogFile="true"/>
+
+  <include file="2018-01-17--01-UpdateOlap_RefreshDataProcedure.xml" relativeToChangelogFile="true"/>
+
+  <include file="2018-01-19--01-Update_dsh_GetGroupsByPeriod_Procedure.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-02-15--01-Create_ImportLog_Table.xml" relativeToChangelogFile="true"/>
+  
+  
+  <include file="2018-02-16--02-Update_imp_ReturnsRefresh_Procedure.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-02-16--01-Inserts_Settings_For_AnalizeByPeriod.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-02-16--03-Update_imp_DeliveriesRefresh_Procedure.xml" relativeToChangelogFile="true"/>
+  <include file="2018-02-16--04-Create_dsh_compareWith1cDatabase_Procedure.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-02-21--01-Update_imp_DeliveriesRefresh_Procedure.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-03-02--01-Update_dsh_compareWith1cDatabase_Procedure.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-03-07--01-Update_dsh_compareWith1cDatabase_Procedure_AllMoney.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-03-12--01-Add_isEmployeeHierarhy_To_mdxHierarchy.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-03-12--02-Update_dsh_compareWith1cDatabase_Procedure_AllMoney.xml" relativeToChangelogFile="true"/>
+
+  <include file="2018-03-14--01-CreateCorrecrDataTypeTable.xml" relativeToChangelogFile="true"/>
+  <include file="2018-03-14--02-CreateCorrecrDataTable.xml" relativeToChangelogFile="true"/>
+  
+  
+  <include file="2018-03-15--01-Update_imp_ContactsRefresh_Procedure.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-03-14--03-InsertDefaultCorrectDataTypes.xml" relativeToChangelogFile="true"/>
+
+  <include file="2018-03-23--01-CreateBasicMaterialTable.xml" relativeToChangelogFile="true"/>
+  <include file="2018-03-23--02-CreateBasicMaterialPriceTypeTable.xml" relativeToChangelogFile="true"/>
+  <include file="2018-03-23--03-CreateBasicMaterialPrice.xml" relativeToChangelogFile="true"/>
+
+  <include file="2018-03-26--01-Update_rpt_ByPeriods_Indicators_Table.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-03-28--01-ChangeLength_Comment_ent_CorrectData.xml" relativeToChangelogFile="true"/>
+  <include file="2018-03-28--02-CorrectDataType_InsertIncorrectRegionsFilter.xml" relativeToChangelogFile="true"/>
+
+  <include file="2018-03-29--01-CreateTable_ExcelSaveHistory.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-03-30--01-Add_Filters_To_dsh_ExcelSaveHistory.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-04-05--01-Add_PositionIdAndIsFilterToMdxHierarhy.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-04-06--01-Add_IsRegionToMdxHierarhy.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-04-06--09-AddFKGood.xml" relativeToChangelogFile="true"/>
+    
+  <include file="2018-04-10--01-ChangePriceCorrectDataTypeFrom10To50Percent.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-04-13--01-ReCreateCorrectDataType.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-04-13--02-InsertDatToCorrectDataType.xml" relativeToChangelogFile="true"/>
+
+  <include file="2018-04-17--01-DeleteNullPriceGood.xml" relativeToChangelogFile="true"/>
+  <include file="2018-04-17--02-AddNotNullForPriceGood.xml" relativeToChangelogFile="true"/>
+  <include file="2018-04-17--03-UpdateProcedureOlapRefresh.xml" relativeToChangelogFile="true"/>
+  <include file="2018-04-17--04-UpdateProcedurePriceGoodRefresh.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-0-18--01Update_dsh_compareWith1cDatabase.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-04-19--01-AddIdentityForBasicMaterial.xml" relativeToChangelogFile="true"/>
+    
+  <include file="2018-04-19--01-Update_MergeDetails_Procedures.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-05-24--01-CreateDshDocument1CReference.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-05-24--05-DeleteEntTaskTables.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-05-24--02-CreateTaskTable.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-05-24--03-CreateTaskStateTable.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-05-24--04-CreatePriceTable.xml" relativeToChangelogFile="true"/>
+    
+  <include file="2018-05-24--06-CreateDshTaskStateTable.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-05-24--07-CreateDshTaskTable.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-05-24--08-CreateDshTaskPostTable.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-05-24--09-CreateDshTaskFileTable.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-05-24--10-InsertTaskStateDefaultValues.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-04-24--11-Create_demoReplaceData_Procedure.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-04-24--12-Create_RouteForwardersRefresh_Procedure.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-04-24--13-AddColumn_amount_contact1c_Table.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-05-24--14-Add_ent_Contacts_ent_Contact_ForeignConstraint.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-04-24--15-Create_testsPeriodIndex.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-04-24--16-Update_dsh_compareWith1cDatabase_Procedure.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-04-24--17-Update_ValidateDatabaseState_Procedure.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-05-24--22-InsertDefaultData_DshDocument1CReferenceTable.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-05-23--01-Update_Update_imp_DeliveriesRefresh_Procedure.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-06-01--01-CreateEnt_DocumentsOfSettlementsByDocuments_Table.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-06-01--02-CreateEnt_DocumentsOfSettlementsByContragents_Table.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-06-01--03-Create_deb_InsertDataToAgregateRegistresStoredProcedure.xml" relativeToChangelogFile="true"/>
+  
+  <include file="2018-06-05--01-Test_Update_ImportData_Procedures.xml" relativeToChangelogFile="true"/>
+
+  <include file="2018-06-06--01-InsertNoManagerHierarhyTypeCorrectDataType.xml" relativeToChangelogFile="true"/>
+
+  <include file="2018-06-07--01-InsertDebitoreExpiredPeriodUserSettingValue.xml" relativeToChangelogFile="true"/>
+
+  <include file="2018-06-07--01-Update_Imp_DeliveryRefresh_Procedure.xml" relativeToChangelogFile="true"/>
+
+  <include file="2018-06-13--02-UpdateNoSameHierarHyCorrectDataTypeName.xml" relativeToChangelogFile="true"/>
+
+</databaseChangeLog>

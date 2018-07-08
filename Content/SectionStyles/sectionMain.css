@@ -1,0 +1,227 @@
+﻿.section-content {
+    padding-bottom: 50px;
+    min-width: 1480px !important;
+}
+
+.col-xs-2,
+.col-xs-10,
+.col-xs-4,
+.col-xs-8,
+.col-xs-6,
+.section-card,
+.section-header {
+    /*border: 1px solid red !important;*/
+}
+
+#main-section-content {
+    text-align: center;
+}
+
+h2.section-header {
+    font-size: 20px;
+    font-weight: bold;
+    padding: 5px 0;
+    margin: 0;
+    color: #974706;
+    margin: 5px 0;
+}
+
+h2.sales-indicator {
+    background-color: #EEECE1;
+}
+
+.section-card,
+.receivable-card {
+    width: 290px;
+    margin: 5px 0;
+}
+
+.receivable-card {
+    height: 70px;
+}
+
+.graphic-card {
+    height: 210px;
+}
+
+.speedometer {
+    background-color: #F7F6F1;
+    border: 2px solid #C4BD97;
+    border-radius: 25px;
+    text-align: center;
+}
+
+.speedometer h3 {
+    margin: 0;
+    padding-top: 5px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.speedometer p,
+.speedometer p span,
+.speedometer p strong {
+    line-height: 3px;
+    padding: 0;
+    margin: 0;
+}
+
+.speedometer-dz h3 {
+    font-size: 12px;
+}
+
+.speedometer-dz p {
+    font-size: 10px;
+}
+
+.large {
+    font-size: 14px;
+}
+
+.sales-indicator {
+    background-color: #EEECE1;
+    padding: 15px;
+    font-size: 11px;
+}
+
+.sales-indicator table {
+    width: 100%;
+}
+
+.sales-indicator td:first-child {
+    padding-right: 10px;
+
+}
+
+h2.returnes-header {
+    width: 310px;
+    background-color: #FDE9D9;
+    display: inline-block;
+}
+
+.sales-indicator .main-indicator-name {
+    font-size: 12px;
+    color: #66334B;
+    width: 50%;
+}
+
+.sales-indicator .main-indicator-value {
+    font-size: 20px;
+    color: #C00000;
+    font-weight: bold;
+}
+
+.sales-indicator .aver-indicator-name {
+    font-size: 12px;
+    color: #66334B;
+    width: 50%;
+}
+
+.sales-indicator .aver-indicator-value {
+    font-size: 12px;
+    color: #c06100;
+    font-weight: bold;
+}
+
+.with-border {
+    border: 1px solid #948A54;
+}
+
+.date-picker {
+    margin-top: 20px;
+}
+
+.plan-implement-weight {
+    margin-top: 30px;
+}
+
+.plan-implement-sum {
+    margin-top: 30px;
+}
+
+h2.debt-indicators-header {
+    background-color: #D9D9D9;
+}
+
+.section-datepicker input {
+    font-size: 12px;
+}
+
+.receivable-indicator {
+    background-color: #D9D9D9;
+}
+
+.receivable-indicator table {
+    width: 100%;
+}
+
+.receivable-main-indicator-name,
+.receivable-main-indicator-value {
+    color: #C00000;
+}
+
+.receivable-main-indicator-name {
+    text-align: right;
+    font-size: 16px;
+}
+
+.receivable-main-indicator-value {
+    font-size: 18px;
+}
+
+.receivable-second-indicator-name,
+.receivable-second-indicator-value {
+    color: #99666A;
+}
+
+.receivable-second-indicator-name {
+    text-align: right; 
+}
+
+.dashboard {
+    
+}
+
+.legendLabel {
+    text-align: left;
+}
+
+.waffleChart {
+    width: 150px;
+    height: 200px;   
+    font-weight: bold;
+}
+
+.waffleChart > table {
+    font-size: 12px;
+    width: 100%;
+}
+
+.waffleChart > table td:last-child {
+    text-align: right;
+}
+
+.waffleChart > table td:first-child {
+    text-align: left;
+}
+
+.legend {
+    padding-top: 4px;
+    font-size: 10px;
+}
+
+.hoverable-pie-chart {
+    text-align: left;
+    width: 200px;
+}
+
+.semiopacity {
+    opacity: 0.25; /* Полупрозрачный фон */
+}
+
+.errorPlaceholder {
+    background-color: #D9D9D9;
+    height: 100px;
+    padding: 20px;
+    font-size: 20px;
+}

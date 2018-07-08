@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="AddGoodsTypeToRpt_Dimension" author="ura">
+
+    <insert tableName="rpt_Dimension">
+      <column name="name" value="Тип продукта" />
+      <column name="value" value="Goods_Type" />
+      <column name="dimensionCategory_id" value="4" />
+      <column name="isLarge" value="0" />
+    </insert>
+
+  </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="CreateRelatedUserNamesTable" author="ura">
+
+    <createTable tableName="dsh_RelatedUserNames">
+
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+
+
+      <column name="UserName"
+        type="nvarchar(256)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="PasswordHash"
+        type="nvarchar(256)">
+        <constraints nullable="false"/>
+      </column>      
+      
+      <column name="MainUserName" type="nvarchar(256)">
+      </column>
+
+    </createTable>
+  </changeSet>
+</databaseChangeLog>

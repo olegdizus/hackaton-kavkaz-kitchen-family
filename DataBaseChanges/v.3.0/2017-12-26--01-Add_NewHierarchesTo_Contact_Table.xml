@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Add_NewHierarchesTo_Contact_Table" author="Ura">
+
+    <addColumn tableName="ent_Contacts">
+      <column name="secondLevel_id" type="int"/>
+    </addColumn>
+
+    <addColumn tableName="ent_Contacts">
+      <column name="thirdLevel_id" type="int"/>
+    </addColumn>
+
+  </changeSet>
+</databaseChangeLog>

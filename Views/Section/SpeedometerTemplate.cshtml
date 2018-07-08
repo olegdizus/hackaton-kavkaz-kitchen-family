@@ -1,0 +1,14 @@
+﻿<script type="text/html" id="speedometerTemplate">
+    <div class="speedometer section-card" style ="height: 165px;">
+        <h3 data-bind="text: indicatorName"></h3>
+        <canvas data-bind="attr: { id: canvasId }" height="100">Canvas not available.</canvas>
+        <p >
+            <span data-bind="text: footer" style="display: block;">ср. знач. за последние 30 дней=</span>
+            <strong data-bind="text: footerValue" style="display: inline-block; padding-top: 17px;">26</strong><strong>%</strong>
+        </p>
+    </div>
+</script>
+
+@Scripts.Render(
+        Dashboard.Bundles.speedometer.Scripts.Key
+    )

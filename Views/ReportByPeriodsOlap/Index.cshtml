@@ -1,0 +1,183 @@
+﻿@using Dashboard
+@using Dashboard.Helpers
+
+@{
+    ViewBag.Title = "Отчет по периодам";
+}
+
+@section styles
+{
+    @Styles.Render(
+        Dashboard.Bundles.Kendo.kendo.Css.Key,
+        Dashboard.Bundles.BootstrapTagsInput.Css.Key,
+        Dashboard.Bundles.FilterControl.Css.Key,
+        Dashboard.Bundles.Tooltipster.Css.Key)
+}
+<style>
+    .tooltip {
+        position: relative;
+        font-size: 14px;
+        opacity: 1; 
+    }
+    
+    .k-grid .k-grouping-row td,
+    .k-grid-footer .k-footer-template td
+    
+    {
+        padding: 0px;
+        
+    }
+    .all-column-cell,
+    .collored-grid-column {
+        padding: 8px;
+    }
+        
+    {padding-right:8px;}
+</style>
+
+
+@Html.Partial("UserSettingModal")
+@Html.Partial("infoModal")
+
+
+<h2>@ViewBag.Title</h2>
+
+<div class="row">
+    @Html.Partial("~/Views/Shared/DateRangeFilter.cshtml")
+    <div class="col-lg-1 col-md-1 col-xs-1 col-sm-1 right-align">
+        <h5>Показатель:</h5>
+    </div>
+    <div class="col-lg-2 col-md-2 col-xs-2 col-sm-2">
+        @*@Html.DropDownList("Indexes", null, new { @class = "form-control" })*@
+        <select class="form-control activateRefreshButton tooltip" id="Indexes" name="Indexes">
+            @foreach (var i in @ViewBag.Indexes)
+            {
+                <option  value="@(i.id)" measureName="@(i.measureName)" title="@(i.description)"
+                        @(ViewBag.SelectedIndex == i.id ? "selected=\"selected\"" : "")
+                        data-aggregate-type="@(i.aggregateType)">
+                    @(i.name)
+                </option>
+            }
+        </select>
+
+        <font size="1" id="OnlyForPrMonthAlertForCombobox" hidden="true" color="red">R1, R2, R3, Плановая кратность или АКБ корректны только для производственного месяца</font>
+
+    </div>
+    <div class="col-lg-1 col-md-1 col-xs-1 col-sm-1 right-align period">
+        <h5>Период:</h5>
+    </div>
+    <div class="col-lg-2 col-md-2 col-xs-2 col-sm-2 select_period">
+        @Html.DropDownList("periods", null, new { @class = "form-control activateRefreshButton" })
+    </div>
+    
+    <div class="col-lg-2 col-md-2 col-xs-3 col-sm-2 checkbox_report_by_per">
+        <div>
+            <input type="checkbox" id="onlyColorShow" />
+            Только цвета
+        </div>
+        <div>
+            <input type="checkbox" id="sortByColor" checked="" />
+            Сортировать по цвету
+        </div>
+        
+        <div>
+            <a id="SaveUserSettingsLink" href="#">Поделиться отчетом</a>
+        </div>
+        
+        <div>
+            <a id="ExportExcelLink" href="#">Выгрузить в Excel</a>
+        </div>
+
+    </div>
+    <div class="col-lg-9 col-md-1 col-xs-1 col-sm-1 right-align">
+        <button type="button" class="btn btn-default" id="openSettingsModalButton">
+            Настройки
+        </button>
+    </div>
+</div>
+@Html.Partial("FilterControl")
+
+<br />
+
+<div class="form-group">
+        
+    <div class="row">
+        <div style="float: right">
+            <div id="select">
+                <input type="button" value="СМС рассылка" class="btn btn-primary " id="AddSmDistributionControl">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="Grid"></div>
+
+
+
+<script type="text/javascript">
+
+    var periods = @ViewBag.periodsEnum;
+    var userSettings = JSON.parse(@Html.JsonRaw((object) ViewBag.userSettings));
+
+</script>
+
+
+@section Scripts
+{
+    @Scripts.Render(
+        Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+        Dashboard.Bundles.Knockout.Scripts.Key,
+        Dashboard.Bundles.Kendo.kendoHelp.Scripts.Key,
+
+        Dashboard.Bundles.Extentions.Scripts.Key,
+        Dashboard.Bundles.bootstrapplugins.Scripts.Key,
+        Dashboard.Bundles.UserSetting.Scripts.Key,
+
+        Dashboard.Bundles.Reports.ReportHelper.Scripts.Key,
+        Dashboard.Bundles.Reports.ReportByPeriods.Scripts.Key,
+                
+        Dashboard.Bundles.Helpers.Scripts.Key,
+        Dashboard.Bundles.PrMonthAlert.Scripts.Key,
+
+        Dashboard.Bundles.Reports.ReportByPeriodsOLAP.Scripts.Key,
+        Dashboard.Bundles.Tooltipster.Scripts.Key,
+        Dashboard.Bundles.Underscore.Scripts.Key
+        )
+}
+<script src="~/Scripts/notifTest.js"></script>
+<script>
+    $(document).ready(function() {
+        $('.tooltip').tooltipster(
+            {
+                content: 'Loading...',
+                theme: 'tooltipster-light',
+                functionBefore: function(instance, helper) {
+
+                    var $origin = $(helper.origin);
+                    var attributes = $(helper.origin).find("option:selected").attr("measureName");
+
+                    getTooltipAjax(instance, $origin,attributes);
+
+                }
+            }
+        );
+
+        var isCheckboxesVisible = false;
+
+        $('#AddSmDistributionControl').on('click',
+            function() {
+                if (isCheckboxesVisible) {
+                    notification.info('В рассылку добавлены');
+                    return;
+                }
+
+                isCheckboxesVisible = true;
+                $(this).val('Добавить в рассылку');
+                $('.k-master-row').each(function() {
+                    $(this).append('<td class="center">&nbsp;&nbsp;&nbsp;<input type="checkbox" checked="checked"/></td>');
+                });
+            });
+    });
+
+
+</script>

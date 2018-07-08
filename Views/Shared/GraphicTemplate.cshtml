@@ -1,0 +1,27 @@
+﻿<style>
+    .rotate-xtick div.xAxis div.tickLabel {
+        margin-top: 15px;
+        transform: rotate(-90deg);
+        -ms-transform: rotate(-90deg);
+        -moz-transform: rotate(-90deg); 
+        -webkit-transform: rotate(-90deg);
+        -o-transform: rotate(-90deg); 
+    }
+    .graphic-main-header {
+        text-align: center;
+    }
+    </style>
+
+<script type="text/html" id="graphicTemplate">
+    <div class="section-card graphic-card">
+        <h5 class="graphic-main-header" data-bind="text: mainHeader"></h5>
+        <div data-bind="attr: { id: legendContainerId }" style="margin-left: 13%;"></div>
+        <div data-bind="attr: { id: graphicId, class: rotateClassName } "
+             style="width:@{ @Html.Raw(ViewBag.WidgetWidth); }px; height:@{ @Html.Raw(ViewBag.WidgetHeight); }px; margin-top: 6px;">
+        </div>
+    </div>
+</script>
+
+@Scripts.Render(
+    Dashboard.Bundles.graphics.Scripts.Key
+)

@@ -1,0 +1,95 @@
+﻿<#@ template language="C#" HostSpecific="True" #>
+<#@ output extension=".cshtml" #>
+<#@ include file="Imports.include.t4" #>
+@model <#= ViewDataTypeName #>
+<#
+// The following chained if-statement outputs the file header code and markup for a partial view, a view using a layout page, or a regular view.
+
+//Literl Name Constants 
+string pageNameText = "Детали";
+string editOperationNameText = "Редактировать";
+string backwardNameText = "Назад";
+//
+
+if(IsPartialView) {
+#>
+
+<#
+} else if(IsLayoutPageSelected) {
+#>
+@{
+    
+<#
+if (!String.IsNullOrEmpty(LayoutPageFile)) {
+#>
+    Layout = "<#= LayoutPageFile#>";
+<#
+}
+#>
+}
+<#
+} else {
+#>
+<#
+    PushIndent("    ");
+}
+#>
+
+@{
+	ViewBag.Title = "<#= pageNameText#>";
+}
+
+<h2>@ViewBag.Title</h2>
+
+<div class="form-horizontal">
+    <dl class="dl-horizontal">
+<#
+foreach (PropertyMetadata property in ModelMetadata.Properties) {
+    if (property.Scaffold && !property.IsPrimaryKey && !property.IsForeignKey) {
+#>
+<#
+        // We do not want to show any association properties for which there is
+        // no associated foreign key.
+        if (property.IsAssociation && GetRelatedModelMetadata(property) == null) {
+            continue;
+        }
+#>
+		<div class="form-group">
+            @Html.LabelFor(model => model.<#= GetValueExpression(property) #>, htmlAttributes: new { @class = "control-label col-md-2"})
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.<#= GetValueExpression(property) #>, new { htmlAttributes = new { @class = "form-control", @readonly = "readonly" } })
+            </div>
+        </div>
+<#
+    }
+}
+#>
+    </dl>
+</div>
+<p>
+<#
+string pkName = GetPrimaryKeyName();
+if (pkName != null) {
+#>
+    @Html.ActionLink("<#= backwardNameText #>", "Index") |
+    @Html.ActionLink("<#= editOperationNameText #>", "Edit", new { id = Model.<#= pkName #> })
+<#
+} else {
+#>
+    @Html.ActionLink("<#= backwardNameText #>", "Index") |
+    @Html.ActionLink("Edit", "Edit", new { /* id = Model.PrimaryKey */ })
+<#
+}
+#>
+</p>
+<#
+// The following code closes the tag used in the case of a view using a layout page and the body and html tags in the case of a regular view page
+#>
+<#
+if(!IsPartialView && !IsLayoutPageSelected) {
+    ClearIndent();
+#>
+<#
+}
+#>
+<#@ include file="ModelMetadataFunctions.cs.include.t4" #>

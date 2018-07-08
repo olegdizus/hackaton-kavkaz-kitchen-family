@@ -1,0 +1,73 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="CreateImportTable_ProductsDelivery_ProductsDeliveryDetails" author="Ura">
+
+    <createTable tableName="imp_ProductsDelivery">
+
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+
+      <column name="guid" type="uniqueidentifier">
+        <constraints nullable="false" />
+      </column>
+
+      <column name="isDeleted" type="bit"/>
+      
+      <column name="number" type="INT"/>
+
+      <column name="date" type="datetime"/>
+      
+      <column name="IsCarriedOut" type="bit"/>
+
+      <column name="forwarderGuid" type="uniqueidentifier"/>
+
+      <column name="cruise" type="INT"/>
+      
+      <column name="RouteForwarderGuid" type="uniqueidentifier"/>
+
+      <column name="isDirectDelivery" type="bit"/>
+
+      <column name="factForwarderGuid" type="uniqueidentifier"/>
+      
+      <column name="user1C" type="nvarchar(300)"/>
+
+      <column name="typeObject" type="nvarchar(300)"/>
+
+      <column name="importId" type="uniqueidentifier"/>
+
+      <column name="hst_datetime" type="datetime"/>
+
+    </createTable>
+
+
+    <createTable tableName="imp_ProductsDeliveryDetails">
+
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+
+      <column name="productsDeliveryGuid" type="uniqueidentifier">
+        <constraints nullable="false" />
+      </column>
+
+      <column name="Weight" type="decimal(18,2)"/>
+
+      <column name="DeliveryGuid" type="uniqueidentifier"/>
+      
+      <column name="user1C" type="nvarchar(300)"/>
+
+      <column name="importId" type="uniqueidentifier"/>
+
+      <column name="hst_datetime" type="datetime"/>
+
+    </createTable>  
+    
+  </changeSet>
+</databaseChangeLog>
+

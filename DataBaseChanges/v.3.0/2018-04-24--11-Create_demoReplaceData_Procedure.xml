@@ -1,0 +1,211 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Create_demo_ReplaceData_Procedure" author="Andrey">
+    <createProcedure>
+
+	-- =============================================
+-- Author:		Tatarkov
+-- Create date: 
+-- Description:	
+-- =============================================
+CREATE PROCEDURE [dbo].[demo_ReplaceData] 
+	-- Add the parameters for the stored procedure here
+
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	UPDATE [dbo].[ent_Delivery]
+   SET  [key]='Р0'+cast(id as nvarchar(100))
+     -- ,[date]
+      ,[sumAll]=[sumAll]*0.7
+      
+      ,[grossWeight]=[grossWeight]*0.8
+      ,[orderDoc]='O0'+cast(order_id as nvarchar(100))
+      
+      ,[paymentSum]=[paymentSum]*0.7
+
+
+	  UPDATE [dbo].[ent_DeliveryDetails]
+   SET  [sumPrice]=[sumPrice]*0.7
+      
+      ,[weight]=[weight]*0.8
+      
+
+	  UPDATE [dbo].[ent_Contacts]
+   SET   [contactKey]='УТ-00'+cast(id_contact as nvarchar(100))
+      ,[name]='Контрагент'+cast(id_contact as nvarchar(100))
+      ,[fullName]='Контрагент'+cast(id_contact as nvarchar(100))
+     
+   
+      ,[CompanyAddress]='Адрес контрагента '+cast(id_contact as nvarchar(100))
+      ,[factAddress]='Адрес контрагента '+cast(id_contact as nvarchar(100))
+      ,[shippingAddress]='Адрес контрагента '+cast(id_contact as nvarchar(100))
+
+	  UPDATE [dbo].[ent_Employe]
+   SET [Name] = 'Сотрудник'+ cast(id as nvarchar(100))
+
+    UPDATE [dbo].[ent_FirstLevels]
+   SET [Name] = 'Руководитель '+ cast(id as nvarchar(100)),
+   [key] = 'Ключ'+ cast(id as nvarchar(100))
+
+   UPDATE [dbo].[ent_Goods]
+   SET [Name] = case when [isGroup]=1 then 'Группа товаров ' else 'Товар ' end+ cast([id_good] as nvarchar(100)),
+   [fullName] = case when [isGroup]=1 then 'Группа товаров ' else 'Товар ' end+ cast([id_good] as nvarchar(100)),
+   [goodKey] = 'Ключ'+ cast([id_good] as nvarchar(100))
+
+
+   UPDATE [dbo].[ent_GoodsType]
+   SET [Name] = 'Тип продукции '+ cast(id as nvarchar(100))
+
+
+   UPDATE [dbo].[ent_GroupNMK]
+   SET [Name] = 'Группа НМК '+ cast(id as nvarchar(100))
+
+   UPDATE [dbo].[ent_KindPacking]
+   SET [Name] = 'Упаковка '+ cast(id as nvarchar(100))
+
+   UPDATE [dbo].[ent_MainManagers]
+   SET [Name] = 'Менеджер '+ cast(id as nvarchar(100))
+
+    UPDATE [dbo].[ent_Payment]
+   SET [payment_key] = 'P '+ cast(id as nvarchar(100)),
+   amount=amount*0.7
+
+   UPDATE [dbo].[ent_PaymentDetails]
+   SET 
+   amount=amount*0.7
+
+    UPDATE [dbo].[ent_PaymentOrder]
+   SET [key] = 'PO '+ cast(id as nvarchar(100)),
+   [sum]=[sum]*0.7
+
+   UPDATE [dbo].[ent_PaymentOrderDetails]
+   SET 
+   [amount]=[amount]*0.7
+
+   UPDATE [dbo].[ent_PaymentOrderOutcome]
+   SET [key] = 'POO '+ cast(id as nvarchar(100)),
+   [sum]=[sum]*0.7
+
+    UPDATE [dbo].[ent_PaymentOrderOutcomeDetails]
+   SET 
+   amount=amount*0.7
+
+
+   UPDATE [dbo].[ent_Plan]
+   SET 
+    [sum]=[sum]*0.7
+      ,[weight]=[weight]*0.8
+
+      ,[profit]=[profit]*0.7
+
+	  UPDATE [dbo].[ent_PriceGoods]
+   SET [key] = 'PT '+ cast(id as nvarchar(100))
+
+   UPDATE [dbo].[ent_PriceGoodsDetails]
+   SET [price] = [price]*0.7
+
+    UPDATE [dbo].[ent_PriceType]
+   SET name = 'PT '+ cast(id as nvarchar(100))
+
+   UPDATE [dbo].[ent_ProfitManagers]
+   SET name = 'Основной менеджер '+ cast(id as nvarchar(100))
+
+   
+   UPDATE [dbo].[ent_Regions]
+   SET 
+   [key] = 'Ключ '+ cast(id as nvarchar(100)),
+   name = 'Регион '+ cast(id as nvarchar(100))
+
+
+   UPDATE [dbo].[ent_ReturnGoods]
+   SET 
+    [key] = 'Ключ '+ cast(id as nvarchar(100)),
+    [sumAll]=[sumAll]*0.7
+      ,[grossWeight]=[grossWeight]*0.8
+
+	  
+   UPDATE [dbo].[ent_ReturnGoodsDeiliveries]
+   SET 
+
+    [sum]=[sum]*0.7
+
+	UPDATE [dbo].[ent_ReturnGoodsDetails]
+   SET 
+   
+    [sumPrice]=[sumPrice]*0.7
+      ,[weight]=[weight]*0.8
+
+	  UPDATE [dbo].[ent_SalesPlans]
+   SET 
+   
+    [plan]=[plan]*0.7
+
+
+	 UPDATE [dbo].[ent_Stock]
+   SET 
+   
+   name = 'Склад '+ cast(id as nvarchar(100))
+
+    UPDATE [dbo].[ent_SubgroupNMK]
+   SET 
+   
+   name = 'Подгруппа НМК '+ cast(id as nvarchar(100))
+
+     UPDATE [dbo].[ent_CauseReturn]
+   SET 
+   
+   name = 'Причина '+ cast(id as nvarchar(100))
+
+    UPDATE [dbo].[ent_BKG]
+   SET 
+   
+   name = 'БКГ '+ cast(id as nvarchar(100))
+
+   UPDATE [dbo].[ent_Brends]
+   SET 
+   
+   name = 'Бренд '+ cast(id as nvarchar(100)),
+    [key] = 'Бренд '+ cast(id as nvarchar(100))
+
+	UPDATE [dbo].[ent_Geography]
+   SET 
+   
+   [geographyValue] = 'География '+ cast(id as nvarchar(100))
+
+   
+
+    UPDATE [dbo].[ent_Supervizer]
+   SET 
+   
+   name = 'Супервайзер '+ cast(id as nvarchar(100)),
+   UserName = 'Супервайзер '+ cast(id as nvarchar(100))
+
+   UPDATE [dbo].[rep_SumWeightByDay]
+   SET 
+   
+    [planSum]=[planSum]*0.7
+	,[Sum]=[Sum]*0.7
+      ,[weight]=[weight]*0.8
+
+	  DELETE FROM [dbo].[tst_CalculateData]
+
+	  delete from [tst_CalculateDataByContacts]
+
+	  delete from [tst_DebitoreByContacts]
+	  delete from [tst_PastDueAccountsByContacts]
+END
+	
+    </createProcedure>
+
+  </changeSet>
+</databaseChangeLog>

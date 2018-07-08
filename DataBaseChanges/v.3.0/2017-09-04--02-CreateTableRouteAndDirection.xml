@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="2017-09-04--02-CreateTableRouteAndDirection" author="Alexey">
+
+    <createTable tableName="ent_RoutesForwarders">
+
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+	  
+      <column name="guid" type="uniqueidentifier">
+	  <constraints nullable="false" />
+      </column>
+       
+       <column name="name" type="nvarchar(100)">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="isDeleted" type="bit">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="parentId" type="int">
+	  <constraints nullable="true" />
+      </column>
+        
+        <column name="isGroup" type="bit">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="distance" type="int">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="outTime" type="time(7)">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="forwarder_id" type="int">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="costCruise" type="int">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="logisticsNorm" type="int">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="logisticsMax" type="int">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="minInvoice" type="int">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="minAverageInvoice" type="int">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="directDelivery" type="bit">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="region_id" type="int">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="direction_id" type="int">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="user1C" type="nvarchar(10)">
+        <constraints nullable="true" />
+      </column>
+      
+      <column name="typeObject" type="nvarchar(20)">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="hst_datetime" type="datetime">
+        <constraints nullable="true" />
+      </column>
+    </createTable>
+      
+      
+      
+     <createTable tableName="ent_Directions">
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+	  
+         
+      <column name="guid" type="uniqueidentifier">
+	  <constraints nullable="false" />
+      </column>
+      
+       <column name="name" type="nvarchar(100)">
+        <constraints nullable="false" />
+      </column>
+         
+        <column name="isDeleted" type="bit">
+        <constraints nullable="false" />
+      </column>
+         
+        <column name="user1C" type="nvarchar(20)">
+        <constraints nullable="false" />
+      </column>
+         
+        <column name="typeObject" type="nvarchar(20)">
+        <constraints nullable="false" />
+      </column>
+         
+        <column name="hst_datetime" type="datetime">
+        <constraints nullable="true" />
+      </column>
+    </createTable>
+      
+      
+      
+    <createTable tableName="ent_Forwarders">
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+	  
+      <column name="guid" type="uniqueidentifier">
+	  <constraints nullable="false" />
+      </column>
+      
+       <column name="name" type="nvarchar(100)">
+        <constraints nullable="true" />
+      </column>
+        
+        <column name="hst_datetime" type="datetime">
+        <constraints nullable="true" />
+      </column>
+    </createTable>
+    
+    <addForeignKeyConstraint referencedColumnNames="id" referencedTableName="ent_Forwarders"
+                                 baseColumnNames="forwarder_id" baseTableName="ent_RoutesForwarders"
+                           constraintName="FK_RoutesForwarder_Forwarder" onDelete="NO ACTION"/>
+      
+   <addForeignKeyConstraint referencedColumnNames="id" referencedTableName="ent_Regions"
+                                 baseColumnNames="region_id" baseTableName="ent_RoutesForwarders"
+                           constraintName="FK_RoutesForwarder_Region" onDelete="NO ACTION"/>
+      
+   <addForeignKeyConstraint referencedColumnNames="id" referencedTableName="ent_Directions"
+                                 baseColumnNames="direction_id" baseTableName="ent_RoutesForwarders"
+                           constraintName="FK_RoutesForwarder_Direction" onDelete="NO ACTION"/> 
+    
+      
+  </changeSet>
+</databaseChangeLog>
+

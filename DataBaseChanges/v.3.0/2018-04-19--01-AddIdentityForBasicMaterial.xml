@@ -1,0 +1,44 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+		 
+  <changeSet id="AddColumnToBasicMaterial" author="Zhukov">
+	<addColumn tableName="ent_BasicMaterial">
+        <column name="IndexNumber" type="int"/>
+    </addColumn>
+  </changeSet>
+  
+  
+  <changeSet id="UpdateColumnBasicMaterial" author="Zhukov">
+  	<sql>
+	     UPDATE [dbo].[ent_BasicMaterial]
+		   SET IndexNumber = 1
+		 WHERE [Name] = 'Молоко'
+
+		 
+		UPDATE [dbo].[ent_BasicMaterial]
+		   SET IndexNumber = 2
+		 WHERE [Name] = 'Жир'
+
+		 
+		UPDATE [dbo].[ent_BasicMaterial]
+		   SET IndexNumber = 3
+		 WHERE [Name] = 'СОМ'
+
+		 
+		UPDATE [dbo].[ent_BasicMaterial]
+		   SET IndexNumber = 4
+		 WHERE [Name] = 'Масло 72'
+
+		 
+		UPDATE [dbo].[ent_BasicMaterial]
+		   SET IndexNumber = 5
+		 WHERE [Name] = 'Масло 82'
+    </sql>
+  	 
+		
+  </changeSet>
+</databaseChangeLog>

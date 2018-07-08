@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Add_PositionId_mdxHierarhy" author="Andrey">
+
+    
+    <addColumn tableName="mdxHierarchy">
+      <column name="position_id" type="int">     
+		<constraints nullable="true" />
+	  </column>
+    </addColumn>
+	
+	<addForeignKeyConstraint referencedColumnNames="id" referencedTableName="dsh_Position"
+                                 baseColumnNames="position_id" baseTableName="mdxHierarchy"
+                           constraintName="FK_mdxHierarchy_dsh_Position" onDelete="NO ACTION"/>
+	
+	<sql>
+		UPDATE mdxHierarchy 
+		SET position_id=1
+		WHERE name='1-й уровень иерархии'
+		UPDATE mdxHierarchy 
+		SET position_id=2
+		WHERE name='2-й уровень иерархии'
+		UPDATE mdxHierarchy 
+		SET position_id=3
+		WHERE name='3-й уровень иерархии'
+		UPDATE mdxHierarchy 
+		SET position_id=4
+		WHERE name='Основной менеджер'
+		UPDATE mdxHierarchy 
+		SET position_id=5
+		WHERE name='Менеджер'
+	</sql>
+						   
+  </changeSet>
+  <changeSet id="Add_IsFilter_mdxHierarhy" author="Andrey">
+  
+    <addColumn tableName="mdxHierarchy">
+      <column name="isFilter" type="BIT" defaultValue="0">     
+		<constraints nullable="false" />
+	  </column>
+    </addColumn>
+	
+	<sql>
+		UPDATE mdxHierarchy
+		SET isFilter=1
+		WHERE mdxName IN (
+			'Contact_FirstLevel',
+			'Contact_SecondLevel',
+			'Contact_ThirdLevel',
+			'Contact_MainManager',
+			'Contact_Manager',
+			'Contact_Region',
+			'Contact_Group''Contact_SecondLevel',
+			'Contact_ThirdLevel',
+			'Contact_MainManager',
+			'Contact_Manager',
+			'Contact_Region',
+			'Contact_Group')
+	</sql>
+	
+  </changeSet>
+</databaseChangeLog>

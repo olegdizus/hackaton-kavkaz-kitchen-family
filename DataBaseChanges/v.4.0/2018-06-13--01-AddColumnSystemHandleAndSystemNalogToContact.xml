@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="AddColumnSystemHandleAndSystemNalogToContact" author="Egorov">
+
+    <addColumn tableName="imp_Contacts">
+
+      <column name="systemHandleGuid" type="uniqueidentifier">
+        <constraints nullable="true" />
+      </column>
+        <column name="systemHandleName" type="nvarchar(100)">
+        <constraints nullable="true" />
+      </column>
+      
+      <column name="systemNalogGuid" type="uniqueidentifier">
+        <constraints nullable="true" />
+      </column>
+        <column name="systemNalogName" type="nvarchar(100)">
+        <constraints nullable="true" />
+      </column>
+      
+    </addColumn>
+
+  </changeSet>
+</databaseChangeLog>

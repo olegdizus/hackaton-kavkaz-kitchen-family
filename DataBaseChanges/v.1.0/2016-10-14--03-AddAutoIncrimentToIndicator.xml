@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="AddAutoIncrimentToIndicator" author="ipoluboyarov">
+    <sql dbms="mssql" splitStatements="true" stripComments="false">
+      BEGIN TRANSACTION
+SET QUOTED_IDENTIFIER ON
+SET ARITHABORT ON
+SET NUMERIC_ROUNDABORT OFF
+SET CONCAT_NULL_YIELDS_NULL ON
+SET ANSI_NULLS ON
+SET ANSI_PADDING ON
+SET ANSI_WARNINGS ON
+COMMIT
+BEGIN TRANSACTION
+GO
+CREATE TABLE dbo.Tmp_rpt_ByPeriods_Indicators
+ (
+ id int NOT NULL IDENTITY (28, 1),
+ name nvarchar(50) NOT NULL,
+ aggregateType nvarchar(10) NOT NULL,
+ measureName nvarchar(50) NULL,
+ bkgName nvarchar(50) NULL
+ )  ON [PRIMARY]
+GO
+ALTER TABLE dbo.Tmp_rpt_ByPeriods_Indicators SET (LOCK_ESCALATION = TABLE)
+GO
+SET IDENTITY_INSERT dbo.Tmp_rpt_ByPeriods_Indicators ON
+GO
+IF EXISTS(SELECT * FROM dbo.rpt_ByPeriods_Indicators)
+  EXEC('INSERT INTO dbo.Tmp_rpt_ByPeriods_Indicators (id, name, aggregateType, measureName, bkgName)
+  SELECT id, name, aggregateType, measureName, bkgName FROM dbo.rpt_ByPeriods_Indicators WITH (HOLDLOCK TABLOCKX)')
+GO
+SET IDENTITY_INSERT dbo.Tmp_rpt_ByPeriods_Indicators OFF
+GO
+ALTER TABLE dbo.kpi_Matrix
+ DROP CONSTRAINT FK_Matrix_Indicators
+GO
+DROP TABLE dbo.rpt_ByPeriods_Indicators
+GO
+EXECUTE sp_rename N'dbo.Tmp_rpt_ByPeriods_Indicators', N'rpt_ByPeriods_Indicators', 'OBJECT' 
+GO
+ALTER TABLE dbo.rpt_ByPeriods_Indicators ADD CONSTRAINT
+ pk_ByPeriods_Indicators PRIMARY KEY CLUSTERED 
+ (
+ id
+ ) WITH( STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+
+GO
+COMMIT
+BEGIN TRANSACTION
+GO
+ALTER TABLE dbo.kpi_Matrix ADD CONSTRAINT
+ FK_Matrix_Indicators FOREIGN KEY
+ (
+ indicator_id
+ ) REFERENCES dbo.rpt_ByPeriods_Indicators
+ (
+ id
+ ) ON UPDATE  NO ACTION 
+  ON DELETE  NO ACTION 
+ 
+GO
+ALTER TABLE dbo.kpi_Matrix SET (LOCK_ESCALATION = TABLE)
+GO
+COMMIT
+  </sql>
+  </changeSet>
+</databaseChangeLog>

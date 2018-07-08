@@ -1,0 +1,25 @@
+﻿.deliveryHeader {
+	background-color: #8ebbeb !important;
+	font-weight: bold !important;
+}
+
+.delivery {
+	background-color: #cfe2f7;
+    text-decoration: none;
+}
+
+.color {
+	border-radius: 10px;
+	display: inline-block;
+	height: 15px;
+	width: 15px;
+}
+
+.delayFilter.active {
+	color: blue;
+    font-weight: bold;
+}
+
+.delayFilter:hover {
+	text-decoration: underline;
+}

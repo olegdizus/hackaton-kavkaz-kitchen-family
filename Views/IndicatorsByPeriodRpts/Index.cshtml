@@ -1,0 +1,71 @@
+﻿@using Kendo.Mvc.UI;
+@using Dashboard.DB.Models;
+@using System.Web.Mvc;
+
+@section styles
+{
+    @Styles.Render(
+        Dashboard.Bundles.Kendo.KendoStandart.Css.Key,
+        Dashboard.Bundles.Fontawesome.Css.Key
+    )
+
+}
+
+@section Scripts
+{
+    @Scripts.Render(
+        Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+        Dashboard.Bundles.Kendo.kendoHelp.Scripts.Key
+    )
+}
+
+@Html.Partial("DeleteModalWindow")
+    @{
+    	ViewBag.Title = "Список показателей";
+    }
+    <h2>@ViewBag.Title</h2>
+    
+    <div class="form-horizontal">
+    <p>
+        @Html.ActionLink("Создать", "Create")
+    </p>
+    
+    <div>
+    		 @(Html.Kendo().Grid<IndicatorsByPeriodRpt>()
+            .Name("Grid")
+            .Columns(columns =>
+            {
+    			columns.Bound(p => p.name);
+    			columns.Bound(p => p.aggregateType);
+    			columns.Bound(p => p.measureName);
+    			columns.Bound(p => p.bkgName);
+    			columns.Bound(p => p.id)
+                .Title("")
+                .Filterable(false)
+                .Sortable(false)
+    			.Template(t => { })
+    			.ClientTemplate("#=getClientTemplate(id, name,'IndicatorsByPeriodRpts')#");
+            })
+            .DataSource(dataSource => dataSource
+    					.Ajax()
+    					.Events(events => events.Error("error_handler"))
+    					.Read(read => read.Action("AllIndicatorsByPeriodRpts", "IndicatorsByPeriodRpts"))
+    					.PageSize(30)
+    					.Total(0))					
+    				.Pageable()
+    				.Sortable()
+    				.Filterable()
+    					)
+    </div>
+    </div>
+    
+
+
+
+
+
+
+
+
+
+

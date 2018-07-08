@@ -1,0 +1,27 @@
+﻿
+<div class="modal fade" id="importPlanFromExcel" tabindex="-1" role="dialog" aria-labelledby="importKSPlanFromExcelLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">Импорт планов продаж КС из Excel</h4>
+            </div>
+            <div class="modal-body">
+                <input name="file" id="uploadExcel" type="file" title="Выбрать файл" />
+            </div>
+            <div class="modal-footer">
+                <a href="@Url.Content("~/Temp/Excel/КСПлан_образец.xlsx")" target="_blank" class="pull-left  btn  btn-md  btn-info">Скачать пример Excel</a>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
+                <input type="submit" id="buttonDownloadExcel" value="Загрузить" class="btn btn-md btn-success">
+            </div>
+            <div class="pre-scrollable"  id="message">
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts
+{
+    <script>
+
+    </script>
+}

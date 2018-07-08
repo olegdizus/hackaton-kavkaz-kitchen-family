@@ -1,0 +1,39 @@
+2018-07-07T20:45:53 AccountController Info Account Login Action Get Requested 
+2018-07-07T20:46:10 AccountController Info Ищем сопоставление для авторизации под пользователем Admin 
+2018-07-07T20:46:11 AccountController Info Для пользователя Admin не задано сопоставление с сотрудником 
+2018-07-07T20:46:15 Dashboard.OLAP.DAL.FaceData Info FaceData: использование календарного месяца: True 
+2018-07-07T20:46:15 DataController Info Используется MonthAccounting = Dashboard.OLAP.DAL.FaceInRoleData.CalendarMonthAccounting 
+2018-07-07T20:46:15 Dashboard.OLAP.DAL.FaceData Debug GetSaleIndicators IN 
+2018-07-07T20:46:15 StandardQuery Info Запрос reportDaysDataProduction WITH
+    MEMBER [Measures].[delKg] AS
+        Divide ([Measures].[deliverySum], [Measures].[SalesCount], 0)
+    MEMBER [Measures].[delRub] AS
+        [Measures].[deliverySum]
+    MEMBER [Measures].[delCount] AS
+        [Measures].[SalesCount]
+    MEMBER [Measures].[profitPercent] AS
+        Round ([Measures].[grossProfitCoef], 2)
+    MEMBER [Measures].[profitAverPercent] AS
+        Round ([Measures].[grossProfitCoefAver], 2)
+    MEMBER [Measures].[grossProfitSum] AS
+        [Measures].[grossProfit]
+    MEMBER [Measures].[grossProfitSumAver] AS
+        [Measures].[grossProfitAver]
+    MEMBER [Measures].[grossProfitSumAccum] AS
+        Sum (PeriodsToDate ([Dates].[Календарная].[Cal Month], [Dates].[Календарная].CurrentMember), ([Measures].[SumPrice] - [Measures].[Cost]))
+    MEMBER [Measures].[prognozProfitSum] AS
+        [Measures].[grossProfitSumAver] * [Measures].[MonthDayCount]
+SELECT
+    {
+        [Measures].[delRub],
+        [Measures].[delKg],
+        [Measures].[delCount],
+        [Measures].[prognozProfitSum]
+    }
+ON COLUMNS,
+{
+    [Dates].[Date].&[2018-04-01T00:00:00]:[Dates].[Date].&[2018-09-30T00:00:00],
+    [Dates].[Date].&[2017-04-01T00:00:00]:[Dates].[Date].&[2017-09-30T00:00:00]
+}
+ON ROWS
+FROM Dashboard 

@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Create_demo_ReplaceData_Procedure" author="Andrey">
+    <createProcedure>
+
+	-- =============================================
+-- Author:		Татарков
+-- Create date: 
+-- Description:	
+-- =============================================
+ALTER PROCEDURE [dbo].[ValidateDatabaseState] 
+	-- Add the parameters for the stored procedure here
+	
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+-- проврка дубликатов цен на дату ( и между прайсами)
+
+SELECT MIN(pg.[key]), 
+		pg.[date], 
+		pgd.good_id, 
+		COUNT(*) countDubl
+  FROM [Dashboard].[dbo].[ent_PriceGoods] pg
+  JOIN ent_PriceGoodsDetails pgd on pgd.priceGoods_id = pg.id
+
+  GROUP BY pg.[date], pgd.good_id
+  HAVING COUNT(*)>1 
+
+  -----------------Проверка дубликатов цен внутри документа на один товар------------------
+
+select pd.*
+FROM [dbo].[ent_PriceGoodsDetails] pd
+join (
+
+
+SELECT 
+      [priceGoods_id]
+      ,[good_id]
+     
+  FROM [dbo].[ent_PriceGoodsDetails] pgd
+  join ent_PriceGoods pg on pgd.priceGoods_id=pg.id
+  where pg.isDeleted=0
+  group by priceGoods_id, good_id
+  having count(*)>1) pdd on pd.good_id=pdd.good_id and pd.priceGoods_id=pdd.priceGoods_id
+  
+  order by recNum
+
+   -----------------Проверка дубликатов деталей отгрузок в кубе------------------
+  select dd.*
+FROM [dbo].olap_Details dd
+join ( 
+SELECT 
+      [good_id],
+     olapdelivery_id,
+	 recnum
+  FROM [dbo].olap_Details pdd
+  group by pdd.good_id,  pdd.olapdelivery_id, recnum
+  having count(*)>1) as  pdd2 on dd.good_id=pdd2.good_id and dd.olapdelivery_id=pdd2.olapdelivery_id and dd.recNum=pdd2.recNum
+  
+  order by recNum
+
+
+END
+	
+    </createProcedure>
+
+  </changeSet>
+</databaseChangeLog>

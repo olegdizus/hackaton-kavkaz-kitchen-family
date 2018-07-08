@@ -1,0 +1,39 @@
+﻿    .btn-menu {
+        color: #333333;
+        background-color: #cccccc;
+        border-color: #646464;
+    }
+
+    .btn-menu-selected {
+        color: #333333;
+        background-color: #ffffff;
+        border-right-color: #ffffff;
+    }
+    
+    #block{
+      margin-left:20px;
+      display:block;
+      padding:2%;
+      border:4px double #454647;
+      position:relative;
+      font-family:Sans-serif;
+    }
+
+    h1{
+      font-weight:normal;
+      font-size:16px;
+      color:#454647;
+      display:inline-block;
+      padding-bottom:2%;
+      margin-bottom:0%;
+      margin-top:0%;
+      font-style: italic;
+      font-weight: bold;
+    }
+
+    p{
+      font-weight:300;
+      color:#565656;
+      margin-bottom:0%;
+      margin-top:2%;
+    }

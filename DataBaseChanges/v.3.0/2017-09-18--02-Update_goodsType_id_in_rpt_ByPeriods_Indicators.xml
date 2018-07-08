@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Update_goodsType_id_in_rpt_ByPeriods_Indicators" author="Ura">
+
+    <sql>
+
+      Update rpt_ByPeriods_Indicators set goodsType_id=2 where measureName='avgWeight'
+      Update rpt_ByPeriods_Indicators set goodsType_id=2 where measureName='mmlPrice'
+      Update rpt_ByPeriods_Indicators set goodsType_id=2 where measureName='grossProfitCoef'
+      Update rpt_ByPeriods_Indicators set goodsType_id=2 where measureName='ReturnLimit'
+      Update rpt_ByPeriods_Indicators set goodsType_id=2 where measureName='ExceedingReturnLimit'
+      Update rpt_ByPeriods_Indicators set goodsType_id=2 where measureName='ContactSalarySales'
+
+    </sql>
+
+  </changeSet>
+</databaseChangeLog>

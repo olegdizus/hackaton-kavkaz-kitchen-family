@@ -1,0 +1,46 @@
+﻿@using Kendo.Mvc.UI
+@using Dashboard.DB.Models.TaskPlanner
+@model PagedList.IPagedList<TaskViewModel>
+
+@*@Styles.Render(Reactive.App_Start.Bundle.Kendo.KendoBlack.Css.Key)*@
+
+<style>
+    .k-state-selected {
+        background-color: #77b300;
+    }
+
+</style>
+
+<script src="~/Scripts/kendo/kendoExt/selectRowGrid.js"></script>
+<script src="~/Scripts/kendo/kendoExt/TasksKendoFunction.js"></script>
+
+@(Html.Kendo().Grid<TaskKendoGrid>()
+      .Name("Grid")
+      .Columns(columns =>
+      {
+          columns.Bound(p => p.EmployeeFromName);
+          columns.Bound(p => p.EmployeeToName);
+          columns.Bound(p => p.CreationDate)
+              .ClientTemplate("#= kendo.toString(kendo.parseDate(CreationDate, 'yyyy-MM-dd HH:mm'), 'dd.MM.yyyy HH:mm') #");
+          columns.Bound(p => p.Theme);
+          columns.Bound(p => p.PlannedDate)
+              .ClientTemplate("#= kendo.toString(kendo.parseDate(PlannedDate, 'yyyy-MM-dd HH:mm'), 'dd.MM.yyyy HH:mm') #");
+          columns.Bound(p => p.StateName).ClientTemplate("<span style='color:#=Color#'>#=StateName#</span>");
+          columns.Bound(p => p.id).Hidden().ClientTemplate("<span data-task-id='#=id#'></span>");
+      })
+       .Events(e => e
+        .DataBound("initPageChangeHandler")
+        .Change("kendoGridRowClick"))
+      .DataSource(dataSource => dataSource
+        .Ajax()
+        .Read(read => read.Action("GetAllTasksForKendoGrid", "Tasks").Data("getFiltersConfiguration"))
+        .PageSize(10)
+        .Total(0))
+     .Pageable()
+     .Sortable()
+     .Filterable()
+     .Selectable(selectable => selectable
+        .Mode(GridSelectionMode.Single)
+        .Type(GridSelectionType.Row))
+
+)

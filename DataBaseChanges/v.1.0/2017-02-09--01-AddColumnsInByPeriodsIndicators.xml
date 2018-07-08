@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="AddColumnsInByPeriodsIndicators" author="zelim">
+
+    <!-- Добавляем столбцы в rpt_ByPeriods_Indicators -->
+    
+    <addColumn tableName="rpt_ByPeriods_Indicators">
+      <column name="kategory_id" type="INT" defaultValue="1">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+
+    <addColumn tableName="rpt_ByPeriods_Indicators">
+      <column name="isTestReport" type="BIT" defaultValue="0">
+        <constraints nullable="false" />
+      </column>
+    </addColumn>
+
+    <addForeignKeyConstraint referencedColumnNames="id" referencedTableName="tst_Kategory"
+                             baseColumnNames="kategory_id" baseTableName="rpt_ByPeriods_Indicators"
+                       constraintName="FK_ByPeriods_Indicators_Kategory" onDelete="NO ACTION"/>
+  </changeSet>
+</databaseChangeLog>

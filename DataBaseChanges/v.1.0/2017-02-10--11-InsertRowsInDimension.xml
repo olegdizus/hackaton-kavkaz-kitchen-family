@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="InsertRowsInDimension" author="zelim">
+
+    <insert tableName="rpt_Dimension">
+      <column name="name" value="1-й уровень иерархии" />
+      <column name="value" value="Contact_FirstLevel" />
+      <column name="dimensionCategory_id" valueComputed="(SELECT id FROM rpt_DimensionCategory WHERE name = N'Контакты')" />
+    </insert>
+
+
+    <insert tableName="rpt_Dimension">
+      <column name="name" value="Регион" />
+      <column name="value" value="Contact_Region" />
+      <column name="dimensionCategory_id" valueComputed="(SELECT id FROM rpt_DimensionCategory WHERE name = N'Контакты')" />
+    </insert>
+
+    <insert tableName="rpt_Dimension">
+      <column name="name" value="Группа НМК" />
+      <column name="value" value="Good_GroupNMK" />
+      <column name="dimensionCategory_id" valueComputed="(SELECT id FROM rpt_DimensionCategory WHERE name = N'Номенклатура')" />
+    </insert>
+
+    <insert tableName="rpt_Dimension">
+      <column name="name" value="Подгруппа НМК" />
+      <column name="value" value="Good_subGroupNMK" />
+      <column name="dimensionCategory_id" valueComputed="(SELECT id FROM rpt_DimensionCategory WHERE name = N'Номенклатура')" />
+    </insert>
+
+    <insert tableName="rpt_Dimension">
+      <column name="name" value="Бренд" />
+      <column name="value" value="Good_brend" />
+      <column name="dimensionCategory_id" valueComputed="(SELECT id FROM rpt_DimensionCategory WHERE name = N'Номенклатура')" />
+    </insert>
+
+    <insert tableName="rpt_Dimension">
+      <column name="name" value="Основной менеджер" />
+      <column name="value" value="Contact_MainManager" />
+      <column name="dimensionCategory_id" valueComputed="(SELECT id FROM rpt_DimensionCategory WHERE name = N'Контакты')" />
+    </insert>
+
+    <insert tableName="rpt_Dimension">
+      <column name="name" value="Менеджер" />
+      <column name="value" value="Contact_Manager" />
+      <column name="dimensionCategory_id" valueComputed="(SELECT id FROM rpt_DimensionCategory WHERE name = N'Контакты')" />
+    </insert>
+
+    <insert tableName="rpt_Dimension">
+      <column name="name" value="Контакт" />
+      <column name="value" value="Contact_name" />
+      <column name="dimensionCategory_id" valueComputed="(SELECT id FROM rpt_DimensionCategory WHERE name = N'Контакты')" />
+    </insert>
+
+    <insert tableName="rpt_Dimension">
+      <column name="name" value="Вид упаковки" />
+      <column name="value" value="Good_kindPacking" />
+      <column name="dimensionCategory_id" valueComputed="(SELECT id FROM rpt_DimensionCategory WHERE name = N'Номенклатура')" />
+    </insert>
+
+    <insert tableName="rpt_Dimension">
+      <column name="name" value="БКГ" />
+      <column name="value" value="Good_BKG" />
+      <column name="dimensionCategory_id" valueComputed="(SELECT id FROM rpt_DimensionCategory WHERE name = N'Номенклатура')" />
+    </insert>
+
+    <insert tableName="rpt_Dimension">
+      <column name="name" value="Товар" />
+      <column name="value" value="Good_name" />
+      <column name="dimensionCategory_id" valueComputed="(SELECT id FROM rpt_DimensionCategory WHERE name = N'Номенклатура')" />
+    </insert>
+
+  </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,220 @@
+﻿@using System
+@using Dashboard.DB.Models.ModelExt
+@using Dashboard.DB.Models.Reports
+@using Kendo.Mvc.UI
+@using PagedList
+@using Dashboard.DB.Models.TaskPlanner
+@using Dashboard.Models
+
+@{
+    ViewBag.Title = "Отчет по некорректным данным";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    DateTime startPeriodDate = ViewBag.startPeriodDate;
+    DateTime endPeriodDate = ViewBag.endPeriodDate;
+}
+
+@*@Styles.Render(Dashboard.Bundles.TasksEditor.Css.Key)*@
+
+@section styles
+{
+    @Styles.Render(
+        Dashboard.Bundles.Kendo.kendo.Css.Key,
+        Dashboard.Bundles.BootstrapTagsInput.Css.Key,
+        Dashboard.Bundles.FilterControl.Css.Key,
+        Dashboard.Bundles.Tooltipster.Css.Key)
+    @*        ,Dashboard.Bundles.Fontawesome.Css.Key)*@
+    <link href="~/Content/font-awesome.css" rel="stylesheet" />
+}
+<style>
+    .filter-container {
+        margin: 10px 0px;
+    }
+    .period-select-description-block {
+        padding: 0 30px 0 10px;
+        font-size: 14px;
+    }
+    #StartPeriodDate,#EndPeriodDate {
+        border: 1px solid lightgray;
+        border-radius: 5px;
+        padding: 5px;
+    }
+    #PreviousPeriodButton,#NextPeriodButton{
+        border: 1px solid #dddddd;
+        border-radius: 15px;
+        padding: 6px 20px;
+    }
+</style>
+<link href="~/Content/font-awesome.css" rel="stylesheet" />
+
+
+<h2>@ViewBag.Title</h2>
+
+<div class="filter-container">
+    <button type="button" class="btn btn-default" title="предыдущий период" id="PreviousPeriodButton" style="display: inline-block;">
+        <i class="fa fa-angle-double-left"></i>
+    </button>
+    <span class="period-select-description-block">C:</span>
+    <input class="datepicker" id="StartPeriodDate" />
+    <span class="period-select-description-block">По:</span>
+    <input class="datepicker" id="EndPeriodDate" />
+    <button type="button" class="btn btn-default" title="предыдущий период" id="NextPeriodButton" style="display: inline-block;">
+        <i class="fa fa-angle-double-right"></i>
+    </button>
+    <input type="button" class="btn btn-primary" id="RefreshBtn" value="Обновить"/>
+</div>
+<div>
+    @(Html.Kendo().Grid<CorrectDataGrid>()
+      .Name("Grid")
+      .Columns(columns =>
+      {
+          columns.Bound(p => p.id)
+              .Hidden(true);
+          columns.Bound(p => p.DetectedDate).Width(170);
+          columns.Bound(p => p.TypeName);
+          columns.Bound(p => p.System).Width(120);
+          columns.Bound(p => p.Destination).Width(170);
+          columns.Bound(p => p.Description);
+          })
+      .DataSource(dataSource => dataSource
+        .Ajax()
+        .Read(read => read.Action("AllCorrectData", "CorrectData").Data("GetParams"))
+        .Sort(el => el.Add(c => c.DetectedDate).Descending())
+        .PageSize(20)
+        .Total(0))
+     .Pageable()
+     .Sortable()
+     .Filterable()
+     .Selectable(selectable => selectable
+        .Mode(GridSelectionMode.Single)
+        .Type(GridSelectionType.Row))
+
+    )
+</div>
+
+@section Scripts
+{
+    @Scripts.Render(
+        Dashboard.Bundles.Kendo.kendo.Scripts.Key,
+        Dashboard.Bundles.Knockout.Scripts.Key,
+        Dashboard.Bundles.Kendo.kendoHelp.Scripts.Key,
+
+        Dashboard.Bundles.Extentions.Scripts.Key,
+        Dashboard.Bundles.bootstrapplugins.Scripts.Key,
+        Dashboard.Bundles.UserSetting.Scripts.Key,
+
+        Dashboard.Bundles.Reports.ReportHelper.Scripts.Key,
+
+        Dashboard.Bundles.Helpers.Scripts.Key,
+        Dashboard.Bundles.PrMonthAlert.Scripts.Key,
+
+        Dashboard.Bundles.Tooltipster.Scripts.Key,
+        Dashboard.Bundles.Underscore.Scripts.Key
+        )
+
+    <script type="text/javascript">
+        var startPeriodDate = new Date(
+            @startPeriodDate.Year,
+            @(startPeriodDate.Month - 1),
+            @(startPeriodDate.Day)
+        ).toShortDateString();
+        var endPeriodDate = new Date(
+            @endPeriodDate.Year,
+            @(endPeriodDate.Month - 1),
+            @(endPeriodDate.Day)
+        ).toShortDateString();
+
+        $(function() {
+            var setPeriodDates = function(startDate, endDate) {
+
+                startPeriodDate = startDate;
+                endPeriodDate = endDate;
+            }
+
+            var isValidatePeriodDates = function() {
+
+                var startDate = Date.StrDMYtoDate($("#StartPeriodDate").val());
+                var endDate = Date.StrDMYtoDate($("#EndPeriodDate").val());
+
+                return startDate <= endDate;
+
+            }
+
+            var initFilterData = function() {
+                $("#StartPeriodDate").val(startPeriodDate);
+                $("#EndPeriodDate").val(endPeriodDate);
+            };
+
+            initFilterData();
+
+            $("#RefreshBtn").click(function() {
+                if (isValidatePeriodDates()) {
+                    setPeriodDates(
+                        $("#StartPeriodDate").val(),
+                        $("#EndPeriodDate").val()
+                    );
+
+                    $("#Grid").data("kendoGrid").dataSource.read();
+                } else {
+                    alert("Дата начала периода больше даты начала периода");
+                }
+            });
+
+            $("#PreviousPeriodButton").click(function() {
+                if (isValidatePeriodDates()) {
+                    setPeriodDates(
+                        $("#StartPeriodDate").val(),
+                        $("#EndPeriodDate").val()
+                    );
+
+                    setNewDatePeriod(-1);
+
+                    $("#RefreshBtn").click();
+                }
+                else {
+                    alert("Дата начала периода больше даты начала периода");
+                }
+
+                
+            });
+
+            $("#NextPeriodButton").click(function() {
+                if (isValidatePeriodDates()) {
+                    setPeriodDates(
+                        $("#StartPeriodDate").val(),
+                        $("#EndPeriodDate").val()
+                    );
+
+                    setNewDatePeriod(1);
+
+                    $("#RefreshBtn").click();
+                }
+                else {
+                    alert("Дата начала периода больше даты начала периода");
+                }
+
+                
+            });
+        });
+
+        var setNewDatePeriod = function(addValue) {
+            var startDateTime = Date.StrDMYtoDate(startPeriodDate);
+            var endDateTime = Date.StrDMYtoDate(endPeriodDate);
+
+            var timeSpan = ((endDateTime - startDateTime)  + 86400000)*addValue ;
+
+            startDateTime.setTime(startDateTime.getTime() + timeSpan);
+            endDateTime.setTime(endDateTime.getTime() + timeSpan);
+
+            $("#StartPeriodDate").val(startDateTime.toShortDateString());
+            $("#EndPeriodDate").val(endDateTime.toShortDateString());
+        }
+
+        function GetParams() {
+            return {
+                startPeriodDate: startPeriodDate,
+                endPeriodDate: endPeriodDate
+            };
+        }
+    </script>
+}

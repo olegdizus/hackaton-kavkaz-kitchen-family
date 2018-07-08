@@ -1,0 +1,23 @@
+﻿@Scripts.Render(
+    Dashboard.Bundles.waffleChart.Scripts.Key
+)
+
+<script type="text/html" id="waffleChartTemplate">
+    <div class="waffleChart section-card">
+        <table>
+            <tr>
+                <td><span data-bind="text: planLabel"></span></td>
+                <td data-bind="numericText: plan"></td>
+            </tr>
+            <tr>
+                <td><span data-bind="text: factLabel"></span></td>
+                <td data-bind="numericText: fact"></td>
+            </tr>
+        </table>
+        <div class="legend">
+            <span data-bind="text: indicatorName"></span>
+        </div>
+        <canvas height="150" width="150" data-bind="attr: { id: canvasId }">Canvas not available.</canvas>
+    </div>
+    <br/>
+</script>

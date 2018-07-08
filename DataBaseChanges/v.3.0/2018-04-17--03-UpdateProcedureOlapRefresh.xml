@@ -1,0 +1,730 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+    <changeSet id="UpdateProcedureOlapRefresh" author="Zhukov">
+  <createProcedure>
+  
+ALTER PROCEDURE [dbo].[olap_RefreshData]
+      -- Add the parameters for the stored procedure here
+      AS
+      BEGIN
+      -- SET NOCOUNT ON added to prevent extra result sets from
+      -- interfering with SELECT statements.
+      SET NOCOUNT ON;
+
+      --  drop table #goods
+      --drop table #priceDates
+      --drop table #prices
+
+
+
+
+      create table #goods
+      (
+      id_good int
+      )
+
+      CREATE CLUSTERED INDEX IDX_C_Goods_good_id ON #goods(id_good)
+
+      insert into #goods
+      select id_good
+      from ent_Goods AS g
+      WHERE g.goodsType_id in (2, 3)
+
+
+      truncate table olap_Details;
+      truncate table olap_delivery;
+
+      insert into olap_delivery(deliveryId, deliveryKey, date, contact_id, ent_type, isPlan, isEffective)
+
+      SELECT        d.id AS deliveryId,
+      'Реализация ' + [key] + ' от ' + CAST([date] AS nvarchar(20)) AS deliveryKey,
+      [date], contact_id,
+      1 AS ent_type,
+      case when DATEPART(dw, date) in (SELECT [DeliveryDay] FROM [ent_ContactsDeliveryDays] where contact_id = d.contact_id)
+      then 1 else 0 end as isPlan,
+      0 as isEffective
+      FROM            ent_Delivery AS d
+      join ent_Contacts c on c.id_contact=d.contact_id and c.isReport=1
+      WHERE        (d.isDeleted = 0) AND id in
+      (SELECT        dd.delivery_id
+      FROM            ent_DeliveryDetails AS dd INNER JOIN
+      #goods AS g ON dd.good_id = g.id_good
+      )
+      UNION
+      SELECT        d.id AS deliveryId, 'Возврат ' + [key] + ' от ' + CAST([date] AS nvarchar(20)) AS deliveryKey, [date], contact_id, 2 AS type, 0 as isPlan, 0 as isEffective
+      FROM            ent_ReturnGoods AS d
+      join ent_Contacts c on c.id_contact=d.contact_id and c.isReport=1
+      WHERE        (d.isDeleted = 0) AND id in
+      (SELECT        dd.return_id
+      FROM            ent_ReturnGoodsDetails AS dd INNER JOIN
+      #goods AS g ON dd.good_id = g.id_good
+      )
+
+
+
+      CREATE TABLE #priceDates
+      (
+      id_good int, date date, priceDate date, priceType_id int
+      )
+      CREATE TABLE #prices
+      (
+      id int identity,
+	  id_good int, date date, price decimal(18, 2), pricePlan decimal(18, 2)
+      )
+
+      insert into #priceDates
+      Select p.id_good, p.date, max(pg.date) as priceDate, pg.priceType_id
+      from
+      (
+      select date, good_id as id_good
+      from olap_delivery d
+      join ent_DeliveryDetails dd on d.deliveryId=dd.delivery_id
+      --where good_id=436
+      union all
+      select date, good_id as id_good
+      from olap_delivery d
+      join ent_ReturnGoodsDetails dd on d.deliveryId=dd.return_id
+
+      --where good_id=436
+      ) p
+      inner join ent_PriceGoodsDetails pgd on p.id_good = pgd.good_id
+      inner join ent_PriceGoods pg on pg.id = pgd.priceGoods_id and p.date >= pg.date
+      AND PG.isDeleted=0
+
+      group by p.id_good, p.date, pg.priceType_id;
+
+      --select *
+      --from #priceDates
+      --where   date>='2016-11-29'
+      --and id_good=436
+      --order by date
+
+
+      --	  Select distinct ap.id_good, ap.date, pgd.price as price, null
+      --      from #priceDates ap
+      --		inner join ent_PriceGoodsDetails pgd
+      --      on ap.id_good = pgd.good_id
+      --		 left join ent_PriceGoods pg
+      --      on pg.id = pgd.priceGoods_id AND PG.isDeleted=0
+      --      where  (ap.priceType_id is null or ap.priceType_id = 1)
+      --		and ap.priceDate = pg.date
+      -- and good_id=436
+      --and ap.date>='2016-11-29'
+      --order by ap.date
+
+
+      insert into #prices
+      Select distinct ap.id_good, ap.date, pgd.price as price, null
+      from #priceDates ap
+      inner join ent_PriceGoodsDetails pgd
+      on ap.id_good = pgd.good_id
+      inner join ent_PriceGoods pg
+      on pg.id = pgd.priceGoods_id
+      where
+      (ap.priceType_id = 1)
+      and ap.priceDate = pg.date
+      AND PG.isDeleted=0
+      --and good_id=436
+
+
+
+      --order by date
+      MERGE #prices AS T
+      USING (
+      Select distinct ap.id_good, ap.date, pgd.price as pricePlan
+
+      from #priceDates ap
+      inner join ent_PriceGoodsDetails pgd
+      on ap.id_good = pgd.good_id 
+      inner join ent_PriceGoods pg  
+      on pg.id = pgd.priceGoods_id
+      and ap.priceDate = pg.date
+      where ap.priceType_id = 2 AND PG.isDeleted=0
+      --and good_id=436
+      )
+      AS S
+      ON T.[date] = S.[date]
+      and T.id_good=S.id_good
+      WHEN MATCHED
+      and T.pricePlan != S.pricePlan or T.pricePlan is null
+      THEN
+      UPDATE
+      SET
+      T.pricePlan = S.pricePlan
+
+      WHEN NOT MATCHED BY TARGET
+      THEN
+      INSERT (
+      id_good , date , price, pricePlan)
+      values(
+      id_good, date, null, pricePlan
+      );
+
+	   if(exists(select 1 from #prices group by id_good, date having count(*)>1))
+	  begin
+
+	  print 'Ошибки в ценах!!! Есть дублирующиеся цены на даты'
+
+	  DECLARE @error NVARCHAR(MAX)
+
+	  SELECT @error = '[{goodPrice":['+
+							((SELECT STUFF((    
+								SELECT 
+									',{"good_id":"'+convert(nvarchar(24), month, 104)+'"'
+									+',"date":"'+cast(id_good as nvarchar(18))+'"'
+									+'}'
+								FROM (
+								select dateadd(month,datediff(month,0,min(date)),0) as month, sum(id_good) as id_good
+								from (select id_good, date from #prices group by id_good, date having count(*)>1) t
+								 group by id_good
+								) as zapros
+							FOR XML PATH('') 
+							), 1, 1, ''))
+						+']' )  
+
+	  print @error
+	  
+	  insert into dsh_ImportLog
+      select 'FFF6509A-36D6-11E7-80F9-002590E5A70B' as [importGuid], 'FFF6509A-36D6-11E7-80F9-002590E5A70B' as [guid],
+
+      'Ошибки в ценах! Есть дублирующиеся цены на даты.  Json = ' + @error as  [message],
+      GETDATE() as [hst_datetime]
+	  
+	  select id_good, min(date) [date]
+	  from (select id_good, date from #prices group by id_good, date having count(*)>1) t
+	  group by id_good
+
+	  delete from #prices
+	  where id not in(select max(id) from #prices group by id_good, date)
+      --  select * from #prices
+      --    where date>='2016-11-29'
+      ----  where pricePlan is not null
+      --  order by date
+	  end
+
+      insert into
+      olap_Details (good_id, olapdelivery_id, amount, weight, sumPrice, cost, cause_id, recNum, costPlan)
+
+      SELECT        dd.good_id, od.id AS delivery_id, dd.amount,dd.weight, dd.sumPrice, isnull(pr.price,0) * dd.amount as cost , null as cause_, dd.recNum, isnull(pr.pricePlan,0) * dd.amount
+      FROM            ent_DeliveryDetails AS dd
+      INNER JOIN #goods AS g ON dd.good_id = g.id_good
+      INNER JOIN ent_Delivery AS d ON dd.delivery_id = d.id AND d.isDeleted = 0
+      join ent_Contacts c on c.id_contact=d.contact_id and c.isReport=1
+      join olap_delivery od on dd.delivery_id=od.deliveryId and od.ent_type=1
+      left join #prices pr on pr.date=d.date and pr.id_good=dd.good_id
+      --  where d.date>='2016-11-29' and dd.good_id=436
+      UNION ALL
+      SELECT       dd.good_id, od.id AS delivery_id, -dd.amount, -dd.weight, -dd.sumPrice, isnull(pr.price,0) * -dd.amount, cause_id, dd.recNum, isnull(pr.pricePlan,0) * -dd.amount
+      FROM            ent_ReturnGoodsDetails AS dd
+      INNER JOIN #goods AS g ON dd.good_id = g.id_good
+      INNER JOIN ent_ReturnGoods AS d ON dd.return_id = d.id AND d.isDeleted = 0
+      join ent_Contacts c on c.id_contact=d.contact_id and c.isReport=1
+      join olap_delivery od on dd.return_id=od.deliveryId and od.ent_type=2
+      left join #prices pr on pr.date=d.date and pr.id_good=dd.good_id
+
+
+
+      update olap_delivery
+      set isEffective = case when (
+	  
+		  select sum(weight)
+		  from olap_Details d
+			join ent_Goods g on g.id_good=d.good_id and g.goodsType_id=2 --Продукция сатурн!
+		  where d.olapdelivery_id=olap_delivery.id)
+	  
+		   >
+		   (select planWeight
+			from ent_Contacts 
+			where ent_Contacts.id_contact=olap_delivery.contact_id)
+
+      then 1 else 0
+      end
+      where ent_type=1
+
+
+      update olap_Delivery
+      set isMmlRazvitiePercent = 0;
+
+      update olap_Delivery
+      set isMmlRazvitiePercent = 1
+      from
+      (
+      select *
+      from olap_Delivery as od
+      LEFT OUTER JOIN
+      (
+      select sum(dd.weight) as AllWeight, dd.delivery_id as Alldelivery_id
+      from ent_Goods as g
+      join ent_BKG as bkg
+      on g.BKG_id = bkg.id
+
+      join ent_DeliveryDetails as dd
+      on g.id_good = dd.good_id
+
+      group by (dd.delivery_id)
+      ) as res
+      on od.deliveryId = res.Alldelivery_id
+
+      LEFT OUTER JOIN
+
+      (
+      select sum(dd.weight) as MmlRazvWeight, dd.delivery_id as Mmldelivery_id
+      from ent_Goods as g
+      join ent_BKG as bkg
+      on g.BKG_id = bkg.id
+
+      join ent_DeliveryDetails as dd
+      on g.id_good = dd.good_id
+
+      where bkg.id = 3 or bkg.id = 4
+      group by (dd.delivery_id)) as res2
+
+      on od.deliveryId = res2.Mmldelivery_id
+      ) as odResult
+
+      where
+      olap_Delivery.deliveryId = Alldelivery_id
+      and odResult.MmlRazvWeight >= 0.5 * odResult.AllWeight
+      and olap_Delivery.isEffective = 1
+
+
+      --.
+      if(not exists(select 1 from olap_Dates))
+      begin
+
+
+      WITH T(date)
+      AS
+      (
+      SELECT CAST('20140101' AS smalldatetime)
+      UNION ALL
+      SELECT DateAdd(day,1,T.date) FROM T WHERE T.date  &lt; '20500101'
+      )
+
+      insert into olap_Dates
+      SELECT     date
+      FROM         T OPTION(MAXRECURSION 0)
+      end
+
+      create table #tempActiveContacts
+      (
+      yearProd int
+      ,monthNumberProd int
+      ,startDate datetime
+      ,id_contact int
+      ,isActive int
+      ,isWork int
+      )
+
+      insert into #tempActiveContacts
+      SELECT
+      pm.yearProd,
+      pm.monthNumberProd,
+      pm.startDate,
+      pm.id_contact,
+      CASE WHEN isnull(ds.amount, 0) >= 4 THEN 1 ELSE 0 END AS isActive,
+      CASE WHEN isnull(ds.amount, 0) >= 1 THEN 1 ELSE 0 END AS isWork
+      FROM
+      (
+		  SELECT
+		  t.yearProd,
+		  t.monthNumberProd,
+		  t.startDate,
+		  c.id_contact
+		  FROM
+      (
+		  SELECT
+		  yearProd,
+		  monthNumberProd,
+		  MIN([date]) AS startDate
+		  FROM	ProductionDates AS pd
+		  GROUP BY yearProd, monthNumberProd
+		  having MIN([date])  &lt;= Getdate()			-- или еще несколько дней вперед должно быть?
+
+      ) AS t
+      CROSS JOIN
+      ent_Contacts AS c
+      WHERE (c.isReport = 1)) AS pm
+      LEFT OUTER JOIN
+      (
+		  SELECT
+			  COUNT(1) AS amount,
+			  d.contact_id,
+			  pd.yearProd,
+			  pd.monthNumberProd,
+			  MIN(pd.[date]) AS startDate
+		  FROM ProductionDates AS pd
+			  LEFT OUTER JOIN
+			  (select [date], contact_id from olap_Delivery  WHERE (ent_type = 1) group by [date], contact_id) AS d
+			  ON pd.[date] = d.[date]
+		  GROUP BY d.contact_id, pd.yearProd, pd.monthNumberProd) AS ds
+      ON pm.monthNumberProd = ds.monthNumberProd
+      AND pm.yearProd = ds.yearProd
+      AND pm.id_contact = ds.contact_id
+
+
+
+
+      MERGE ent_ActiveContacts AS T
+      USING (
+      SELECT * FROM #tempActiveContacts) AS S
+
+      ON T.startDate = S.startDate and T.id_contact = S.id_contact
+      WHEN MATCHED
+      THEN
+      UPDATE
+      SET T.yearProd = S.yearProd,
+      T.monthNumberProd = S.monthNumberProd,
+      T.isActive = S.isActive,
+      T.isWork = S.isWork
+
+      WHEN NOT MATCHED BY TARGET
+      THEN
+      INSERT	(yearProd
+      ,monthNumberProd
+      ,startDate
+      ,id_contact
+      ,isActive
+      ,isWork)
+
+      VALUES	(yearProd
+      ,monthNumberProd
+      ,startDate
+      ,id_contact
+      ,isActive
+      ,isWork);
+
+
+
+
+
+      -- формирование данных для таблицы ent_ContactSalarySales (зарплата отдела продаж на точку)
+      -- работник - подчиненные
+      create table #dsh_EmpWithChildren
+      (
+      dsh_parentEmployeeId int,
+      dsh_childEmployeeId int,
+      month Date
+      )
+      INSERT INTO #dsh_EmpWithChildren
+      (
+      dsh_parentEmployeeId,
+      dsh_childEmployeeId,
+      month
+      )
+      SELECT
+      parentEmployee.id as dsh_parentEmployeeId,
+      childEmployee.Id as dsh_childEmployeeId,
+      s.month
+
+      FROM dsh_Employee as parentEmployee
+      join dsh_Employee as childEmployee
+      on childEmployee.treeKey like CONCAT(parentEmployee.treeKey, '%')
+      join dsh_Salary as s
+      on parentEmployee.id = s.employee_id
+
+
+
+
+      -- id сотрудников по иерархии к userName
+      create table #UserNameToId
+      (
+      userName nvarchar(250),
+      firstLevelId int,
+      mainManagerId int,
+      employeeId int
+      )
+      INSERT INTO #UserNameToId
+      (
+      userName,
+      firstLevelId,
+      mainManagerId,
+      employeeId
+      )
+      SELECT
+      f.userName as userName,
+      case
+      when f.hierarchyId = 7
+      then hierarchyValueId
+      else -1
+      end as firstLevelId,
+
+      case
+      when f.hierarchyId = 8
+      then hierarchyValueId
+      else -1
+      end as mainManagerId,
+
+      case
+      when f.hierarchyId = 9
+      then hierarchyValueId
+      else -1
+      end as employeeId
+
+
+      FROM mdxFilter as f
+
+      join mdxHierarchy as h
+      on f.hierarchyId = h.id
+
+
+      join dsh_Employee as e
+      on e.userName = f.userName
+
+
+      where h.id in (7, 8, 9)   --and e.endDate is null
+
+      order by username
+
+
+
+      -- месяц - контакт - id-работника/зарплата (для каждого уровня)
+      create table #ContactEmployesSalary
+      (
+      month DATE,
+      id_contact int,
+
+      dsh_employeId int,
+      dsh_employeeSalary decimal(18,2),
+
+      dsh_firstLevelId int,
+      dsh_firstLevelSalary decimal(18,2),
+
+      dsh_mainManagerId int,
+      dsh_mainManagerSalary decimal(18,2)
+      )
+      INSERT INTO #ContactEmployesSalary
+      (
+      month,
+      id_contact,
+
+      dsh_employeId,
+      dsh_employeeSalary,
+
+      dsh_firstLevelId,
+      dsh_firstLevelSalary,
+
+      dsh_mainManagerId,
+      dsh_mainManagerSalary
+      )
+      SELECT
+
+      ac.startDate as month,
+      c.[id_contact],
+
+      dEmp.id as dsh_employeId,
+      isnull(dEmpSalary.amount, 0) as dsh_employeeSalary,
+
+      dFirst.id as dsh_firstLevelId,
+      isnull(dFirstSalary.amount, 0) as dsh_firstLevelSalary,
+
+      dMain.id as dsh_mainManagerId,
+      isnull(dMainSalary.amount, 0) as dsh_mainManagerSalary
+
+      FROM ent_Contacts as c
+
+      left join ent_ActiveContacts as ac
+      on ac.id_contact = c.id_contact
+
+      left join #UserNameToId as employee
+      on c.employe_id = employee.employeeId
+      left join #UserNameToId as mainManager
+      on c.mainManager_id = mainManager.mainManagerId
+      left join #UserNameToId as firstLevel
+      on c.firstLevel_id = firstLevel.firstLevelId
+
+      left join dsh_Employee as dEmp
+      on dEmp.userName = employee.userName
+      left join dsh_Employee as dFirst
+      on dFirst.userName = firstLevel.userName
+      left join dsh_Employee as dMain
+      on dMain.userName = mainManager.userName
+
+      left join dsh_Salary as dEmpSalary
+      on dEmpSalary.employee_id = dEmp.id
+      and dEmpSalary.month = ac.startDate
+
+      left join dsh_Salary as dFirstSalary
+      on dFirstSalary.employee_id = dFirst.id
+      and dFirstSalary.month = ac.startDate
+
+      left join dsh_Salary as dMainSalary
+      on dMainSalary.employee_id = dMain.id
+      and dMainSalary.month = ac.startDate
+
+      where ac.isActive = 1
+
+      -- месяц - активный контакт - id-работников(для каждого уровня)
+      create table #ActiveContactsByMonth
+      (
+      id_contact int,
+      employe_id int,
+      firstLevel_id int,
+      mainManager_id int,
+      startDate DATE
+      )
+      INSERT INTO #ActiveContactsByMonth
+      (
+      id_contact,
+      employe_id,
+      firstLevel_id,
+      mainManager_id,
+      startDate
+      )
+      select
+      c.id_contact,
+      c.dsh_employeId,
+      c.dsh_firstLevelId,
+      c.dsh_mainManagerId,
+      ac.startDate
+
+      from ent_ActiveContacts as ac
+      join #ContactEmployesSalary as c
+      on ac.id_contact = c.id_contact
+      where ac.isActive = 1
+      group by
+      c.id_contact,
+      c.dsh_employeId,
+      c.dsh_firstLevelId,
+      c.dsh_mainManagerId,
+      ac.startDate
+
+      --
+      create table #ActiveEmployeeContactsCountByMonth
+      (
+      dsh_Id int,
+      month DATE,
+      dsh_ContactsCount int
+      )
+      insert into #ActiveEmployeeContactsCountByMonth
+      (
+      dsh_Id,
+      month,
+      dsh_ContactsCount
+      )
+      select
+      dsh_Id,
+      month,
+      COUNT(DISTINCT id_contact) as dsh_ContactsCount
+      from
+      (
+      select
+      ac.id_contact,
+      e.dsh_parentEmployeeId as dsh_Id,
+      e.month
+
+      from #dsh_EmpWithChildren as e
+      join #ActiveContactsByMonth as ac
+      on e.dsh_childEmployeeId = ac.employe_id
+      and e.month = ac.startDate
+      union
+
+      select
+      ac.id_contact,
+      e.dsh_parentEmployeeId as dsh_Id,
+      e.month
+
+      from #dsh_EmpWithChildren as e
+      join #ActiveContactsByMonth as ac
+      on e.dsh_childEmployeeId = ac.firstLevel_id
+      and e.month = ac.startDate
+
+      union
+
+      select
+      ac.id_contact,
+      e.dsh_parentEmployeeId as dsh_Id,
+      e.month
+
+      from #dsh_EmpWithChildren as e
+      join #ActiveContactsByMonth as ac
+      on e.dsh_childEmployeeId = ac.mainManager_id
+      and e.month = ac.startDate
+      ) as t
+
+      group by month, dsh_Id
+
+
+
+
+      --
+      create table #SalaryPerContactByMonth
+      (
+      month DATE,
+      id_contact int,
+      dsh_employeId int,
+      employeSalary decimal(18,2),
+      dsh_mainManagerId int,
+      mainManagerSalary decimal(18,2),
+      dsh_firstLevelId int,
+      firstLevelSalary decimal(18,2)
+      )
+      insert into #SalaryPerContactByMonth
+      (
+      month,
+      id_contact,
+      dsh_employeId,
+      employeSalary,
+      dsh_mainManagerId,
+      mainManagerSalary,
+      dsh_firstLevelId,
+      firstLevelSalary
+      )
+      select
+      c.month as month,
+      c.id_contact,
+
+      c.dsh_employeId,
+      isnull(c.dsh_employeeSalary/acEmp.dsh_ContactsCount, 0) as employeSalary,
+
+      c.dsh_mainManagerId,
+      isnull(c.dsh_mainManagerSalary/acMain.dsh_ContactsCount, 0) as mainManagerSalary,
+
+      c.dsh_firstLevelId,
+      isnull(c.dsh_firstLevelSalary/acFirst.dsh_ContactsCount, 0) as firstLevelSalary
+
+      from #ContactEmployesSalary as c
+
+      left join #ActiveEmployeeContactsCountByMonth as acEmp
+      on c.dsh_employeId = acEmp.dsh_Id and c.month = acEmp.month
+
+      left join #ActiveEmployeeContactsCountByMonth as acMain
+      on c.dsh_mainManagerId = acMain.dsh_Id and c.month = acMain.month
+
+      left join #ActiveEmployeeContactsCountByMonth as acFirst
+      on c.dsh_firstLevelId = acFirst.dsh_Id and c.month = acFirst.month
+
+      MERGE ent_ContactSalarySales AS T
+      USING (
+      SELECT
+      month,
+      id_contact,
+      sum(employeSalary) + sum(mainManagerSalary) + sum(firstLevelSalary) as SalarySales
+      FROM #SalaryPerContactByMonth
+      group by month, id_contact
+      )	AS S
+      ON T.month = S.month
+      and T.contact_id = S.id_contact
+      WHEN MATCHED
+      THEN
+      UPDATE
+      SET
+      T.SalarySales = S.SalarySales
+
+      WHEN NOT MATCHED BY TARGET
+      THEN
+      INSERT (month, contact_id, SalarySales)
+      values (month, id_contact, SalarySales);
+
+
+
+      END
+	</createProcedure>
+  </changeSet>
+  
+</databaseChangeLog>

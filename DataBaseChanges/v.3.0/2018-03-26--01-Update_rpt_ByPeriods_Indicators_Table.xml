@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="Update_rpt_ByPeriods_Indicators_Table" author="Ura">
+
+    <update tableName="rpt_ByPeriods_Indicators">
+      <column name="measureName" value="SumPrice"/>
+      <where>id=4</where>
+    </update>
+
+    <update tableName="rpt_ByPeriods_Indicators">
+      <column name="measureName" value="Weight"/>
+      <where>id=8</where>
+    </update>
+
+    <update tableName="rpt_ByPeriods_Indicators">
+      <column name="measureName" value="DeliveryTT"/>
+      <where>id=10</where>
+    </update>
+
+    <update tableName="rpt_ByPeriods_Indicators">
+      <column name="measureName" value="DeliveryCount"/>
+      <where>id=12</where>
+    </update>
+
+    <update tableName="rpt_ByPeriods_Indicators">
+      <column name="measureName" value="returnSum"/>
+      <where>id=22</where>
+    </update>
+
+  </changeSet>
+</databaseChangeLog>

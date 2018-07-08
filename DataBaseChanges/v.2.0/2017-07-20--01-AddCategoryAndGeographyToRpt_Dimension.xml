@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="AddCategoryAndGeography ToRpt_Dimension" author="ura">
+
+    <insert tableName="rpt_Dimension">
+      <column name="name" value="Категория торговой точки" />
+      <column name="value" value="Contact_Category" />
+      <column name="dimensionCategory_id" value="1" />
+      <column name="isLarge" value="0" />
+      <column name="isTransferNameToServer" value="1" />
+    </insert>
+
+    <insert tableName="rpt_Dimension">
+      <column name="name" value="География" />
+      <column name="value" value="Contact_Geography" />
+      <column name="dimensionCategory_id" value="1" />
+      <column name="isLarge" value="0" />
+      <column name="isTransferNameToServer" value="1" />
+    </insert>
+
+  </changeSet>
+</databaseChangeLog>

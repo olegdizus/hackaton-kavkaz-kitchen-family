@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="CreateApproveHistoryTable" author="zelim">
+
+    <createTable tableName="kpi_ApproveHistory">
+
+      <column name="id"  type="INT" autoIncrement="true">
+        <constraints nullable="false" primaryKey="true"/>
+      </column>
+
+      <column name="hst_datetime" type="DATETIME">
+        <constraints nullable="false" />
+      </column>
+
+      <column name="employee_id" type="INT">
+        <constraints nullable="false" />
+      </column>
+
+      <column name="employeeVariantsByMonth_id" type="INT">
+        <constraints nullable="false" />
+      </column>
+
+      <column name="approvalStatus_id" type="INT">
+        <constraints nullable="false" />
+      </column>
+
+      <column name="approve" type="BIT">
+        <constraints nullable="false" />
+      </column>
+
+      <column name="comment" type="nvarchar(500)">
+        <constraints nullable="true" />
+      </column>
+
+    </createTable>
+
+    <addForeignKeyConstraint referencedColumnNames="id" referencedTableName="dsh_Employee"
+                                 baseColumnNames="employee_id" baseTableName="kpi_ApproveHistory"
+                           constraintName="FK_ApproveHistory_Employee" onDelete="NO ACTION"/>
+
+    <addForeignKeyConstraint referencedColumnNames="id" referencedTableName="kpi_ApprovalStatus"
+                                 baseColumnNames="approvalStatus_id" baseTableName="kpi_ApproveHistory"
+                           constraintName="FK_ApproveHistory_ApprovalStatus" onDelete="NO ACTION"/>
+
+    <addForeignKeyConstraint referencedColumnNames="id" referencedTableName="kpi_EmployeeVariantsByMonth"
+                                 baseColumnNames="employeeVariantsByMonth_id" baseTableName="kpi_ApproveHistory"
+                           constraintName="FK_ApproveHistory_EmployeeVariantsByMonth" onDelete="NO ACTION"/>
+
+  </changeSet>
+</databaseChangeLog>
+

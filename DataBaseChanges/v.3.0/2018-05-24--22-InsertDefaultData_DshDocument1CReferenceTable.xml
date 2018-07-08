@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+  <changeSet id="InsertDefaultData_DshDocument1CReferenceTable" author="Andrey">
+<sql>
+INSERT INTO [dbo].[dsh_Document1CReference]
+           ([id],[docName])
+ VALUES(292,'Ввод начальных остатков по взаиморасчетам');
+		
+INSERT INTO [dbo].[dsh_Document1CReference]
+           ([id],[docName])
+ VALUES (308,'Возврат товаров от покупателей');
+ 
+ INSERT INTO [dbo].[dsh_Document1CReference]
+           ([id],[docName])
+ VALUES(328,'Документ расчетов с контрагентом');
+ 
+ INSERT INTO [dbo].[dsh_Document1CReference]
+           ([id],[docName])
+ VALUES (379,'Корректировка долга');
+ 
+ INSERT INTO [dbo].[dsh_Document1CReference]
+           ([id],[docName])
+ VALUES (387,'Корректировака реализации');
+ 
+ INSERT INTO [dbo].[dsh_Document1CReference]
+           ([id],[docName])
+ VALUES (459,'Платежное поручение входящее');
+ 
+ INSERT INTO [dbo].[dsh_Document1CReference]
+           ([id],[docName])
+ VALUES (460,'Платежное поручение исходяще');
+ 
+ INSERT INTO [dbo].[dsh_Document1CReference]
+           ([id],[docName])
+ VALUES (475,'Поступление товаров и услуг');
+ 
+ INSERT INTO [dbo].[dsh_Document1CReference]
+           ([id],[docName])
+ VALUES(484,'Приходный кассовый ордер');
+ 
+ INSERT INTO [dbo].[dsh_Document1CReference]
+           ([id],[docName])
+ VALUES (492,'Расходный кассовый ордер');
+ 
+ INSERT INTO [dbo].[dsh_Document1CReference]
+           ([id],[docName])
+ VALUES (503,'Реализация товаров и услуг');
+ 
+ INSERT INTO [dbo].[dsh_Document1CReference]
+           ([id],[docName])
+ VALUES (577,'Акт предоставления скидки');
+</sql>
+   </changeSet>
+  
+</databaseChangeLog>
+
